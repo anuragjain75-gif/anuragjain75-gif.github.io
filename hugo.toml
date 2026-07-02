@@ -1,0 +1,7 @@
+baseURL = "https://thelilamaya.github.io/"
+languageCode = "en-us"
+title = "The Lilamaya"
+
+[params]
+tagline = "Essays on the extraordinary hidden within ordinary life"
+author = "Anurag Jain"
