@@ -14,7 +14,7 @@ Here I write essays, fragments, and books about childhood, memory, fatherhood, n
 
 Beyond writing, I find equal satisfaction in reading, tending a garden, making things with my hands, and watching my young son discover the world with fresh eyes. These activities are not separate from my writing; they are the soil from which it grows. They remind me, day after day, that attention is perhaps the simplest and most profound form of gratitude.
 
-The Lilamaya is only one part of my work. Those interested in the philosophical foundations that quietly inform many of these essays may wish to visit the [NEEV Community for Self-Inquiry](https://neevselfinquiry.in/)**,** where my writing and teaching are devoted to Self-Inquiry and Advaita Vedānta. Although the two websites have different purposes, they arise from the same way of seeing. NEEV asks, “What is Reality?” The Lilamaya asks, “How does that understanding illuminate ordinary life?”
+The Lilamaya is only one part of my work. Those interested in the philosophical foundations that quietly inform many of these essays may wish to visit the [NEEV Community for Self-Inquiry](https://neevselfinquiry.in/), where my writing and teaching are devoted to Self-Inquiry and Advaita Vedānta. Although the two websites have different purposes, they arise from the same way of seeing. NEEV asks, “What is Reality?” The Lilamaya asks, “How does that understanding illuminate ordinary life?”
 
 If these pages encourage you to pause a little longer, to notice a little more carefully, or to rediscover the extraordinary hidden within your own ordinary life, then The Lilamaya will have fulfilled its purpose.
 
