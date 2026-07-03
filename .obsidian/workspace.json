@@ -192,8 +192,9 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "3f3abcd3b5e85474",
+  "active": "38d1c3e4d1b146ff",
   "lastOpenFiles": [
+    "static/robots.txt",
     "assets/css/style.css",
     "assets/css/Untitled Document",
     "assets/css",
@@ -210,7 +211,6 @@
     "layouts/_default/Untitled Document",
     "public/about/index.xml",
     "public/about",
-    "content/about",
     "public/images/peepal-tree.png",
     "static/images/peepal-tree.png",
     "public/Images/peepal-tree.png",

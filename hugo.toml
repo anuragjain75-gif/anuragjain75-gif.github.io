@@ -5,3 +5,5 @@ title = "The Lilamaya"
 [params]
 tagline = "Essays on the extraordinary hidden within ordinary life"
 author = "Anurag Jain"
+
+disableKinds = ["taxonomy", "term"]
