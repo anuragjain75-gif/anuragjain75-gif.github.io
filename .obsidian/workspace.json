@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/Vision.md",
+                "file": "content/essays/first-essay.md",
                 "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Vision"
+              "title": "first-essay"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "6ebd9853d1bd24e5",
@@ -178,7 +179,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 358
+    "width": 358,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -194,30 +196,33 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "public/css/style.min.6374c8cb8e25f0230ede9db78cc48841ebdd23f00cc9801065809439da061f3f.css",
+    "public/css/style.min.a1e2cc356a46571bcd88d649f5abd5ae7ae2e7f184f626f6abae60e7a4c1f026.css",
+    "public/css/style.min.bf2399c093624c3d0b943334842d02a2f8a9f9bc5a17ad1389f0ef7f63653f7b.css",
+    "public/css/style.min.97df37d449583b1509a5ed14607ad18b6b35d09b971576d6db12fa74d6e331dc.css",
+    "public/css/style.min.28908bfbdf6b0dedf20cf93d239e37e7782a52e536eb38281f704c8b9fa98d4b.css",
+    "public/css/style.min.cbb9e3519e8002ba333fe9b3504f034d186eb047ed8d8b80aa39861bcbd69e1f.css",
+    "public/css/style.min.b957eb339458e9b25e0c20adb3c7cba3807ab7a9ae6528c36dd4e57bffc562c3.css",
+    "public/css/style.min.605ad65680805e96aa46e46b044af20287609c193f8294e0e893fc622ee96e5c.css",
+    "public/css/style.min.19dad54880f5f4dcd061c8e700885529af91e33e4a3e20fca4cc91c04c99d713.css",
+    "themes/lilamaya/assets/scss/_variable.scss",
+    "public/css/style.min.ebdf56405e11cbea95a69b8853a7cf0ac31d54eac236a4ab293c786ef74ade87.css",
+    "content/essays/index.md",
+    "content/essays/_index.md",
+    "content/essays/first-essay.md",
+    "docs/Vision.md",
     "public/favicon.svg",
     "public/web-app-manifest-512x512.png",
     "public/images/peepal-tree1.png",
     "public/images/tree-logo.png",
-    "public/favicon.ico",
     "public/apple-touch-icon.png",
     "public/web-app-manifest-192x192.png",
     "public/favicon-96x96.png",
-    "themes/lilamaya/assets/scss/_footer.scss",
-    "themes/lilamaya/assets/scss/Untitled Document",
-    "themes/lilamaya/assets/scss/_header.scss",
-    "themes/lilamaya/assets/scss/_typography.scss",
-    "themes/lilamaya/assets/scss/_layout.scss",
-    "themes/lilamaya/assets/scss/_base.scss",
-    "themes/lilamaya/assets/scss/_variable.scss",
-    "themes/lilamaya/assets/scss/main.scss",
-    "themes/lilamaya/assets/scss",
     "Design Considerations/Image Designs.md",
-    "docs/Vision.md",
     "static/images/tree-logo.png",
     "static/images/ChatGPT Image Jul 3, 2026, 05_29_42 PM.png",
     "content/about.md",
     "static/images/peepal-tree.png",
-    "static/images/peepal-tree1.png",
     "content/about/_index.md"
   ]
 }
