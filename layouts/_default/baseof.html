@@ -5,7 +5,51 @@
 
 <head>
     <meta charset="utf-8">
-    <title>{{ .Site.Title }}</title>
+
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
+    <meta name="description"
+      content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+
+    <meta name="author"
+      content="{{ .Site.Params.author }}">
+
+    <meta property="og:title"
+      content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+
+    <meta property="og:description"
+      content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+
+    <meta property="og:type"
+      content="{{ if .IsHome }}website{{ else }}article{{ end }}">
+
+    <meta property="og:url"
+      content="{{ .Permalink }}">
+
+    <meta property="og:site_name" content="{{ .Site.Title }}">
+
+    <meta property="og:locale" content="en_IN">
+
+    <meta name="twitter:card" content="summary_large_image">
+
+    <meta name="twitter:title"
+      content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+
+    <meta name="twitter:description"
+      content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+
+    <meta name="theme-color" content="#F8F5EF">
+    
+    <title>
+        {{ if .IsHome }}
+        {{ .Site.Title }} — {{ .Site.Params.tagline }}
+        {{ else }}
+        {{ .Title }} — {{ .Site.Title }}
+        {{ end }}
+    </title>
+
+    <link rel="canonical" href="{{ .Permalink }}">
 
     <style>
 
@@ -98,16 +142,6 @@ main img {
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-34TCWQ0NGL"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-34TCWQ0NGL');
-</script>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-34TCWQ0NGL"></script>
-<script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
@@ -123,12 +157,6 @@ gtag('config', 'G-34TCWQ0NGL');
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 })(window, document, "clarity", "script", "xgm7v5hnh4");
 </script>
-
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="manifest" href="/site.webmanifest">
 
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">

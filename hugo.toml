@@ -7,5 +7,6 @@ disableKinds = ["taxonomy", "term"]
 [params]
 tagline = "Essays on the extraordinary hidden within ordinary life"
 author = "Anurag Jain"
+description = "A quiet literary home of essays on memory, childhood, fatherhood, nature, books, gardens, silence, and the extraordinary hidden within ordinary life."
 
 
