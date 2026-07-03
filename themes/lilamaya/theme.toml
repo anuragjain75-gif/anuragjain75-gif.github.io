@@ -1,0 +1,10 @@
+name = "Lilamaya"
+license = "MIT"
+description = "A quiet literary home."
+
+homepage = "https://lilamaya.com"
+
+min_version = "0.123.7"
+
+[author]
+  name = "Anurag Jain"

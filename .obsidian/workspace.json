@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Design Considerations/Image Designs.md",
-                "mode": "preview",
+                "file": "docs/Vision.md",
+                "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "Image Designs"
+              "title": "Vision"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "6ebd9853d1bd24e5",
@@ -195,29 +194,30 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "public/favicon.svg",
+    "public/web-app-manifest-512x512.png",
+    "public/images/peepal-tree1.png",
+    "public/images/tree-logo.png",
+    "public/favicon.ico",
+    "public/apple-touch-icon.png",
+    "public/web-app-manifest-192x192.png",
+    "public/favicon-96x96.png",
+    "themes/lilamaya/assets/scss/_footer.scss",
+    "themes/lilamaya/assets/scss/Untitled Document",
+    "themes/lilamaya/assets/scss/_header.scss",
+    "themes/lilamaya/assets/scss/_typography.scss",
+    "themes/lilamaya/assets/scss/_layout.scss",
+    "themes/lilamaya/assets/scss/_base.scss",
+    "themes/lilamaya/assets/scss/_variable.scss",
+    "themes/lilamaya/assets/scss/main.scss",
+    "themes/lilamaya/assets/scss",
+    "Design Considerations/Image Designs.md",
+    "docs/Vision.md",
     "static/images/tree-logo.png",
     "static/images/ChatGPT Image Jul 3, 2026, 05_29_42 PM.png",
     "content/about.md",
-    "Design Considerations/Image Designs.md",
-    "Design Considerations",
     "static/images/peepal-tree.png",
     "static/images/peepal-tree1.png",
-    "static/images/ChatGPT Image Jul 3, 2026, 03_16_50 PM.png",
-    "static/images/peepal-tree .png",
-    "static/images/peepal-tree 1.png",
-    "static/images/ChatGPT Image Jul 2, 2026, 03_33_40 PM.png",
-    "static/images/master-favicon.png",
-    "static/web-app-manifest-512x512.png",
-    "static/web-app-manifest-192x192.png",
-    "static/favicon.ico",
-    "favicon/favicon.ico",
-    "static/images/favicon.ico",
-    "Untitled Folder",
-    "favicon/site.webmanifest",
-    "favicon",
-    "Favicon",
-    "public/robots.txt",
-    "static/robots.txt",
     "content/about/_index.md"
   ]
 }

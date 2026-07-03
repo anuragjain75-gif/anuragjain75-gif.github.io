@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>The Lilamaya</title>
-    <link>https://anuragjain75-gif.github.io/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on The Lilamaya</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://anuragjain75-gif.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
-      <link>https://anuragjain75-gif.github.io/about/</link>
+      <link>http://localhost:1313/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://anuragjain75-gif.github.io/about/</guid>
+      <guid>http://localhost:1313/about/</guid>
       <description>The Lilamaya began with an observation: the extraordinary is rarely found elsewhere. It is hidden within ordinary life.&#xA;Most of our lives are spent waiting for remarkable moments, while quietly overlooking the countless ordinary ones that shape us far more deeply. A child discovering the world for the first time. Rain falling on a familiar garden. The remembered fragrance of an old home. A tree that has stood unnoticed for years.</description>
     </item>
   </channel>

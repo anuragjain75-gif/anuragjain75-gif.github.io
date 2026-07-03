@@ -1,0 +1,13 @@
+.container {
+
+    width: min(100% - 64px, var(--page-width));
+
+    margin-inline: auto;
+
+}
+
+.site-main {
+
+    min-height: 70vh;
+
+}
