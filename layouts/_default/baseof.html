@@ -97,7 +97,10 @@ main img {
 
 <header>
 
-<h1>{{ .Site.Title }}</h1>
+<h1 class="site-title">
+    <img src="/images/tree-logo.png" alt="Lilamaya Logo">
+    <span>{{ .Site.Title }}</span>
+</h1>
 
 <p class="tagline">
 {{ .Site.Params.tagline }}

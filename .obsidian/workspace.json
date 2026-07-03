@@ -194,6 +194,8 @@
   },
   "active": "38d1c3e4d1b146ff",
   "lastOpenFiles": [
+    "static/images/tree-logo.png",
+    "static/images/master-favicon.png",
     "static/web-app-manifest-512x512.png",
     "static/web-app-manifest-192x192.png",
     "static/favicon-96x96.png",
@@ -205,8 +207,6 @@
     "favicon/favicon-96x96.png",
     "favicon/favicon.svg",
     "favicon/favicon.ico",
-    "favicon/apple-touch-icon.png",
-    "static/images/web-app-manifest-512x512.png",
     "static/images/favicon.ico",
     "Untitled Folder",
     "favicon/site.webmanifest",
