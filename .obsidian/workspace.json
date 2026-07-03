@@ -194,6 +194,7 @@
   },
   "active": "38d1c3e4d1b146ff",
   "lastOpenFiles": [
+    "public/robots.txt",
     "static/robots.txt",
     "assets/css/style.css",
     "assets/css/Untitled Document",
@@ -210,7 +211,6 @@
     "layouts/_default/single.html",
     "layouts/_default/Untitled Document",
     "public/about/index.xml",
-    "public/about",
     "public/images/peepal-tree.png",
     "static/images/peepal-tree.png",
     "public/Images/peepal-tree.png",
