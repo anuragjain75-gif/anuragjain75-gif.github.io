@@ -1,10 +1,41 @@
 {{ define "main" }}
 
-<main>
+<main class="essay">
 
-<h1>{{ .Title }}</h1>
+    <header class="essay-header">
 
-{{ .Content }}
+        <h1 class="essay-title">
+            {{ .Title }}
+        </h1>
+
+    {{ if eq .Section "essays" }}
+    <div class="essay-meta">
+    <time>{{ .Date.Format "2 January 2006" }}</time>
+    <span> · </span>
+    <span>{{ .ReadingTime }} min read</span>
+    </div>
+
+    {{ end }}
+
+    </header>
+
+    {{ with .Params.image }}
+
+    <figure class="essay-hero">
+
+        <img
+            src="{{ . | relURL }}"
+            alt="{{ $.Title }}">
+
+    </figure>
+
+    {{ end }}
+
+    <article class="essay-content">
+
+        {{ .Content }}
+
+    </article>
 
 </main>
 

@@ -1,15 +1,56 @@
 {{ define "main" }}
 
-<div class="container">
+<main class="essays-page">
 
-    <h1>Essays</h1>
+    <header class="page-header">
 
-    <p>
-        Reflections on memory, childhood, fatherhood, nature,
-        books, gardens, solitude, and the quiet mysteries
-        hidden within ordinary life.
-    </p>
+        <h1 class="page-title">
+            Essays
+        </h1>
 
-</div>
+        <p class="page-introduction">
+            Reflections on memory, childhood, fatherhood,
+            nature, books, gardens, solitude, and the quiet
+            mysteries hidden within ordinary life.
+        </p>
+
+    </header>
+
+    <nav class="essay-themes">
+
+        <a href="/essays/">All</a>
+        <span>·</span>
+
+        <a href="#">Childhood</a>
+        <span>·</span>
+
+        <a href="#">Fatherhood</a>
+        <span>·</span>
+
+        <a href="#">Nature</a>
+        <span>·</span>
+
+        <a href="#">Gardens</a>
+        <span>·</span>
+
+        <a href="#">Books</a>
+        <span>·</span>
+
+        <a href="#">Solitude</a>
+        <span>·</span>
+
+        <a href="#">Memoir</a>
+
+    </nav>
+
+    <section class="essay-list">
+
+        {{ range .Pages }}
+            {{ partial "essay-card.html" . }}
+        {{ end }}
+
+    </section>
+
+</main>
 
 {{ end }}

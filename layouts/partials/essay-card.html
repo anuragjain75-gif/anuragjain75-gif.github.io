@@ -1,67 +1,46 @@
 <article class="essay-card">
 
-    <a class="essay-card__image"
-       href="{{ .RelPermalink }}">
-
-        {{ with .Params.image }}
-
-    <a class="essay-card__image"
-    href="{{ $.RelPermalink }}">
-
-    <img
-        src="{{ . | relURL }}"
-        alt="{{ $.Title }}">
-
-</a>
-
-{{ end }}
-
+    {{ with .Params.image }}
+    <a class="essay-card__image" href="{{ $.RelPermalink }}">
+        <img
+            src="{{ . | relURL }}"
+            alt="{{ $.Title }}">
     </a>
+    {{ end }}
 
     <div class="essay-card__content">
 
         <h2 class="essay-card__title">
-
             <a href="{{ .RelPermalink }}">
-
                 {{ .Title }}
-
             </a>
-
         </h2>
 
         <p class="essay-card__excerpt">
 
-            {{ with .Params.description }}
-                {{ . }}
-            {{ else }}
-                {{ .Summary }}
-            {{ end }}
+        {{ with .Params.description }}
+        {{ . | truncate 180 }}
+        {{ else }}
+        {{ .Summary | truncate 180 }}
+        {{ end }}
 
         </p>
 
         <div class="essay-card__meta">
 
             <time>
-
                 {{ .Date.Format "2 January 2006" }}
-
             </time>
 
-            <span>•</span>
+            {{ with .Params.theme }}
+                <span> • </span>
+                <span>{{ . }}</span>
+            {{ end }}
+
+            <span> • </span>
 
             <span>
-
-                {{ .Params.theme }}
-
-            </span>
-
-            <span>•</span>
-
-            <span>
-
                 {{ .ReadingTime }} min
-
             </span>
 
         </div>

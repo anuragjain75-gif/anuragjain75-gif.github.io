@@ -83,5 +83,353 @@ main img {
     display: inline-block;
 }
 
+/*==================================================
+    ESSAYS PAGE
+==================================================*/
+
+.essays-page{
+
+    max-width:1100px;
+
+    margin:80px auto;
+
+    padding:0 30px;
+
+}
+
+.page-header{
+
+    margin-bottom:72px;
+
+}
+
+.page-title{
+
+    font-size:3.5rem;
+
+    font-weight:400;
+
+    line-height:1.1;
+
+    margin-bottom:18px;
+
+    color:#2F2D2A;
+
+}
+
+.page-introduction{
+
+    max-width:700px;
+
+    font-size:1.2rem;
+
+    line-height:1.9;
+
+    color:#666;
+
+}
+
+/*==================================================
+    ESSAY CARD
+==================================================*/
+
+.essay-card{
+
+    display:grid;
+
+    grid-template-columns:240px 1fr;
+
+    gap:48px;
+
+    align-items:flex-start;
+
+    padding:70px 0;
+
+    border-top:none;
+
+}
+
+.essay-card:first-child{
+
+    border-top:none;
+
+}
+
+.essay-card__image{
+
+    display:block;
+
+}
+
+.essay-card__image img{
+
+    display:block;
+
+    padding-left:14px;
+
+    width:220px;
+
+    aspect-ratio:4 / 3;
+
+    object-fit:cover;
+
+    transform .35s ease;
+        opacity .35s ease;
+
+}
+
+.essay-card__image:hover img{
+
+    transform:scale(1.015);
+
+    opacity:.94;
+
+}
+
+.essay-card__title{
+
+    margin:-4px 0 18px;
+
+    font-size:1.75rem;
+
+    font-weight:400;
+
+    line-height:1.35;
+
+}
+
+.essay-card__title a{
+
+    color:#2F2D2A;
+
+    text-decoration:none;
+
+    transition:color .25s ease;
+
+}
+
+.essay-card__title a:hover{
+
+    color:#6E7451;
+
+}
+.essay-card__excerpt{
+
+    margin:0 0 22px;
+
+    color:#555;
+
+    font-size:1.05rem;
+
+    line-height:1.9;
+
+}
+
+.essay-card__meta{
+
+    margin-top:20px;
+
+    color:#4a5760;
+
+    font-size:.90rem;
+
+    letter-spacing:.03em;
+
+}
+
+
+/*==================================================
+    SINGLE ESSAY
+==================================================*/
+
+.essay{
+
+    max-width:760px;
+
+    margin:0 auto;
+
+}
+
+.essay-header{
+
+    text-align:center;
+
+    margin:90px 0 60px;
+
+}
+
+.essay-title{
+
+    font-size:4rem;
+
+    font-weight:400;
+
+    line-height:1.1;
+
+    margin:0 0 18px;
+
+}
+
+.essay-meta{
+
+    color:#4a5760;
+
+    font-size:.9rem;
+
+    letter-spacing:.03em;
+
+}
+
+.essay-hero{
+
+    margin:0 0 90px;
+
+}
+
+.essay-hero img{
+
+    width:100%;
+
+    display:block;
+
+}
+
+.essay-content{
+
+    font-size:1.18rem;
+
+    line-height:2.0;
+
+    color:#3C3A36;
+
+}
+
+.essay-content p{
+
+    margin:0 0 2em;
+
+}
+
+.essay-content a{
+
+    color:#6E7451;
+
+    text-decoration:none;
+
+    border-bottom:1px solid rgba(110,116,81,.35);
+
+    transition:all .25s ease;
+
+}
+
+.essay-content a:hover{
+
+    border-bottom-color:#6E7451;
+
+}
+
+.essay-content blockquote{
+
+    margin:3em 0;
+
+    padding-left:2em;
+
+    border-left:2px solid #DDD5C8;
+
+    color:#555;
+
+    font-style:italic;
+
+}
+
+.essay-content h2{
+
+    margin-top:3rem;
+
+    margin-bottom:1.6rem;
+
+    font-size:2rem;
+
+    font-weight:400;
+
+}
+
+.essay-content h3{
+
+    margin:2.5em 0 .8em;
+
+    font-size:1.5rem;
+
+    font-weight:400;
+
+}
+
+/*==================================================
+    ESSAY THEMES
+==================================================*/
+
+.essay-themes{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:.45rem;
+
+    margin:0 auto 40px;
+
+    max-width:900px;
+
+    font-size:1rem;
+
+    color:#6E7451;
+
+}
+
+.essay-themes a{
+
+    color:#6E7451;
+
+    text-decoration:none;
+
+    transition:color .25s ease;
+
+}
+
+.essay-themes a:hover{
+
+    color:#2F2D2A;
+
+}
+
+.essay-themes span{
+
+    color:#B5AEA1;
+
+}
+
+.essay-list{
+
+    max-width:920px;
+
+    margin:35px auto 0;
+
+    padding-top:30px;
+
+    border-top:1px solid #E5DED1;
+
+}
+
+}
+
+
+
+
+
+
 
 
