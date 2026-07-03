@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/about.md",
-                "mode": "source",
+                "file": "Design Considerations/Image Designs.md",
+                "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "about"
+              "title": "Image Designs"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "6ebd9853d1bd24e5",
@@ -192,19 +193,22 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "38d1c3e4d1b146ff",
+  "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "static/images/tree-logo.png",
+    "static/images/ChatGPT Image Jul 3, 2026, 05_29_42 PM.png",
+    "content/about.md",
+    "Design Considerations/Image Designs.md",
+    "Design Considerations",
     "static/images/peepal-tree.png",
     "static/images/peepal-tree1.png",
     "static/images/ChatGPT Image Jul 3, 2026, 03_16_50 PM.png",
     "static/images/peepal-tree .png",
     "static/images/peepal-tree 1.png",
     "static/images/ChatGPT Image Jul 2, 2026, 03_33_40 PM.png",
-    "static/images/tree-logo.png",
     "static/images/master-favicon.png",
     "static/web-app-manifest-512x512.png",
     "static/web-app-manifest-192x192.png",
-    "static/favicon-96x96.png",
     "static/favicon.ico",
     "favicon/favicon.ico",
     "static/images/favicon.ico",
@@ -214,8 +218,6 @@
     "Favicon",
     "public/robots.txt",
     "static/robots.txt",
-    "assets/css/style.css",
-    "content/about.md",
     "content/about/_index.md"
   ]
 }
