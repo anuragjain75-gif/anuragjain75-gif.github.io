@@ -14,14 +14,29 @@
               "type": "markdown",
               "state": {
                 "file": "content/essays/first-essay.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": true
               },
               "icon": "lucide-file",
               "title": "first-essay"
             }
+          },
+          {
+            "id": "3ef0af9db97e3c18",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/essays/Second Essay.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Second Essay"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -41,7 +56,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": true
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -78,8 +93,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "6ebd9853d1bd24e5",
@@ -179,8 +193,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 358,
-    "collapsed": true
+    "width": 358
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -194,31 +207,35 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "4dee1c2dbe64e2f0",
+  "active": "3ef0af9db97e3c18",
   "lastOpenFiles": [
-    "public/css/style.min.8f8474c9b0d9e71fe879708dbb1f5c4a766d7cb26be984d2f257ba90b2477778.css",
-    "public/css/style.min.cb39482a4786073f77bc9b27b6ab6edb282ba6b3aeadef43bc3a1fae6e21f107.css",
-    "public/css/style.min.8ce911928f31a183e757117365ad3621ab7fe0fc1e7e7758f916caad7b1ef5f1.css",
-    "public/css/style.min.755d1d297dcc6299900d06760d33a1ca21ec4ae9c237d57baefbbc312dc7bd60.css",
-    "public/css/style.min.a17e0e0ca7299738077e7503f96374ad805189e61a2d08ab729b82723c2114c1.css",
-    "public/css/style.min.2fb8aeca011bd7c38f2a9e68916bdb1efeb01244d28bc9f70311db19e9e22638.css",
-    "public/css/style.min.ebae5609c40a6cb20f80ba5f0418b85b3e1c884c302fa1817a0570119a7d71e0.css",
-    "public/css/style.min.af868ec746accf9abd7ded4a6e1fde0defa23a475520551045d6e0add45935d0.css",
-    "public/css/style.min.8c32c0c52b22134de178ab0fe3356e2bb94835de5eef59014495892f0be5d8e2.css",
-    "public/css/style.min.3490740117f351c51bd1d409d9f68c8d3a2425f247728dc60906f15ec63ea19d.css",
-    "public/css/style.min.a348df93ec724be687f2144006c9a7570bcf87df3d1ed5c47fb07742bb658fbe.css",
-    "content/essays/index.md",
-    "content/essays/_index.md",
+    "public/essays/second-essay/index.html",
+    "public/essays/second-essay",
+    "public/essays/untitled/index.html",
+    "public/essays/untitled",
+    "Essay Page Design Elements.md",
+    "content/essays/Second Essay.md",
+    "public/css/style.min.05c088319f0ca46bab31d94dc50a868b28899f0eefe19e97d124f371d8ad73e0.css",
+    "public/css/style.min.dc5934a477e1424341af491ae355fe175d568d173ea25f9e32b1f09170aa252b.css",
+    "public/css/style.min.c3dd73f5e6e7dacfe3e6af62e42e487e3c5c76f0970ce1e3eb9e343e618821b8.css",
+    "layouts/partials/analytics.html",
     "content/essays/first-essay.md",
-    "docs/Vision.md",
-    "public/favicon.svg",
-    "public/web-app-manifest-512x512.png",
-    "public/images/peepal-tree1.png",
-    "public/images/tree-logo.png",
-    "public/apple-touch-icon.png",
-    "public/web-app-manifest-192x192.png",
-    "public/favicon-96x96.png",
+    "How To Work On Local Server And Merge Later.md",
+    "themes/lilamaya/layouts/partials/header.html",
+    "themes/lilamaya/layouts/partials/head.html",
+    "themes/lilamaya/layouts/partials/footer.html",
     "Design Considerations/Image Designs.md",
+    "the first.md",
+    "public/web-app-manifest-512x512.png",
+    "public/web-app-manifest-192x192.png",
+    "public/images/tree-logo.png",
+    "public/images/peepal-tree1.png",
+    "public/favicon.svg",
+    "public/favicon-96x96.png",
+    "public/apple-touch-icon.png",
+    "docs/Vision.md",
+    "content/essays/_index.md",
+    "content/essays/index.md",
     "static/images/tree-logo.png",
     "static/images/ChatGPT Image Jul 3, 2026, 05_29_42 PM.png",
     "content/about.md",
