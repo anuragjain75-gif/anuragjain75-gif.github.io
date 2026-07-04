@@ -1,5 +1,7 @@
 {{ define "main" }}
 
+{{ if eq .Section "essays" }}
+
 <main class="essay">
 
     <header class="essay-header">
@@ -8,14 +10,11 @@
             {{ .Title }}
         </h1>
 
-    {{ if eq .Section "essays" }}
-    <div class="essay-meta">
-    <time>{{ .Date.Format "2 January 2006" }}</time>
-    <span> · </span>
-    <span>{{ .ReadingTime }} min read</span>
-    </div>
-
-    {{ end }}
+        <div class="essay-meta">
+            <time>{{ .Date.Format "2 January 2006" }}</time>
+            <span> · </span>
+            <span>{{ .ReadingTime }} min read</span>
+        </div>
 
     </header>
 
@@ -38,5 +37,23 @@
     </article>
 
 </main>
+
+{{ else }}
+
+<main class="page">
+
+    <h1 class="page-title">
+        {{ .Title }}
+    </h1>
+
+    <article class="page-content">
+
+        {{ .Content }}
+
+    </article>
+
+</main>
+
+{{ end }}
 
 {{ end }}

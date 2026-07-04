@@ -1,0 +1,28 @@
+<header>
+
+<div class="site-emblem">
+    <img src="/images/tree-logo.png" alt="Lilamaya emblem">
+</div>
+
+<h1>{{ .Site.Title }}</h1>
+
+<p class="tagline">
+{{ .Site.Params.tagline }}
+
+</p>
+
+<nav>
+
+<a href="{{ "/" | relURL }}">Home</a>
+
+<a href="{{ "essays/" | relURL }}">Essays</a>
+
+<a href="{{ "fragments/" | relURL }}">Fragments</a>
+
+<a href="{{ "books/" | relURL }}">Books</a>
+
+<a href="{{ "about/" | relURL }}">About</a>
+
+</nav>
+
+</header>
