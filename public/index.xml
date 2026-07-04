@@ -16,6 +16,13 @@
       <description>This is the second essay.</description>
     </item>
     <item>
+      <title>The Third Essay</title>
+      <link>http://localhost:1313/essays/third-essay/</link>
+      <pubDate>Sun, 05 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/essays/third-essay/</guid>
+      <description>See this is just a test We need to take some rest and not burden ourselves with so much work that our body suffers.</description>
+    </item>
+    <item>
       <title>The First Essay</title>
       <link>http://localhost:1313/essays/first-essay/</link>
       <pubDate>Fri, 03 Jul 2026 00:00:00 +0000</pubDate>

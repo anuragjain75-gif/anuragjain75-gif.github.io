@@ -6,9 +6,7 @@
 
     <header class="essay-header">
 
-        <h1 class="essay-title">
-            {{ .Title }}
-        </h1>
+        <h1 class="essay-title">{{ .Title }}</h1>
 
         <div class="essay-meta">
             <time>{{ .Date.Format "2 January 2006" }}</time>
@@ -19,27 +17,43 @@
     </header>
 
     {{ with .Params.image }}
-
     <figure class="essay-hero">
-
-        <img
-            src="{{ . | relURL }}"
-            alt="{{ $.Title }}">
-
+        <img src="{{ . | relURL }}" alt="{{ $.Title }}">
     </figure>
-
     {{ end }}
 
     <article class="essay-content">
-
         {{ .Content }}
-
     </article>
 
-{{ if eq .Section "essays" }}
+    <nav class="essay-pagination">
 
+        <div class="essay-pagination__previous">
 
+            {{ with .Prev }}
+    {{ if eq .Section "essays" }}
+
+    <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+        ← {{ .Title }}
+    </a>
+
+    {{ end }}
 {{ end }}
+        </div>
+
+        <div class="essay-pagination__next">
+
+            {{ with .Next }}
+
+            <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                {{ .Title }} →
+            </a>
+
+            {{ end }}
+
+        </div>
+
+    </nav>
 
 </main>
 
@@ -47,14 +61,10 @@
 
 <main class="page">
 
-    <h1 class="page-title">
-        {{ .Title }}
-    </h1>
+    <h1 class="page-title">{{ .Title }}</h1>
 
     <article class="page-content">
-
         {{ .Content }}
-
     </article>
 
 </main>
@@ -62,5 +72,3 @@
 {{ end }}
 
 {{ end }}
-
-

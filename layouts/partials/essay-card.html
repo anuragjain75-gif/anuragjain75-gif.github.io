@@ -18,13 +18,9 @@
 
         {{ range $index, $theme := . }}
 
-            {{ if gt $index 0 }}
-                <span> · </span>
-            {{ end }}
+    {{ if gt $index 0 }}, {{ end }}{{ $theme }}
 
-            <span>{{ $theme }}</span>
-
-        {{ end }}
+{{ end }}
 
     </div>
 
