@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/essays/Second Essay.md",
+                "file": "content/essays/second-essay.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Second Essay"
+              "title": "second-essay"
             }
           }
         ],
@@ -209,12 +209,13 @@
   },
   "active": "3ef0af9db97e3c18",
   "lastOpenFiles": [
+    "Essay Page Design Elements.md",
+    "content/essays/Second Essay.md",
+    "content/essays/second-essay.md",
     "public/essays/second-essay/index.html",
     "public/essays/second-essay",
     "public/essays/untitled/index.html",
     "public/essays/untitled",
-    "Essay Page Design Elements.md",
-    "content/essays/Second Essay.md",
     "public/css/style.min.05c088319f0ca46bab31d94dc50a868b28899f0eefe19e97d124f371d8ad73e0.css",
     "public/css/style.min.dc5934a477e1424341af491ae355fe175d568d173ea25f9e32b1f09170aa252b.css",
     "public/css/style.min.c3dd73f5e6e7dacfe3e6af62e42e487e3c5c76f0970ce1e3eb9e343e618821b8.css",
@@ -223,7 +224,6 @@
     "How To Work On Local Server And Merge Later.md",
     "themes/lilamaya/layouts/partials/header.html",
     "themes/lilamaya/layouts/partials/head.html",
-    "themes/lilamaya/layouts/partials/footer.html",
     "Design Considerations/Image Designs.md",
     "the first.md",
     "public/web-app-manifest-512x512.png",

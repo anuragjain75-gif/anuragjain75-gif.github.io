@@ -453,74 +453,7 @@ main img {
 
 }
 
-/*==================================================
-    ESSAY PAGINATION
-==================================================*/
 
-.essay-pagination{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    gap:60px;
-
-    margin:100px 0 40px;
-
-    padding-top:40px;
-
-    border-top:1px solid #E5DED1;
-
-}
-
-.essay-pagination__previous,
-.essay-pagination__next{
-
-    flex:1;
-
-}
-
-.essay-pagination__next{
-
-    text-align:right;
-
-}
-
-.essay-pagination span{
-
-    display:block;
-
-    margin-bottom:8px;
-
-    font-size:.82rem;
-
-    letter-spacing:.08em;
-
-    text-transform:uppercase;
-
-    color:#9B9488;
-
-}
-
-.essay-pagination a{
-
-    color:#2F2D2A;
-
-    text-decoration:none;
-
-    font-size:1.15rem;
-
-    line-height:1.5;
-
-    transition:color .25s ease;
-
-}
-
-.essay-pagination a:hover{
-
-    color:#6E7451;
-
-}
 
 
 

@@ -37,42 +37,6 @@
 
     </article>
 
-{{ if eq .Section "essays" }}
-
-<nav class="essay-pagination">
-
-    <div class="essay-pagination__previous">
-
-        {{ with .PrevInSection }}
-
-            <span>Previous</span>
-
-            <a href="{{ .RelPermalink }}">
-                ← {{ .Title }}
-            </a>
-
-        {{ end }}
-
-    </div>
-
-    <div class="essay-pagination__next">
-
-        {{ with .NextInSection }}
-
-            <span>Next</span>
-
-            <a href="{{ .RelPermalink }}">
-                {{ .Title }} →
-            </a>
-
-        {{ end }}
-
-    </div>
-
-</nav>
-
-{{ end }}
-
 </main>
 
 {{ end }}
