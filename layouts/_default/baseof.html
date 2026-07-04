@@ -81,10 +81,11 @@ gtag('config', 'G-34TCWQ0NGL');
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 
-</head>
-
 {{ $style := resources.Get "css/style.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $style.RelPermalink }}">
+
+</head>
+
 
 <body>
 

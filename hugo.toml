@@ -2,6 +2,7 @@ baseURL = "https://anuragjain75-gif.github.io/"
 languageCode = "en-us"
 title = "The Lilamaya"
 theme = "lilamaya"
+# theme = "lilamaya"
 
 disableKinds = ["taxonomy", "term"]
 
