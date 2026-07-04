@@ -1,12 +1,38 @@
 <article class="essay-card">
 
     {{ with .Params.image }}
+
+<div class="essay-card__media">
+
     <a class="essay-card__image" href="{{ $.RelPermalink }}">
+
         <img
             src="{{ . | relURL }}"
             alt="{{ $.Title }}">
+
     </a>
+
+    {{ with $.Params.themes }}
+
+    <div class="essay-card__themes">
+
+        {{ range $index, $theme := . }}
+
+            {{ if gt $index 0 }}
+                <span> · </span>
+            {{ end }}
+
+            <span>{{ $theme }}</span>
+
+        {{ end }}
+
+    </div>
+
     {{ end }}
+
+</div>
+
+{{ end }}
 
     <div class="essay-card__content">
 

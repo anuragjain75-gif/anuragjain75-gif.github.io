@@ -45,9 +45,9 @@
 
     <section class="essay-list">
 
-        {{ range .Pages }}
-            {{ partial "essay-card.html" . }}
-        {{ end }}
+         {{ range .RegularPages.ByDate.Reverse }}
+        {{ partial "essay-card.html" . }}
+    {{ end }}
 
     </section>
 

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/essays/first-essay.md",
-                "mode": "preview",
+                "file": "content/essays/second-essay.md",
+                "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "first-essay"
+              "title": "second-essay"
             }
           }
         ]
@@ -174,6 +174,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-git:Open Git source control": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -183,41 +184,40 @@
       "bases:Create new base": false
     }
   },
-  "active": "3f3abcd3b5e85474",
+  "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
-    "public/essays/first-essay/index.html",
+    "content/essays/first-essay.md",
+    "public/css/style.min.f34ab946a6d26b600ea64c04a7ed7df5e51bc38b79cdbc5d553b865a283e7677.css",
+    "content/essays/second-essay.md",
+    "public/essays/second-essay/index.html",
+    "public/essays/second-essay",
+    "Essay Page Design Elements.md",
+    "resources/_gen/assets/scss/main.scss_511aa33e99371f93fbf403479ebfd32e.json",
+    "resources/_gen/assets/scss/main.scss_511aa33e99371f93fbf403479ebfd32e.content",
+    "resources/_gen/assets/scss",
+    "resources/_gen/assets",
+    "resources/_gen",
+    "public/tags/index.xml",
+    "public/tags",
+    "public/Images/peepal-tree.png",
+    "public/Images/Peepal Tree.png",
     "public/images/tree-logo.png",
     "public/images/peepal-tree1.png",
     "public/images/peepal-tree.png",
     "public/images/about-portrait.png",
-    "public/essays/index.xml",
-    "public/essays/index.html",
-    "public/essays/first-essay",
-    "public/css/style.min.6572ad3d864df546497e666d1ab79ae253d25b4d191f4f95f6f4eca07e879815.css",
-    "public/about/index.html",
     "public/web-app-manifest-512x512.png",
     "public/web-app-manifest-192x192.png",
-    "public/sitemap.xml",
-    "public/robots.txt",
-    "public/index.xml",
-    "public/index.html",
-    "public/images",
     "public/favicon.svg",
     "public/favicon-96x96.png",
-    "public/apple-touch-icon.png",
     "style.md",
-    "content/essays/second-essay.md",
     "conflict-files-obsidian-git.md",
     "How To Work On Local Server And Merge Later.md",
-    "Essay Page Design Elements.md",
     "content/essays/Second Essay.md",
-    "content/essays/first-essay.md",
     "Design Considerations/Image Designs.md",
     "the first.md",
     "docs/Vision.md",
     "content/essays/_index.md",
     "content/essays/index.md",
-    "static/images/tree-logo.png",
     "content/about.md",
     "content/about/_index.md"
   ]
