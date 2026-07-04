@@ -20,23 +20,8 @@
               "icon": "lucide-file",
               "title": "first-essay"
             }
-          },
-          {
-            "id": "3ef0af9db97e3c18",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "content/essays/second-essay.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "second-essay"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -170,30 +155,22 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "content/essays/first-essay.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
-            }
-          },
-          {
-            "id": "38d1c3e4d1b146ff",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
+              "title": "Outline of first-essay"
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 358
+    "width": 358,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -203,43 +180,45 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false,
-      "obsidian-git:Open Git source control": false
+      "bases:Create new base": false
     }
   },
-  "active": "3ef0af9db97e3c18",
+  "active": "3f3abcd3b5e85474",
   "lastOpenFiles": [
-    "Essay Page Design Elements.md",
-    "content/essays/Second Essay.md",
-    "content/essays/second-essay.md",
-    "public/essays/second-essay/index.html",
-    "public/essays/second-essay",
-    "public/essays/untitled/index.html",
-    "public/essays/untitled",
-    "public/css/style.min.05c088319f0ca46bab31d94dc50a868b28899f0eefe19e97d124f371d8ad73e0.css",
-    "public/css/style.min.dc5934a477e1424341af491ae355fe175d568d173ea25f9e32b1f09170aa252b.css",
-    "public/css/style.min.c3dd73f5e6e7dacfe3e6af62e42e487e3c5c76f0970ce1e3eb9e343e618821b8.css",
-    "layouts/partials/analytics.html",
-    "content/essays/first-essay.md",
-    "How To Work On Local Server And Merge Later.md",
-    "themes/lilamaya/layouts/partials/header.html",
-    "themes/lilamaya/layouts/partials/head.html",
-    "Design Considerations/Image Designs.md",
-    "the first.md",
-    "public/web-app-manifest-512x512.png",
-    "public/web-app-manifest-192x192.png",
+    "public/essays/first-essay/index.html",
     "public/images/tree-logo.png",
     "public/images/peepal-tree1.png",
+    "public/images/peepal-tree.png",
+    "public/images/about-portrait.png",
+    "public/essays/index.xml",
+    "public/essays/index.html",
+    "public/essays/first-essay",
+    "public/css/style.min.6572ad3d864df546497e666d1ab79ae253d25b4d191f4f95f6f4eca07e879815.css",
+    "public/about/index.html",
+    "public/web-app-manifest-512x512.png",
+    "public/web-app-manifest-192x192.png",
+    "public/sitemap.xml",
+    "public/robots.txt",
+    "public/index.xml",
+    "public/index.html",
+    "public/images",
     "public/favicon.svg",
     "public/favicon-96x96.png",
     "public/apple-touch-icon.png",
+    "style.md",
+    "content/essays/second-essay.md",
+    "conflict-files-obsidian-git.md",
+    "How To Work On Local Server And Merge Later.md",
+    "Essay Page Design Elements.md",
+    "content/essays/Second Essay.md",
+    "content/essays/first-essay.md",
+    "Design Considerations/Image Designs.md",
+    "the first.md",
     "docs/Vision.md",
     "content/essays/_index.md",
     "content/essays/index.md",
     "static/images/tree-logo.png",
-    "static/images/ChatGPT Image Jul 3, 2026, 05_29_42 PM.png",
     "content/about.md",
-    "static/images/peepal-tree.png",
     "content/about/_index.md"
   ]
 }

@@ -453,8 +453,113 @@ main img {
 
 }
 
+/*==================================================
+    ESSAY END
+==================================================*/
 
+.essay-end{
 
+    margin:70px 0 45px;
+
+    text-align:center;
+
+    font-size:2rem;
+
+    color:#B5AEA1;
+
+    letter-spacing:.15em;
+}
+
+/*==================================================
+    FOOTER
+==================================================*/
+
+.site-footer{
+
+    max-width:760px;
+
+    margin:90px auto 70px;
+
+    text-align:center;
+
+}
+
+   .footer-divider{
+
+    width:540px;
+
+    height:1px;
+
+    margin:0 auto 36px;
+
+    background:#B7AE9D;
+
+}
+}
+
+.footer-title{
+
+    margin:0;
+
+    font-size:1.2rem;
+
+    font-weight:400;
+
+    letter-spacing:.08em;
+
+    color:#2F2D2A;
+
+}
+
+.footer-tagline{
+
+    max-width:420px;
+
+    margin:18px auto 38px;
+
+    font-size:.92rem;
+
+    line-height:1.8;
+
+    font-style:italic;
+
+    color:#888;
+
+}
+
+.footer-nav{
+
+    margin-bottom:36px;
+
+}
+
+.footer-nav a{
+
+    margin:0 16px;
+
+    color:#6E7451;
+
+    text-decoration:none;
+
+    transition:color .25s ease;
+
+}
+
+.footer-nav a:hover{
+
+    color:#2F2D2A;
+
+}
+
+.footer-copyright{
+
+    margin:0;
+
+    font-size:.88rem;
+
+    color:#999;
+
+}
 
 
 
