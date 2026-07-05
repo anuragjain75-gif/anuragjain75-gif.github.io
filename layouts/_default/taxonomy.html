@@ -1,0 +1,49 @@
+{{ define "main" }}
+
+<main class="essays-page">
+
+    <header class="page-header">
+
+        <h1 class="page-title">
+            {{ .Title }}
+        </h1>
+
+    </header>
+
+    {{ partial "theme-navigation.html" . }}
+
+    <section class="essay-list">
+
+        {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 1 }}
+
+        {{ range $paginator.Pages }}
+            {{ partial "essay-card.html" . }}
+        {{ end }}
+
+    </section>
+
+    {{ if gt $paginator.TotalPages 1 }}
+
+    <nav class="pagination">
+
+        {{ if $paginator.HasNext }}
+            <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
+                ← Older Essays
+            </a>
+        {{ else }}
+            <span></span>
+        {{ end }}
+
+        {{ if $paginator.HasPrev }}
+            <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
+                Newer Essays →
+            </a>
+        {{ end }}
+
+    </nav>
+
+    {{ end }}
+
+</main>
+
+{{ end }}

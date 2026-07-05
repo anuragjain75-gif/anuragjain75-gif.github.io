@@ -135,6 +135,15 @@ main img {
 
 }
 
+.browse-themes {
+    margin: 3.5rem 0 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #6f6a58;
+}
+
 /*==================================================
     ESSAY CARD
 ==================================================*/
@@ -734,4 +743,108 @@ main img {
 
     color:#2F2D2A;
 
+}
+
+/*==================================================
+    SEARCH
+==================================================*/
+
+.search-wrapper {
+    max-width: 42rem;
+    margin: 3rem auto 4rem;
+}
+
+.pagefind-ui {
+    max-width: 42rem;
+    margin: 0 auto;
+}
+
+/* Search input */
+
+.pagefind-ui__search-input {
+    width: 100% !important;
+
+    border: none !important;
+    border-bottom: 1px solid #d8d2c6 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+
+    padding: 0.85rem 0 !important;
+
+    font-family: inherit !important;
+    font-size: 1rem !important;
+    color: #3C3A36 !important;
+
+    box-shadow: none !important;
+}
+
+.pagefind-ui__search-input::placeholder {
+    color: #8b8474 !important;
+}
+
+.pagefind-ui__search-input:focus {
+    outline: none !important;
+    border-bottom-color: #6E7451 !important;
+    box-shadow: none !important;
+}
+
+/* Remove Pagefind icon */
+
+.pagefind-ui__search-icon {
+    display: none !important;
+}
+
+/* Remove clear button */
+
+.pagefind-ui__search-clear {
+    display: none !important;
+}
+
+/* Remove Pagefind borders */
+
+.pagefind-ui__drawer,
+.pagefind-ui__message {
+    border: none !important;
+}
+
+/* Hide Pagefind credit */
+
+.pagefind-ui__credits {
+    display: none !important;
+}
+
+/* ==============================================
+   PAGEFIND - REMOVE SEARCH ICON COMPLETELY
+============================================== */
+
+.pagefind-ui__search-input-wrapper {
+    padding-left: 0 !important;
+}
+
+.pagefind-ui__search-icon {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+.pagefind-ui__search-input {
+    padding-left: 0 !important;
+}
+
+/* Kill Pagefind's pseudo-element search icon */
+
+.pagefind-ui__form::before {
+    display: none !important;
+    content: none !important;
+}
+
+.pagefind-ui__form {
+    padding-left: 0 !important;
+}
+
+.pagefind-ui__search-input {
+    padding-left: 0 !important;
 }
