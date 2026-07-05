@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/essays/third-essay.md",
+                "file": "content/essays/second-essay.md",
                 "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "third-essay"
+              "title": "second-essay"
             }
           }
         ]
@@ -186,19 +186,20 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
-    "content/essays/second-essay.md",
-    "content/essays/first-essay.md",
+    "public/css/style.min.7de58db71d782d220ec11644e22a8fcec26efa15efd1ab283ec698f666f5c011.css",
     "content/essays/third-essay.md",
+    "content/essays/second-essay.md",
+    "public/css/style.min.75654296f97bead203cf0c9728c376b21188448b725f472e4aad083fd43c4f3a.css",
+    "content/essays/first-essay.md",
+    "public/essays/second-essay1/index.html",
+    "public/essays/second-essay1",
+    "public/essays/third-essay1/index.html",
+    "public/essays/third-essay1",
     "public/essays/third-essay/index.html",
     "public/essays/third-essay",
     "public/essays/untitled/index.html",
     "public/essays/untitled",
     "public/css/style.min.5a9302f9c702de38904b1774921809d05ca96f058693fa36eac0fd7657e0240a.css",
-    "public/css/style.min.0295823c7ad6bd446ac4450e60bd72504d3279d64574e67f5a74ceb564c97516.css",
-    "public/css/style.min.5ca082029a22dac074e58d8dcaa2bff676e25bfb579d7387aa585c7bd956824d.css",
-    "public/css/style.min.ed62c073c2424db145162946c54b288f2768b424fe5d736c83d91348b52f4866.css",
-    "public/css/style.min.636b160fb0db026e3b8bcf8888b999863812a4d632e7e6cf77eac53d40079d15.css",
-    "public/css/style.min.174538fe7f9fb00614d2e678b5d0132e4f2c029edccafc95d7073bab1508d60b.css",
     "Essay Page Design Elements.md",
     "public/Images/peepal-tree.png",
     "public/Images/Peepal Tree.png",

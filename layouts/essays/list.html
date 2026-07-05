@@ -45,11 +45,35 @@
 
     <section class="essay-list">
 
-         {{ range .RegularPages.ByDate.Reverse }}
-        {{ partial "essay-card.html" . }}
-    {{ end }}
+        {{ $paginator := .Paginate (.RegularPages.ByDate.Reverse) 1 }}
+
+        {{ range $paginator.Pages }}
+            {{ partial "essay-card.html" . }}
+        {{ end }}
 
     </section>
+
+    {{ if gt $paginator.TotalPages 1 }}
+
+    <nav class="pagination">
+
+        {{ if $paginator.HasPrev }}
+            <a class="pagination-prev" href="{{ $paginator.Prev.URL }}">
+                ← Newer Essays
+            </a>
+        {{ else }}
+            <span></span>
+        {{ end }}
+
+        {{ if $paginator.HasNext }}
+            <a class="pagination-next" href="{{ $paginator.Next.URL }}">
+                Older Essays →
+            </a>
+        {{ end }}
+
+    </nav>
+
+    {{ end }}
 
 </main>
 

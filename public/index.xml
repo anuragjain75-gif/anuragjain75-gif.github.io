@@ -2,24 +2,38 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>The Lilamaya</title>
-    <link>https://anuragjain75-gif.github.io/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on The Lilamaya</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 03 Jul 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://anuragjain75-gif.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 04 Jul 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Second Essay</title>
+      <link>http://localhost:1313/essays/second-essay/</link>
+      <pubDate>Sat, 04 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/essays/second-essay/</guid>
+      <description>This is the third essay.</description>
+    </item>
+    <item>
+      <title>The Third Essay</title>
+      <link>http://localhost:1313/essays/third-essay/</link>
+      <pubDate>Sat, 04 Jul 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/essays/third-essay/</guid>
+      <description>See this is just a test We need to take some rest and not burden ourselves with so much work that our body suffers.</description>
+    </item>
     <item>
       <title>The First Essay</title>
-      <link>https://anuragjain75-gif.github.io/essays/first-essay/</link>
+      <link>http://localhost:1313/essays/first-essay/</link>
       <pubDate>Fri, 03 Jul 2026 00:00:00 +0000</pubDate>
-      <guid>https://anuragjain75-gif.github.io/essays/first-essay/</guid>
+      <guid>http://localhost:1313/essays/first-essay/</guid>
       <description>This is a normal paragraph. The purpose of this page is to test the typography of Lilamaya. Reading should feel calm, spacious, and effortless.&#xA;A Second-Level Heading This paragraph follows an H2 heading. It lets us judge the spacing above and below section headings.&#xA;A Third-Level Heading This paragraph follows an H3 heading.&#xA;&amp;ldquo;The world is full of magic things, patiently waiting for our senses to grow sharper.&amp;rdquo;&#xA;— W. B.</description>
     </item>
     <item>
       <title>About</title>
-      <link>https://anuragjain75-gif.github.io/about/</link>
+      <link>http://localhost:1313/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://anuragjain75-gif.github.io/about/</guid>
+      <guid>http://localhost:1313/about/</guid>
       <description>The Lilamaya began with an observation: the extraordinary is rarely found elsewhere. It is hidden within ordinary life.&#xA;Most of our lives are spent waiting for remarkable moments, while quietly overlooking the countless ordinary ones that shape us far more deeply. A child discovering the world for the first time. Rain falling on a familiar garden. The remembered fragrance of an old home. A tree that has stood unnoticed for years.</description>
     </item>
   </channel>

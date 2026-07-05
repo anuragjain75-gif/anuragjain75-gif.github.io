@@ -35,9 +35,15 @@ h1{
     }
 
 nav a{
-        margin:0 15px;
-        color:#6E7451;
-        text-decoration:none;
+    margin:0 15px;
+    color:#6E7451;
+    text-decoration:none;
+    transition:color .25s ease;
+    }
+
+nav a:hover{
+    color:#2F2D2A;
+
     }
 
 .hero-image {
@@ -453,12 +459,6 @@ main img {
 }
 
 
-    align-items:center;
-
-    gap:.45rem;
-
-}
-
 .essay-sort a{
 
     color:#6E7451;
@@ -512,18 +512,26 @@ main img {
 
 }
 
+    .footer-divider-group{
+
+    width:540px;
+
+    margin:0 auto 36px;
+
+}
+
    .footer-divider{
 
     width:540px;
 
-    height:1px;
-
     margin:0 auto 36px;
 
-    background:#B7AE9D;
+    border-top:1px solid #B7AE9D;
+
+    text-align:center;
 
 }
-}
+
 
 .footer-title{
 
@@ -586,6 +594,28 @@ main img {
     font-size:.88rem;
 
     color:#999;
+
+}
+
+.footer-asterism{
+
+    position:relative;
+
+    top:-0.55em;
+
+    display:inline-block;
+
+    padding:0 12px;
+
+    background:#F8F5EF;
+
+    color:#B7AE9D;
+
+    font-size:1.55rem;
+
+    line-height:1;
+
+    transform:translateX(1px);
 
 }
 
@@ -665,5 +695,43 @@ main img {
 .essay-pagination__link:hover{
 
     color:#6E7451;
+
+}
+
+/*==================================================
+    PAGINATION
+==================================================*/
+
+.pagination{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin:90px 0 20px;
+
+    padding-top:45px;
+
+    border-top:1px solid #DDD5C8;
+
+}
+
+.pagination a{
+
+    color:#6E7451;
+
+    text-decoration:none;
+
+    font-size:1rem;
+
+    transition:color .25s ease;
+
+}
+
+.pagination a:hover{
+
+    color:#2F2D2A;
 
 }

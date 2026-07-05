@@ -1,5 +1,7 @@
 {{ define "main" }}
 
+{{ $paginator := .Paginate (.Pages.ByDate.Reverse) 10 }}
+
 <section class="essays-page">
 
     <div class="container">
@@ -17,48 +19,66 @@
                 mysteries hidden within ordinary life.
             </p>
 
-         </header>
+        </header>
 
-<nav class="essay-themes">
+        <nav class="essay-themes">
 
-    <a href="/essays/">All</a>
-    <span>·</span>
+            <a href="/essays/">All</a>
+            <span>·</span>
 
-    <a href="#">Childhood</a>
-    <span>·</span>
+            <a href="#">Childhood</a>
+            <span>·</span>
 
-    <a href="#">Fatherhood</a>
-    <span>·</span>
+            <a href="#">Fatherhood</a>
+            <span>·</span>
 
-    <a href="#">Nature</a>
-    <span>·</span>
+            <a href="#">Nature</a>
+            <span>·</span>
 
-    <a href="#">Gardens</a>
-    <span>·</span>
+            <a href="#">Gardens</a>
+            <span>·</span>
 
-    <a href="#">Books</a>
-    <span>·</span>
+            <a href="#">Books</a>
+            <span>·</span>
 
-    <a href="#">Solitude</a>
-    <span>·</span>
+            <a href="#">Solitude</a>
+            <span>·</span>
 
-    <a href="#">Memoir</a>
+            <a href="#">Memoir</a>
 
-</nav>
-
-</div>
-
-<section class="essay-list">
-
-            {{ range .Pages }}
-
-                {{ partial "essay-card.html" . }}
-
-            {{ end }}
-
-        </section>
+        </nav>
 
     </div>
+
+    <section class="essay-list">
+
+        {{ range $paginator.Pages }}
+            {{ partial "essay-card.html" . }}
+        {{ end }}
+
+    </section>
+
+    {{ if gt $paginator.TotalPages 1 }}
+
+    <nav class="pagination">
+
+        {{ if $paginator.HasNext }}
+            <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
+                ← Older Essays
+            </a>
+        {{ else }}
+            <span></span>
+        {{ end }}
+
+        {{ if $paginator.HasPrev }}
+            <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
+                Newer Essays →
+            </a>
+        {{ end }}
+
+    </nav>
+
+    {{ end }}
 
 </section>
 
