@@ -779,6 +779,15 @@ main img {
     box-shadow: none !important;
 }
 
+.search-input::placeholder,
+#search-input::placeholder {
+
+    color: #7a7469;
+
+    opacity: 1;
+
+}
+
 .pagefind-ui__search-input::placeholder {
     color: #8b8474 !important;
 }
