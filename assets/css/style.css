@@ -9,6 +9,16 @@ body{
 
     }
 
+/*==================================================
+    GLOBAL PAGE SPACING
+==================================================*/
+
+main{
+
+    margin-bottom:100px;
+
+}
+
 header{
         text-align:center;
         margin-bottom:70px;
@@ -556,6 +566,54 @@ main img {
 
 }
 
+.footer-title {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: .6rem;
+
+}
+
+.footer-brand{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:.55rem;
+
+    color:inherit;
+
+    text-decoration:none;
+
+}
+
+.footer-brand:hover{
+
+    color:inherit;
+
+}
+
+.footer-logo {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: block;
+
+    opacity: 1;
+
+    transform: translateY(-1px);
+
+}
+
 .footer-tagline{
 
     max-width:420px;
@@ -997,31 +1055,15 @@ main img {
    SEARCH MATCH
 ========================================== */
 
-.search-result__match{
+.search-result__match {
 
-    margin-top:0.8rem;
+    margin-top: .8rem;
 
-    padding-top:.7rem;
+    padding-top: .7rem;
 
-    border-top:1px solid #ece5d9;
+    border-top: 1px solid #ece5d9;
 
 }
-
-.search-result__match-label{
-
-    display: block;
-
-    margin-bottom: .35rem;
-
-    font-size: .72rem;
-
-    letter-spacing: .08em;
-
-    text-transform: none;
-
-    color: #9a9387;
-
-    font-weight: 400;
 
 .search-result__match-label {
 
@@ -1039,7 +1081,7 @@ main img {
 
     font-weight: 400;
 
-}}
+}
 
 .search-result__excerpt{
 
