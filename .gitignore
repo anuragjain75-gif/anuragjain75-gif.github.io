@@ -1,8 +1,5 @@
 # Hugo build output
-/public/
-
-# Keep Pagefind out of Git (GitHub Actions generates it)
-public/pagefind/
+public/
 
 # Node dependencies
 node_modules/

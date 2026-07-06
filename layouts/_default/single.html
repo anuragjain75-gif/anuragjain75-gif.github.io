@@ -6,7 +6,28 @@
 
     <header class="essay-header">
 
-        <h1 class="essay-title">{{ .Title }}</h1>
+        <h1
+            class="essay-title"
+            data-pagefind-meta="title">
+
+            {{ .Title }}
+
+        </h1>
+
+        <div
+            data-pagefind-meta="reading_time:{{ .ReadingTime }}"
+            hidden>
+        </div>
+
+        <div
+            data-pagefind-meta="type:{{ .Type | title }}"
+            hidden>
+        </div>
+
+        <div
+            data-pagefind-meta="description:{{ with .Params.description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}"
+            hidden>
+        </div>
 
         <div class="essay-meta">
             <time>{{ .Date.Format "2 January 2006" }}</time>
@@ -22,8 +43,12 @@
     </figure>
     {{ end }}
 
-    <article class="essay-content">
+    <article
+        class="essay-content"
+        data-pagefind-body>
+
         {{ .Content }}
+
     </article>
 
     <nav class="essay-pagination">
@@ -31,24 +56,21 @@
         <div class="essay-pagination__previous">
 
             {{ with .Prev }}
-    {{ if eq .Section "essays" }}
+                {{ if eq .Section "essays" }}
+                    <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                        ← {{ .Title }}
+                    </a>
+                {{ end }}
+            {{ end }}
 
-    <a href="{{ .RelPermalink }}" class="essay-pagination__link">
-        ← {{ .Title }}
-    </a>
-
-    {{ end }}
-{{ end }}
         </div>
 
         <div class="essay-pagination__next">
 
             {{ with .Next }}
-
-            <a href="{{ .RelPermalink }}" class="essay-pagination__link">
-                {{ .Title }} →
-            </a>
-
+                <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                    {{ .Title }} →
+                </a>
             {{ end }}
 
         </div>
@@ -61,10 +83,35 @@
 
 <main class="page">
 
-    <h1 class="page-title">{{ .Title }}</h1>
+    <h1
+        class="page-title"
+        data-pagefind-meta="title">
 
-    <article class="page-content">
+        {{ .Title }}
+
+    </h1>
+
+    <div
+        data-pagefind-meta="reading_time:{{ .ReadingTime }}"
+        hidden>
+    </div>
+
+    <div
+        data-pagefind-meta="type:{{ .Type | title }}"
+        hidden>
+    </div>
+
+    <div
+        data-pagefind-meta="description:{{ with .Params.description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}"
+        hidden>
+    </div>
+
+    <article
+        class="page-content"
+        data-pagefind-body>
+
         {{ .Content }}
+
     </article>
 
 </main>

@@ -12,4 +12,11 @@ description = "A quiet literary home of essays on memory, childhood, fatherhood,
 [page]
   nextPrevSortOrder = "asc"
 
+[outputs]
+home = ["HTML", "RSS"]
+section = ["HTML", "RSS"]
+page = ["HTML"]
+taxonomy = ["HTML"]
+term = ["HTML"]
+
 

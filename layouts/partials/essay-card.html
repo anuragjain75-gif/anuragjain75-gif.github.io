@@ -1,72 +1,7 @@
 <article class="essay-card">
 
-    {{ with .Params.image }}
+    {{ partial "essay-card-image.html" . }}
 
-<div class="essay-card__media">
-
-    <a class="essay-card__image" href="{{ $.RelPermalink }}">
-
-        <img
-            src="{{ . | relURL }}"
-            alt="{{ $.Title }}">
-
-    </a>
-
-    {{ with $.Params.themes }}
-
-    <div class="essay-card__themes">
-
-        {{ range $index, $theme := . }}
-
-    {{ if gt $index 0 }}, {{ end }}{{ $theme }}
-
-{{ end }}
-
-    </div>
-
-    {{ end }}
-
-</div>
-
-{{ end }}
-
-    <div class="essay-card__content">
-
-        <h2 class="essay-card__title">
-            <a href="{{ .RelPermalink }}">
-                {{ .Title }}
-            </a>
-        </h2>
-
-        <p class="essay-card__excerpt">
-
-        {{ with .Params.description }}
-        {{ . | truncate 180 }}
-        {{ else }}
-        {{ .Summary | truncate 180 }}
-        {{ end }}
-
-        </p>
-
-        <div class="essay-card__meta">
-
-            <time>
-                {{ .Date.Format "2 January 2006" }}
-            </time>
-
-            {{ with .Params.theme }}
-                <span> • </span>
-                <span>{{ . }}</span>
-            {{ end }}
-
-            <span> • </span>
-
-            <span>
-                {{ .ReadingTime }} min
-            </span>
-
-        </div>
-
-    </div>
+    {{ partial "essay-card-content.html" . }}
 
 </article>

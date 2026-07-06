@@ -4,10 +4,16 @@
   "private": true,
   "description": "The Lilamaya",
   "scripts": {
-    "dev": "hugo server",
+    "dev": "npm run dev:init && concurrently -k -n HUGO,PAGEFIND -c blue,green \"npm:dev:hugo\" \"npm:dev:pagefind\"",
+    "dev:init": "hugo && npx pagefind --site public",
+    "dev:hugo": "hugo server --disableFastRender",
+    "dev:pagefind": "chokidar \"content/**/*\" \"layouts/**/*\" \"assets/**/*\" \"static/**/*\" \"hugo.toml\" --debounce 500 -c \"npx pagefind --site public\"",
     "build": "hugo && npx pagefind --site public"
   },
   "devDependencies": {
-    "pagefind": "^1.5.2"
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^9.2.1",
+    "pagefind": "^1.5.2",
+    "serve": "^14.2.4"
   }
 }

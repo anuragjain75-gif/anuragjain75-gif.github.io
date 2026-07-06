@@ -3,7 +3,10 @@
 
 {{ partial "head.html" . }}
 
-<script src="/pagefind/pagefind.js"></script>
+<script type="module">
+    import * as pagefind from "/pagefind/pagefind.js";
+    window.pagefind = pagefind;
+</script>
 
 <body>
 

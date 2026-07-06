@@ -848,3 +848,202 @@ main img {
 .pagefind-ui__search-input {
     padding-left: 0 !important;
 }
+
+/* ==========================================
+   CUSTOM SEARCH
+========================================== */
+
+.search-wrapper {
+    max-width: 700px;
+    margin: 4rem auto 3rem;
+}
+
+#search-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #b8ab92;
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 1.1rem;
+
+    color: #38342f;
+
+    padding: 0.75rem 0;
+
+    outline: none;
+}
+
+#search-input::placeholder {
+    color: #9c9384;
+}
+
+#search-input:focus {
+    border-bottom-color: #6b7452;
+}
+
+#search-results {
+    margin-top: 2rem;
+}
+
+/* ==========================================
+   SEARCH RESULTS
+========================================== */
+
+.search-result{
+
+    padding:2.5rem 0;
+
+    border-bottom:1px solid #e7dfd3;
+
+}
+
+.search-result__title{
+
+    margin:0;
+
+    font-size:2rem;
+
+    font-family:var(--font-heading);
+
+    font-weight:400;
+
+    line-height:1.25;
+
+}
+
+.search-result__link{
+
+    color:#2f2b27;
+
+    text-decoration:none;
+
+}
+
+.search-result__link:hover{
+
+    color:#6b7452;
+
+}
+
+.search-result__meta{
+
+    margin-top:.45rem;
+
+    margin-bottom:1rem;
+
+    color:#7a775f;
+
+    font-size:.82rem;
+
+    letter-spacing:.04em;
+
+    text-transform:none;
+
+    font-variant:normal;
+
+}
+
+.search-result__description{
+
+    margin:0;
+
+    font-size:1.05rem;
+
+    line-height:1.85;
+
+    color:#5a5652;
+
+}
+
+.search-empty{
+
+    padding:2rem 0;
+
+    text-align:center;
+
+    color:#8d877f;
+
+    font-style:italic;
+
+}
+
+/* ==========================================
+   SEARCH HIGHLIGHT
+========================================== */
+
+.search-result mark {
+
+    background: rgba(191, 176, 107, 0.28);
+
+    color: inherit;
+
+    padding: 0 .08em;
+
+    border-radius: 2px;
+
+}
+
+/* ==========================================
+   SEARCH MATCH
+========================================== */
+
+.search-result__match{
+
+    margin-top:0.8rem;
+
+    padding-top:.7rem;
+
+    border-top:1px solid #ece5d9;
+
+}
+
+.search-result__match-label{
+
+    display: block;
+
+    margin-bottom: .35rem;
+
+    font-size: .72rem;
+
+    letter-spacing: .08em;
+
+    text-transform: none;
+
+    color: #9a9387;
+
+    font-weight: 400;
+
+.search-result__match-label {
+
+    display: block;
+
+    margin-bottom: .35rem;
+
+    font-size: .72rem;
+
+    letter-spacing: .08em;
+
+    text-transform: none;
+
+    color: #9a9387;
+
+    font-weight: 400;
+
+}}
+
+.search-result__excerpt{
+
+    margin: 0;
+
+    color: #6f6962;
+
+    font-size: .93rem;
+
+    font-style: italic;
+
+    line-height: 1.8;
+
+}
+
+

@@ -1,0 +1,33 @@
+<div class="essay-card__content">
+
+    <h2 class="essay-card__title">
+
+        <a href="{{ .RelPermalink }}">
+
+            {{ .Title }}
+
+        </a>
+
+    </h2>
+
+    <p class="essay-card__excerpt">
+
+        {{ with .Params.description }}
+            {{ . | truncate 180 }}
+        {{ else }}
+            {{ .Summary | truncate 180 }}
+        {{ end }}
+
+    </p>
+
+    <div class="essay-card__meta">
+
+        <span>Essay</span>
+
+        <span> • </span>
+
+        <span>{{ .ReadingTime }} min read</span>
+
+    </div>
+
+</div>

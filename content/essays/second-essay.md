@@ -8,4 +8,4 @@ themes:
 - nature
 ---
 
-This is the third essay.
+This is the third essay, which is renamed as the second essay. (Just checking)

@@ -77,4 +77,7 @@
 
     {{ partial "analytics.html" . }}
 
+    {{ $search := resources.Get "js/search.js" | js.Build }}
+    <script defer src="{{ $search.RelPermalink }}"></script>
+
 </head>

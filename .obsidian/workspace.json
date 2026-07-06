@@ -20,8 +20,23 @@
               "icon": "lucide-file",
               "title": "second-essay"
             }
+          },
+          {
+            "id": "f34e7458d88758a1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/essays/third-essay.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "third-essay"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -184,25 +199,27 @@
       "bases:Create new base": false
     }
   },
-  "active": "4dee1c2dbe64e2f0",
+  "active": "f34e7458d88758a1",
   "lastOpenFiles": [
-    "public/css/style.min.01c7f399aed6149d65eed9793c580c21d040b9726e6ec14dabeebc739346d75a.css",
-    "public/css/style.min.e0427637be45e815122a9bc46f02782b1e11b32c7dd3f411f5fa77e9c416801d.css",
-    "public/css/style.min.cc2efd032da3fef74a644660c64caa15ffdfc08c768774c405a8692ead4c47b8.css",
-    "public/css/style.min.2f069af8332b813185548151eb7855904f3a1c5bc44410c43e1e81b5af70d026.css",
-    "public/pagefind/fragment/en_376f8ff.pf_fragment",
-    "public/pagefind/pagefind.en_5ccdf440e4.pf_meta",
-    "public/css/style.min.e0eed1cc438df635e24e088f8f6ebed8c66377dc225f7ae8190846cc272dd33c.css",
-    "node_modules/@pagefind/darwin-x64",
-    "node_modules/@pagefind/darwin-arm64",
-    "node_modules/@pagefind/windows-x64",
-    "node_modules/@pagefind/windows-arm64",
+    "public/css/style.min.f193c3ff323c56ecae4b312950b798d767ac051aa7e1be8bce8aaae62d75ee4e.css",
+    "public/css/style.min.727f378fdf4b01a1eb3b434b0f291857d43f242e2a48994c152655da3617c7f6.css",
+    "public/css/style.min.80dd5d6901cf6e3bece434d073ebb1f4657c6ed01dd42a727a0c2ef7350f721a.css",
+    "public/css/style.min.cca22593179d3f3c76e971989dd30af3a3e8100da99a8c84a22471cc7d423da7.css",
+    "public/css/style.min.6a2bcf9e2446b914c0af7da935d16c58b6796d2e688d75e24617abcea638c7ad.css",
+    "public/css/style.min.51910a1033fe8c1f1537fd64f4716a8588a9fb125dced6c016fabeccc3f435ea.css",
+    "public/css/style.min.95fa80a27d754e8a14de09dc6533f0e8fc995f4714e2ef3b03d4b42bc5a51be9.css",
+    "public/css/style.min.1f2aee6158f6e620a60f3e529360c36e74c505d4bed53a135e247fe4964bcc5b.css",
+    "public/css/style.min.299c0b19a23ac0009900bfde397bdc5c185506dceebf336385d974fde304c510.css",
+    "public/css/style.min.f52d3cd462799ff7bf47d1b5636434029550b0330262d651300272b0876cd4f5.css",
+    "public/css/style.min.74bb044aaa54ed644723e376ce989dd4dabfd7aa3ba988f190d744916114d17d.css",
+    "content/essays/second-essay.md",
+    "content/essays/first-essay.md",
+    "DEVELOPMENT.md",
+    "Essay Page Design Elements.md",
+    "How To Work On Local Server And Merge Later.md",
     "node_modules/@pagefind/linux-x64/README.md",
     "node_modules/pagefind/README.md",
     "content/essays/third-essay.md",
-    "content/essays/second-essay.md",
-    "content/essays/first-essay.md",
-    "Essay Page Design Elements.md",
     "public/Images/peepal-tree.png",
     "public/Images/Peepal Tree.png",
     "public/images/tree-logo.png",
@@ -215,7 +232,6 @@
     "public/favicon-96x96.png",
     "style.md",
     "conflict-files-obsidian-git.md",
-    "How To Work On Local Server And Merge Later.md",
     "content/essays/Second Essay.md",
     "Design Considerations/Image Designs.md",
     "the first.md",
