@@ -554,7 +554,7 @@ main img {
 
 .footer-title{
 
-    margin:0;
+    margin:0 0 18px;
 
     font-size:1.2rem;
 
@@ -631,6 +631,8 @@ main img {
 }
 
 .footer-nav{
+
+    margin-top:22px;   
 
     margin-bottom:36px;
 
