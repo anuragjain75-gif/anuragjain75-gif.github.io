@@ -1,1 +1,23 @@
-public/
+# Hugo build output
+/public/
+
+# Keep Pagefind out of Git (GitHub Actions generates it)
+public/pagefind/
+
+# Node dependencies
+node_modules/
+
+# npm logs
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
