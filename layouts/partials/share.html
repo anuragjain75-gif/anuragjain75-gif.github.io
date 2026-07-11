@@ -1,0 +1,63 @@
+<div class="share-section">
+
+    <p class="share-heading">
+        If this essay resonated with you, consider sharing it with someone who may enjoy a slow read.
+    </p>
+
+    <div class="share-links">
+
+        <a href="https://twitter.com/intent/tweet?text={{ .Title | urlquery }}&url={{ .Permalink | urlquery }}"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on X">
+
+            {{ partial "icon.html" "x" }}
+
+        </a>
+
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ .Permalink | urlquery }}"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on Facebook">
+
+            {{ partial "icon.html" "facebook" }}
+
+        </a>
+
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ .Permalink | urlquery }}"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on LinkedIn">
+
+            {{ partial "icon.html" "linkedin" }}
+
+        </a>
+
+        <a href="mailto:?subject={{ .Title | urlquery }}&body={{ .Permalink }}"
+           aria-label="Share by Email">
+
+            {{ partial "icon.html" "email" }}
+
+        </a>
+
+        <button id="copy-link"
+                data-url="{{ .Permalink }}"
+                aria-label="Copy link">
+
+            <span class="copy-icon">
+                {{ partial "icon.html" "link" }}
+            </span>
+
+            <span class="check-icon">
+                {{ partial "icon.html" "check" }}
+            </span>
+
+        </button>
+
+    </div>
+
+    <div id="copy-toast">
+        Link copied.
+    </div>
+
+</div>

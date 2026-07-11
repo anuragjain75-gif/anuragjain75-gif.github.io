@@ -11,13 +11,13 @@
           content="{{ .Site.Params.author }}">
 
     <meta property="og:title"
-          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }}{{ end }}">
 
     <meta property="og:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
 
     <meta property="og:type"
-          content="{{ if .IsHome }}website{{ else }}article{{ end }}">
+          content="{{ if .IsHome }}website{{ else if eq .Section "essays" }}article{{ else }}website{{ end }}">
 
     <meta property="og:url"
           content="{{ .Permalink }}">
@@ -25,17 +25,57 @@
     <meta property="og:site_name"
           content="{{ .Site.Title }}">
 
+    {{ with .Params.image }}
+    <meta property="og:image"
+          content="{{ . | absURL }}">
+    <meta property="og:image:width"
+          content="1200">
+    <meta property="og:image:height"
+          content="630">
+    {{ else }}
+    <meta property="og:image"
+          content="{{ "images/og-default.jpg" | absURL }}">
+    {{ end }}
+
+    {{ with .Params.description }}
+    <meta property="og:image:alt"
+          content="{{ . }}">
+    {{ end }}
+
     <meta property="og:locale"
           content="en_IN">
+
+    {{ if and (not .IsHome) (eq .Section "essays") }}
+
+    <meta property="article:published_time"
+          content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+
+    {{ with .Lastmod }}
+    <meta property="article:modified_time"
+          content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
+    {{ end }}
+
+    {{ end }}
 
     <meta name="twitter:card"
           content="summary_large_image">
 
+    <meta name="twitter:site"
+          content="@AnuragNEEV">
+
     <meta name="twitter:title"
-          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }}{{ end }}">
 
     <meta name="twitter:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+
+    {{ with .Params.image }}
+    <meta name="twitter:image"
+          content="{{ . | absURL }}">
+    {{ else }}
+    <meta name="twitter:image"
+          content="{{ "images/og-default.jpg" | absURL }}">
+    {{ end }}
 
     <meta name="theme-color"
           content="#F8F5EF">
@@ -79,5 +119,8 @@
 
     {{ $search := resources.Get "js/search.js" | js.Build }}
     <script defer src="{{ $search.RelPermalink }}"></script>
+
+    {{ $share := resources.Get "js/share.js" | js.Build }}
+    <script defer src="{{ $share.RelPermalink }}"></script>
 
 </head>

@@ -51,6 +51,8 @@
 
     </article>
 
+    {{ partial "share.html" . }}
+
     <nav class="essay-pagination">
 
         <div class="essay-pagination__previous">
@@ -111,6 +113,8 @@
         data-pagefind-body>
 
         {{ .Content }}
+
+{{ partial "share.html" . }}
 
     </article>
 

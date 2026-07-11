@@ -724,9 +724,9 @@ main img {
 
     align-items:flex-start;
 
-    margin:100px 0 40px;
+    margin:48px 0 40px;
 
-    padding-top:45px;
+    padding-top:35px;
 
     border-top:1px solid #DDD5C8;
 
@@ -1099,4 +1099,201 @@ main img {
 
 }
 
+/*==================================================
+    SHARE SECTION
+==================================================*/
 
+.share-section {
+
+    margin: 3rem 0 0;
+
+    padding-top: 2rem;
+
+    text-align: center;
+
+    position: relative;
+
+}
+
+.share-section::before {
+
+    content: "";
+
+    display: block;
+
+    width: 42%;
+
+    margin: 0 auto 1.8rem;
+
+    border-top: 1px solid #DDD5C8;
+
+}
+
+.share-heading {
+
+    margin-bottom: 1.6rem;
+
+    font-style: italic;
+
+    font-size: .98rem;
+
+    color: #7A7468;
+
+    line-height: 1.7;
+    
+    max-width: 34rem;
+
+    margin: 0 auto 1.8rem;
+
+
+}
+
+.share-links {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 2.4rem;
+
+}
+
+.share-links a,
+.share-links button {
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:48px;
+
+    height:48px;
+
+    flex-shrink:0;
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    background: none;
+
+    border: none;
+
+    color: #3C3A36;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition:
+        color .25s ease,
+        transform .25s ease,
+        opacity .25s ease;
+
+}
+
+.share-links svg {
+
+    width: 25px;
+
+    height: 25px;
+
+}
+
+.share-links a:hover,
+
+.share-links button:hover {
+
+    color: #6E7451;
+
+    transform: translateY(-2px);
+
+}
+
+.share-links a:focus,
+
+.share-links button:focus {
+
+    outline: none;
+
+    color: #2F2D2A;
+
+}
+
+#copy-toast {
+
+    margin-top: 1.25rem;
+
+    font-size: .88rem;
+
+    color: #8A8478;
+
+    opacity: 0;
+
+    transition: opacity .25s ease;
+
+}
+
+#copy-toast.show {
+
+    opacity: 1;
+
+}
+
+@media (max-width:700px){
+
+    .share-links{
+
+        gap:1.15rem;
+
+    }
+
+    .share-links svg{
+
+        width:22px;
+
+        height:22px;
+
+    }
+
+}
+
+.share-icon{
+
+    display:block;
+
+    width:30px;
+
+    height:30px;
+
+}
+
+.copy-icon {
+
+    display: block;
+
+}
+
+.check-icon {
+
+    display: none;
+
+}
+
+#copy-link.copied .copy-icon {
+
+    display: none;
+
+}
+
+#copy-link.copied .check-icon {
+
+    display: block;
+
+}

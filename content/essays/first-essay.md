@@ -2,10 +2,10 @@
 title: The First Essay
 date: 2026-07-03
 draft: false
-image: images/peepal-tree.png
-themes: 
-- fatherhood
-- childhood
+image: images/peepal-tree1.png
+themes:
+  - fatherhood
+  - childhood
 ---
 This is a normal paragraph. The purpose of this page is to test the typography of Lilamaya. Reading should feel calm, spacious, and effortless.
 
