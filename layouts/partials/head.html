@@ -11,7 +11,7 @@
           content="{{ .Site.Params.author }}">
 
     <meta property="og:title"
-          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }}{{ end }}">
+      content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
 
     <meta property="og:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
@@ -64,7 +64,7 @@
           content="@AnuragNEEV">
 
     <meta name="twitter:title"
-          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }}{{ end }}">
+      content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
 
     <meta name="twitter:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
