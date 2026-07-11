@@ -6,6 +6,7 @@ image: images/peepal-tree1.png
 themes:
   - fatherhood
   - childhood
+description: Just a trial essay to test design
 ---
 This is a normal paragraph. The purpose of this page is to test the typography of Lilamaya. Reading should feel calm, spacious, and effortless.
 

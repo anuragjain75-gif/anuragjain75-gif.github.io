@@ -11,12 +11,14 @@
             "id": "4dee1c2dbe64e2f0",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "static/images/peepal-tree1.png"
+                "file": "content/essays/first-essay.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "peepal-tree1"
+              "icon": "lucide-file",
+              "title": "first-essay"
             }
           }
         ]
@@ -183,6 +185,10 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "public/pagefind/index/en_1c9ec8e.pf_index",
+    "public/pagefind/fragment/en_e9f9e67.pf_fragment",
+    "public/pagefind/pagefind.en_b6a57c290a.pf_meta",
+    "static/images/peepal-tree1.png",
     "content/essays/first-essay.md",
     "public/pagefind/fragment/en_6cf1baf.pf_fragment",
     "public/pagefind/index/en_db3a2b3.pf_index",
@@ -194,8 +200,6 @@
     "public/css/style.min.7155298f7c19f2514c4755c552dcbad3604ffcf381d821ae59d68da1f15880cc.css",
     "public/css/style.min.8b73e0850ac4d6274b5f2b2e26558cfd6bc7272b7e1782a88865cacc33ddcf2b.css",
     "public/css/style.min.8a480da89675750ecad634f054b1739c9401eae1ffaaf282946f02547ec0737b.css",
-    "public/css/style.min.65a3608a7a607bed0203a98af94c8c25b5bf6935ba37a5255f620056fc842dad.css",
-    "public/css/style.min.ea6ee4abc2a517d58e714e499e778573ea83c6d9068799887a575b1219711133.css",
     "DEVELOPMENT.md",
     "Essay Page Design Elements.md",
     "How To Work On Local Server And Merge Later.md",
@@ -210,7 +214,6 @@
     "public/web-app-manifest-512x512.png",
     "public/web-app-manifest-192x192.png",
     "public/favicon.svg",
-    "public/favicon-96x96.png",
     "style.md",
     "conflict-files-obsidian-git.md",
     "content/essays/Second Essay.md",
