@@ -7,7 +7,7 @@ social_image: images/social/first-essay.png
 themes:
   - fatherhood
   - childhood
-description: Just a trial essay to test design
+description: On a quiet night beneath an old peepal tree, an unexpected memory transforms into a meditation on childhood, belonging, and the mysterious ways in which ordinary moments call us back to ourselves. A reflective literary essay about memory, landscape, and home.
 ---
 This is a normal paragraph. The purpose of this page is to test the typography of Lilamaya. Reading should feel calm, spacious, and effortless.
 
