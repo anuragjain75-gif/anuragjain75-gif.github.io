@@ -3,6 +3,7 @@ title: The First Essay
 date: 2026-07-03
 draft: false
 image: images/peepal-tree1.png
+social_image: images/social/first-essay.png
 themes:
   - fatherhood
   - childhood
@@ -29,3 +30,4 @@ Here is a sentence containing an internal link to the [About page](/about/) so w
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae nisi eget purus fermentum consequat. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Sed vel mauris vitae ipsum posuere pretium.
 
 Another paragraph to judge line length, paragraph spacing, and overall reading comfort. Long essays will contain hundreds of paragraphs like this, so getting this right now is important.
+

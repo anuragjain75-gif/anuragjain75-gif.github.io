@@ -1,4 +1,5 @@
 <head>
+
     <meta charset="utf-8">
 
     <meta name="viewport"
@@ -11,7 +12,7 @@
           content="{{ .Site.Params.author }}">
 
     <meta property="og:title"
-      content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
 
     <meta property="og:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
@@ -25,16 +26,33 @@
     <meta property="og:site_name"
           content="{{ .Site.Title }}">
 
-    {{ with .Params.image }}
-    <meta property="og:image"
-          content="{{ . | absURL }}">
-    <meta property="og:image:width"
-          content="1200">
-    <meta property="og:image:height"
-          content="630">
+    {{ if .Params.social_image }}
+
+        <meta property="og:image"
+              content="{{ .Params.social_image | absURL }}">
+
+        <meta property="og:image:width"
+              content="1200">
+
+        <meta property="og:image:height"
+              content="630">
+
+    {{ else if .Params.image }}
+
+        <meta property="og:image"
+              content="{{ .Params.image | absURL }}">
+
+        <meta property="og:image:width"
+              content="1200">
+
+        <meta property="og:image:height"
+              content="630">
+
     {{ else }}
-    <meta property="og:image"
-          content="{{ "images/og-default.jpg" | absURL }}">
+
+        <meta property="og:image"
+              content="{{ "images/og-default.jpg" | absURL }}">
+
     {{ end }}
 
     {{ with .Params.description }}
@@ -47,13 +65,13 @@
 
     {{ if and (not .IsHome) (eq .Section "essays") }}
 
-    <meta property="article:published_time"
-          content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+        <meta property="article:published_time"
+              content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
 
-    {{ with .Lastmod }}
-    <meta property="article:modified_time"
-          content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
-    {{ end }}
+        {{ with .Lastmod }}
+        <meta property="article:modified_time"
+              content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
+        {{ end }}
 
     {{ end }}
 
@@ -64,17 +82,26 @@
           content="@AnuragNEEV">
 
     <meta name="twitter:title"
-      content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
 
     <meta name="twitter:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
 
-    {{ with .Params.image }}
-    <meta name="twitter:image"
-          content="{{ . | absURL }}">
+    {{ if .Params.social_image }}
+
+        <meta name="twitter:image"
+              content="{{ .Params.social_image | absURL }}">
+
+    {{ else if .Params.image }}
+
+        <meta name="twitter:image"
+              content="{{ .Params.image | absURL }}">
+
     {{ else }}
-    <meta name="twitter:image"
-          content="{{ "images/og-default.jpg" | absURL }}">
+
+        <meta name="twitter:image"
+              content="{{ "images/og-default.jpg" | absURL }}">
+
     {{ end }}
 
     <meta name="theme-color"
