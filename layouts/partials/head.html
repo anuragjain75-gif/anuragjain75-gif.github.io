@@ -21,7 +21,7 @@
           content="{{ if .IsHome }}website{{ else if eq .Section "essays" }}article{{ else }}website{{ end }}">
 
     <meta property="og:url"
-          content="{{ .Permalink }}">
+      content="{{ strings.TrimSuffix "/" .Permalink }}">
 
     <meta property="og:site_name"
           content="{{ .Site.Title }}">
@@ -116,7 +116,7 @@
     </title>
 
     <link rel="canonical"
-          href="{{ .Permalink }}">
+      href="{{ strings.TrimSuffix "/" .Permalink }}">
 
     {{ $style := resources.Get "css/style.css" | minify | fingerprint }}
     <link rel="stylesheet"
