@@ -3,7 +3,7 @@ title: The First Essay
 date: 2026-07-03
 draft: false
 image: images/peepal-tree1.png
-social_image: images/social/first-essay.png
+social_image: images/social/first-essay-v2.png
 themes:
   - fatherhood
   - childhood
