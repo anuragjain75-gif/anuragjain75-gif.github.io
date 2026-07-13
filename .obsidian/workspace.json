@@ -11,13 +11,11 @@
             "id": "4dee1c2dbe64e2f0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "content/essays/first-essay.md",
-                "mode": "source",
-                "source": true
+                "file": "static/images/social/first-essay.png"
               },
-              "icon": "lucide-file",
+              "icon": "lucide-image",
               "title": "first-essay"
             }
           }
@@ -185,8 +183,10 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
-    "public/images/social/first-essay.png",
+    "static/images/about-portrait.png",
     "static/images/social/first-essay.png",
+    "content/essays/first-essay.md",
+    "public/images/social/first-essay.png",
     "public/images/social",
     "static/images/social",
     "public/images/Untitled Folder",
@@ -203,7 +203,6 @@
     "design",
     "Untitled Folder",
     "static/images/peepal-tree1.png",
-    "content/essays/first-essay.md",
     "content/essays/second-essay.md",
     "content/essays/third-essay.md",
     "DEVELOPMENT.md",
@@ -213,7 +212,6 @@
     "node_modules/pagefind/README.md",
     "public/Images/peepal-tree.png",
     "public/Images/Peepal Tree.png",
-    "public/images/tree-logo.png",
     "style.md",
     "conflict-files-obsidian-git.md",
     "content/essays/Second Essay.md",
