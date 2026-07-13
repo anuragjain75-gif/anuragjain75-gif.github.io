@@ -18,6 +18,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     });
 
+    function escapeRegex(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
     async function runSearch() {
 
         const query = input.value.trim();
@@ -47,9 +51,29 @@ window.addEventListener("DOMContentLoaded", async () => {
             "Pages": "Page"
         };
 
+        const wholeWord = new RegExp(
+            `\\b${escapeRegex(query.toLowerCase())}\\b`,
+            "i"
+        );
+
+        let matches = 0;
+
         for (const result of search.results) {
 
             const data = await result.data();
+
+            const searchableText = [
+                data.meta.title || "",
+                data.meta.description || "",
+                data.excerpt || ""
+            ].join(" ").toLowerCase();
+
+            // Ignore fuzzy matches like "moments" for "moon"
+            if (!wholeWord.test(searchableText)) {
+                continue;
+            }
+
+            matches++;
 
             const card = template.content.cloneNode(true);
 
@@ -96,12 +120,20 @@ window.addEventListener("DOMContentLoaded", async () => {
                     data.meta.description ||
                     data.excerpt.replace(/<[^>]+>/g, "");
 
-            const excerpt = data.excerpt.trim();
-
             card.querySelector(".search-result__excerpt")
-                .innerHTML = `… ${excerpt} …`;
+                .innerHTML = `… ${data.excerpt.trim()} …`;
 
             results.appendChild(card);
+
+        }
+
+        if (matches === 0) {
+
+            results.innerHTML = `
+                <p class="search-empty">
+                    Nothing in The Lilamaya matched your search.
+                </p>
+            `;
 
         }
 
