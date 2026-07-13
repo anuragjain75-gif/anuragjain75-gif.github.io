@@ -19,4 +19,7 @@ page = ["HTML"]
 taxonomy = ["HTML"]
 term = ["HTML"]
 
+[permalinks]
+  fragments = "/fragments/:year/:month/:day/"
+
 

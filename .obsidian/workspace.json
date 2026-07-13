@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/essays/first-essay.md",
+                "file": "content/fragments/the-rain.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "first-essay"
+              "title": "the-rain"
             }
           }
         ]
@@ -185,28 +185,30 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "public/fragments/2026/07/13/index.html",
+    "public/fragments/2026/07/13",
+    "public/fragments/2026/07",
+    "public/fragments/2026",
+    "public/css/style.min.0a499b44140b84393af81fe762a938ef8823d8b5b833ffa08ea3ab408646a607.css",
+    "public/css/style.min.ea39e6821e9783cf4928b5cc37bf7d7a1e9b60f544e3e6575c6de57fe7b8be26.css",
+    "public/css/style.min.c46bebabc12fd1e1bd69f4057fa93265749f0c9a6f512af4eb79556b8217356f.css",
+    "public/css/style.min.012fb32f834b446f8da9b827794d4d8742df86268becb1c9e8c257770c115c03.css",
+    "public/css/style.min.75471ff8d165595b7bb910a4b77fbbd1d7c4815f01257b0a2060fa28ce6370d9.css",
+    "public/css/style.min.d02303467d932fe1e32d409954a2251624c654f2c226b05b740ac4977cee625f.css",
+    "public/css/style.min.a7dc77ab52c170e890bb2758a32531d2407a2e69cb7734f9fa085ffe08575760.css",
+    "public/images/social/first-essay-v2.png",
+    "content/fragments/_index.md",
+    "content/fragments/the-rain.md",
+    "content/essays/first-essay.md",
     "design/Cards/First-Essay-v2.svg",
     "design/Cards/Lilamaya-OG-Template.svg",
     "static/images/social/first-essay-v2.png",
     "static/images/social/first-essay.png",
     "static/images/about-portrait.png",
-    "content/essays/first-essay.md",
     "public/images/social/first-essay.png",
-    "public/images/social",
-    "static/images/social",
-    "public/images/Untitled Folder",
-    "static/images/Untitled Folder",
     "design/first-essay.png",
     "design/Lilamaya-OG-Template.png",
     "design/Cards/The-First-Essay.svg",
-    "design/Cards",
-    "design/Untitled Folder",
-    "public/pagefind/fragment/en_57f37d5.pf_fragment",
-    "public/pagefind/pagefind.en_a232196ca0.pf_meta",
-    "design/Lilamaya-OG-Template.svg",
-    "design",
-    "Untitled Folder",
-    "static/images/peepal-tree1.png",
     "content/essays/second-essay.md",
     "content/essays/third-essay.md",
     "DEVELOPMENT.md",

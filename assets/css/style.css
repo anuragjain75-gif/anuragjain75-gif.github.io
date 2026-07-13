@@ -1297,3 +1297,88 @@ main img {
     display: block;
 
 }
+
+/* ----------------------------------------------------------
+   Fragments
+---------------------------------------------------------- */
+.fragments-header h1 {
+    font-size: 2.6rem;
+}
+
+
+.fragments-list {
+    max-width: 38rem;
+    margin: 2.5rem auto 4rem;
+}
+
+.fragment {
+    margin-bottom: 4rem;
+}
+
+.fragment-date {
+    display: block;
+    margin-bottom: 2.2rem;
+    font-size: 0.82rem;
+    color: #8a8477;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fragment-content {
+    font-size: 1.18rem;
+    line-height: 2;
+    margin-left: 1rem;
+}
+
+.fragment-divider {
+    margin-top: 3.5rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    color: var(--color-text-light);
+    font-size: 1.2rem;
+}
+
+.fragment:last-child .fragment-divider {
+    display: none;
+}
+
+/* ----------------------------------------------------------
+   Individual Fragment
+---------------------------------------------------------- */
+
+.fragment-page {
+    max-width: 38rem;
+    margin: 2rem auto 5rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 4rem;
+    font-size: 0.9rem;
+    color: #8a8477;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+}
+
+.back-link:hover {
+    color: var(--color-text);
+}
+
+.fragment-page .fragment-date {
+    display: block;
+    margin-bottom: 3rem;
+}
+
+.fragment-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5rem;
+}
+
+.fragment-navigation a {
+    text-decoration: none;
+}
+
+.fragment-navigation a:hover {
+    text-decoration: underline;
+}

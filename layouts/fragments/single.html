@@ -1,0 +1,31 @@
+{{ define "main" }}
+
+<article class="fragment-page">
+
+    <a class="back-link" href="/fragments/">
+        ← Fragments
+    </a>
+
+    <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
+        {{ .Date.Format "2 January 2006" }}
+    </time>
+
+    <section class="fragment-content">
+        {{ .Content }}
+    </section>
+
+    <nav class="fragment-navigation">
+
+        {{ with .PrevInSection }}
+        <a href="{{ .RelPermalink }}">← Previous</a>
+        {{ end }}
+
+        {{ with .NextInSection }}
+        <a href="{{ .RelPermalink }}">Next →</a>
+        {{ end }}
+
+    </nav>
+
+</article>
+
+{{ end }}

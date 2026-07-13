@@ -1,0 +1,35 @@
+{{ define "main" }}
+
+<header class="page-header fragments-header">
+    <h1>{{ .Title }}</h1>
+
+    {{ with .Description }}
+        <p class="page-description">{{ . }}</p>
+    {{ end }}
+</header>
+
+<section class="fragments-list">
+
+    {{ range .Pages.ByDate.Reverse }}
+
+    <article class="fragment">
+
+        <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
+            {{ .Date.Format "2 January 2006" }}
+        </time>
+
+        <a class="fragment-link" href="{{ .RelPermalink }}">
+    <div class="fragment-content">
+        {{ .Content }}
+    </div>
+</a>
+
+        <div class="fragment-divider">⁂</div>
+
+    </article>
+
+    {{ end }}
+
+</section>
+
+{{ end }}
