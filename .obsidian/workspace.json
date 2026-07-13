@@ -185,6 +185,8 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "layouts/partials/fragment-theme-navigation.html",
+    "layouts/partials/Untitled Document",
     "public/pagefind/pagefind-component-ui.js",
     "public/pagefind/pagefind-worker.js",
     "public/pagefind/pagefind.js",
@@ -194,8 +196,6 @@
     "public/pagefind/pagefind-modular-ui.css",
     "public/pagefind/pagefind-modular-ui.js",
     "public/pagefind/pagefind-ui.css",
-    "public/pagefind/pagefind-ui.js",
-    "public/pagefind/pagefind-highlight.js",
     "public/favicon.svg",
     "public/web-app-manifest-512x512.png",
     "public/images/social/first-essay-v2.png",

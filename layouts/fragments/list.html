@@ -1,13 +1,16 @@
 {{ define "main" }}
 
 <header class="page-header fragments-header">
+
     <h1>{{ .Title }}</h1>
 
     {{ with .Description }}
         <p class="page-description">{{ . }}</p>
     {{ end }}
 
-{{ partial "search.html" . }}
+    {{ partial "search.html" . }}
+
+    {{ partial "fragment-theme-navigation.html" . }}
 
 </header>
 
@@ -18,14 +21,14 @@
     <article class="fragment">
 
         <a class="fragment-date-link" href="{{ .RelPermalink }}">
-    <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
-        {{ .Date.Format "2 January 2006" }}
-    </time>
-</a>
+            <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
+                {{ .Date.Format "2 January 2006" }}
+            </time>
+        </a>
 
         <div class="fragment-content">
-    {{ .Content }}
-</div>
+            {{ .Content }}
+        </div>
 
         <div class="fragment-divider">⁂</div>
 
