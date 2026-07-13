@@ -14,15 +14,15 @@
 
     <article class="fragment">
 
-        <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
-            {{ .Date.Format "2 January 2006" }}
-        </time>
-
-        <a class="fragment-link" href="{{ .RelPermalink }}">
-    <div class="fragment-content">
-        {{ .Content }}
-    </div>
+        <a class="fragment-date-link" href="{{ .RelPermalink }}">
+    <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
+        {{ .Date.Format "2 January 2006" }}
+    </time>
 </a>
+
+        <div class="fragment-content">
+    {{ .Content }}
+</div>
 
         <div class="fragment-divider">⁂</div>
 

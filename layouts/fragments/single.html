@@ -16,16 +16,23 @@
 
     <nav class="fragment-navigation">
 
+    <div class="fragment-nav-left">
         {{ with .PrevInSection }}
-        <a href="{{ .RelPermalink }}">← Previous</a>
+            <a href="{{ .RelPermalink }}">
+                ← {{ .Date.Format "2 January 2006" }}
+            </a>
         {{ end }}
+    </div>
 
+    <div class="fragment-nav-right">
         {{ with .NextInSection }}
-        <a href="{{ .RelPermalink }}">Next →</a>
+            <a href="{{ .RelPermalink }}">
+                {{ .Date.Format "2 January 2006" }} →
+            </a>
         {{ end }}
+    </div>
 
-    </nav>
-
+</nav>
 </article>
 
 {{ end }}

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/fragments/the-rain.md",
+                "file": "content/fragments/the-library.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "the-rain"
+              "title": "the-library"
             }
           }
         ]
@@ -185,20 +185,21 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "content/fragments/moon.md",
+    "content/fragments/the-library.md",
+    "content/fragments/the-rain.md",
+    "content/fragments/_index.md",
+    "public/fragments/1/01/01/index.html",
+    "public/fragments/1/01/01",
+    "public/fragments/1/01",
+    "public/fragments/1",
+    "public/css/style.min.93e65ce66fdd7f5b52461e1045531434e80a2a259017274f4aa255781cebc93d.css",
+    "public/css/style.min.0d83fa5f50f0a8456f28645babc59c89ed94ed1febededb3df790682a5cbbd47.css",
     "public/fragments/2026/07/13/index.html",
     "public/fragments/2026/07/13",
     "public/fragments/2026/07",
     "public/fragments/2026",
-    "public/css/style.min.0a499b44140b84393af81fe762a938ef8823d8b5b833ffa08ea3ab408646a607.css",
-    "public/css/style.min.ea39e6821e9783cf4928b5cc37bf7d7a1e9b60f544e3e6575c6de57fe7b8be26.css",
-    "public/css/style.min.c46bebabc12fd1e1bd69f4057fa93265749f0c9a6f512af4eb79556b8217356f.css",
-    "public/css/style.min.012fb32f834b446f8da9b827794d4d8742df86268becb1c9e8c257770c115c03.css",
-    "public/css/style.min.75471ff8d165595b7bb910a4b77fbbd1d7c4815f01257b0a2060fa28ce6370d9.css",
-    "public/css/style.min.d02303467d932fe1e32d409954a2251624c654f2c226b05b740ac4977cee625f.css",
-    "public/css/style.min.a7dc77ab52c170e890bb2758a32531d2407a2e69cb7734f9fa085ffe08575760.css",
     "public/images/social/first-essay-v2.png",
-    "content/fragments/_index.md",
-    "content/fragments/the-rain.md",
     "content/essays/first-essay.md",
     "design/Cards/First-Essay-v2.svg",
     "design/Cards/Lilamaya-OG-Template.svg",

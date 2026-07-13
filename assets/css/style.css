@@ -1372,7 +1372,30 @@ main img {
 .fragment-navigation {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: 5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(0,0,0,.08);
+}
+
+.fragment-nav-left,
+.fragment-nav-right {
+    flex: 1;
+}
+
+.fragment-nav-right {
+    text-align: right;
+}
+
+.fragment-navigation a {
+    text-decoration: none;
+    color: var(--color-text-light);
+    font-size: 0.95rem;
+    transition: color .2s ease;
+}
+
+.fragment-navigation a:hover {
+    color: var(--color-text);
 }
 
 .fragment-navigation a {
@@ -1381,4 +1404,8 @@ main img {
 
 .fragment-navigation a:hover {
     text-decoration: underline;
+}
+
+.fragment-date-link:hover .fragment-date {
+    opacity: 0.7;
 }
