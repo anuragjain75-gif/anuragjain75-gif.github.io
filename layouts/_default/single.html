@@ -6,28 +6,13 @@
 
     <header class="essay-header">
 
-        <h1
-            class="essay-title"
-            data-pagefind-meta="title">
+        {{ partial "pagefind-meta.html" . }}
+
+        <h1 class="essay-title">
 
             {{ .Title }}
 
         </h1>
-
-        <div
-            data-pagefind-meta="reading_time:{{ .ReadingTime }}"
-            hidden>
-        </div>
-
-        <div
-            data-pagefind-meta="type:{{ .Type | title }}"
-            hidden>
-        </div>
-
-        <div
-            data-pagefind-meta="description:{{ with .Params.description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}"
-            hidden>
-        </div>
 
         <div class="essay-meta">
             <time>{{ .Date.Format "2 January 2006" }}</time>
@@ -85,28 +70,13 @@
 
 <main class="page">
 
-    <h1
-        class="page-title"
-        data-pagefind-meta="title">
+    {{ partial "pagefind-meta.html" . }}
+
+    <h1 class="page-title">
 
         {{ .Title }}
 
     </h1>
-
-    <div
-        data-pagefind-meta="reading_time:{{ .ReadingTime }}"
-        hidden>
-    </div>
-
-    <div
-        data-pagefind-meta="type:{{ .Type | title }}"
-        hidden>
-    </div>
-
-    <div
-        data-pagefind-meta="description:{{ with .Params.description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}"
-        hidden>
-    </div>
 
     <article
         class="page-content"
@@ -114,7 +84,7 @@
 
         {{ .Content }}
 
-{{ partial "share.html" . }}
+        {{ partial "share.html" . }}
 
     </article>
 

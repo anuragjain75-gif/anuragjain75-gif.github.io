@@ -1355,13 +1355,14 @@ main img {
     display: inline-block;
     margin-bottom: 4rem;
     font-size: 0.9rem;
-    color: #8a8477;
+    color: var(--color-text-light);
     text-decoration: none;
     letter-spacing: 0.04em;
+    transition: opacity 0.2s ease;
 }
 
 .back-link:hover {
-    color: var(--color-text);
+    opacity: 0.7;
 }
 
 .fragment-page .fragment-date {
@@ -1373,9 +1374,10 @@ main img {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 2rem;
     margin-top: 5rem;
     padding-top: 2rem;
-    border-top: 1px solid rgba(0,0,0,.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .fragment-nav-left,
@@ -1388,24 +1390,27 @@ main img {
 }
 
 .fragment-navigation a {
-    text-decoration: none;
     color: var(--color-text-light);
-    font-size: 0.95rem;
-    transition: color .2s ease;
-}
-
-.fragment-navigation a:hover {
-    color: var(--color-text);
-}
-
-.fragment-navigation a {
     text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s ease;
 }
 
 .fragment-navigation a:hover {
-    text-decoration: underline;
+    opacity: 0.7;
+}
+
+.fragment-date-link {
+    text-decoration: none;
+    color: inherit;
 }
 
 .fragment-date-link:hover .fragment-date {
     opacity: 0.7;
+}
+
+.fragments-header .search-wrapper {
+    margin-top: 2.5rem;
+    margin-bottom: 4rem;
 }

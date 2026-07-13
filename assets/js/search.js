@@ -33,7 +33,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
             results.innerHTML = `
                 <p class="search-empty">
-                    No essays matched your search.
+                    Nothing in The Lilamaya matched your search.
                 </p>
             `;
 
@@ -66,8 +66,30 @@ window.addEventListener("DOMContentLoaded", async () => {
             card.querySelector(".search-result__type")
                 .textContent = contentType;
 
-            card.querySelector(".search-result__reading-time")
-                .textContent = `${data.meta.reading_time} min read`;
+            const meta = card.querySelector(".search-result__reading-time");
+
+            if (contentType === "Fragment") {
+
+                if (data.meta.date) {
+
+                    meta.textContent = new Date(data.meta.date)
+                        .toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric"
+                        });
+
+                } else {
+
+                    meta.textContent = "";
+
+                }
+
+            } else {
+
+                meta.textContent = `${data.meta.reading_time} min read`;
+
+            }
 
             card.querySelector(".search-result__description")
                 .textContent =
@@ -77,7 +99,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             const excerpt = data.excerpt.trim();
 
             card.querySelector(".search-result__excerpt")
-            .innerHTML = `… ${excerpt} …`;
+                .innerHTML = `… ${excerpt} …`;
 
             results.appendChild(card);
 

@@ -1,7 +1,7 @@
 ---
-date: 2026-07-14T09:00:00+05:30
+title: "The Library"
+date: 2026-07-12T09:00:00+05:30
 draft: false
-title: The Library
 ---
 
 A library is not a collection of books.

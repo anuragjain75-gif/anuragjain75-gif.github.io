@@ -2,37 +2,55 @@
 
 <article class="fragment-page">
 
-    <a class="back-link" href="/fragments/">
-        ← Fragments
-    </a>
+    {{ partial "pagefind-meta.html" . }}
 
-    <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
-        {{ .Date.Format "2 January 2006" }}
-    </time>
+    <div data-pagefind-body>
 
-    <section class="fragment-content">
-        {{ .Content }}
-    </section>
+        <a class="back-link" href="/fragments/">
+            ← Fragments
+        </a>
+
+        <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
+            {{ .Date.Format "2 January 2006" }}
+        </time>
+
+        <section class="fragment-content">
+            {{ .Content }}
+        </section>
+
+    </div>
+
+    {{ $pages := .CurrentSection.RegularPages.ByDate }}
+
+    {{ $index := -1 }}
+    {{ range $i, $p := $pages }}
+        {{ if eq $p.RelPermalink $.RelPermalink }}
+            {{ $index = $i }}
+        {{ end }}
+    {{ end }}
 
     <nav class="fragment-navigation">
 
-    <div class="fragment-nav-left">
-        {{ with .PrevInSection }}
-            <a href="{{ .RelPermalink }}">
-                ← {{ .Date.Format "2 January 2006" }}
-            </a>
-        {{ end }}
-    </div>
+        <div class="fragment-nav-left">
+            {{ if gt $index 0 }}
+                {{ $prev := index $pages (sub $index 1) }}
+                <a href="{{ $prev.RelPermalink }}">
+                    ← {{ $prev.Date.Format "2 January 2006" }}
+                </a>
+            {{ end }}
+        </div>
 
-    <div class="fragment-nav-right">
-        {{ with .NextInSection }}
-            <a href="{{ .RelPermalink }}">
-                {{ .Date.Format "2 January 2006" }} →
-            </a>
-        {{ end }}
-    </div>
+        <div class="fragment-nav-right">
+            {{ if lt $index (sub (len $pages) 1) }}
+                {{ $next := index $pages (add $index 1) }}
+                <a href="{{ $next.RelPermalink }}">
+                    {{ $next.Date.Format "2 January 2006" }} →
+                </a>
+            {{ end }}
+        </div>
 
-</nav>
+    </nav>
+
 </article>
 
 {{ end }}

@@ -1,0 +1,23 @@
+{{ if eq .Section "fragments" }}
+
+<div data-pagefind-meta="title:{{ .Date.Format "2 January 2006" }}" hidden></div>
+
+<div data-pagefind-meta="reading_time:{{ .ReadingTime }}" hidden></div>
+
+<div data-pagefind-meta="type:Fragment" hidden></div>
+
+<div data-pagefind-meta="date:{{ .Date.Format "2006-01-02" }}" hidden></div>
+
+<div data-pagefind-meta="description:{{ .Summary | plainify }}" hidden></div>
+
+{{ else }}
+
+<div data-pagefind-meta="title:{{ .Title }}" hidden></div>
+
+<div data-pagefind-meta="reading_time:{{ .ReadingTime }}" hidden></div>
+
+<div data-pagefind-meta="type:{{ .Type | title }}" hidden></div>
+
+<div data-pagefind-meta="description:{{ with .Params.description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}" hidden></div>
+
+{{ end }}
