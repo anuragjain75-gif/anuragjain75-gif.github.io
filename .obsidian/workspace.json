@@ -183,10 +183,11 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "scripts/fragment_renderer.py",
+    "scripts/fragment_renderer_v9.py",
     "static/images/social/fragments/the-library.png",
     "static/images/social/fragments/the-rain.png",
     "static/images/social/fragments/moon.png",
-    "scripts/fragment_renderer.py",
     "scripts/fragment_renderer_v8.py",
     "content/fragments/the-rain.md",
     "content/fragments/the-library.md",
