@@ -11,12 +11,14 @@
             "id": "4dee1c2dbe64e2f0",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "static/images/social/fragments/the-rain.png"
+                "file": "content/essays/first-essay.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "the-rain"
+              "icon": "lucide-file",
+              "title": "first-essay"
             }
           }
         ]
@@ -183,9 +185,11 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "static/images/social/fragments/the-rain.png",
+    "public/images/social/First-Essay-v2.svg",
+    "static/images/social/First-Essay-v2.svg",
     "static/images/social/fragments/the-library.png",
     "static/images/social/fragments/moon.png",
-    "static/images/social/fragments/the-rain.png",
     "scripts/fragment_renderer.py",
     "scripts/fragment_renderer_v9(1).py",
     "scripts/fragment_renderer_v9_from_v7.py",
@@ -206,7 +210,6 @@
     "public/images/tree-logo.png",
     "public/images/peepal-tree1.png",
     "public/images/peepal-tree.png",
-    "public/images/og-default.jpg",
     "content/fragments/_index.md",
     "content/essays/second-essay.md",
     "content/essays/third-essay.md",
