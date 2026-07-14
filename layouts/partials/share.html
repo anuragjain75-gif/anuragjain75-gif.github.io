@@ -1,8 +1,18 @@
 <div class="share-section">
 
     <p class="share-heading">
-        If this essay resonated with you, consider sharing it with someone who may enjoy a slow read.
-    </p>
+
+{{ if eq .Section "fragments" }}
+
+    If this fragment stayed with you, consider sharing it.
+
+{{ else }}
+
+    If this essay resonated with you, consider sharing it with someone who may enjoy a slow read.
+
+{{ end }}
+
+</p>
 
     <div class="share-links">
 

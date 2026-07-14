@@ -1126,6 +1126,11 @@ main img {
 
 }
 
+.fragment-page .share-section {
+    margin-top: 2rem;
+
+}
+
 .share-section::before {
 
     content: "";
