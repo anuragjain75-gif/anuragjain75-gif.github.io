@@ -11,8 +11,36 @@
     <meta name="author"
           content="{{ .Site.Params.author }}">
 
+    {{/* ---------- Page Title ---------- */}}
+
+    {{ $pageTitle := "" }}
+
+    {{ if .IsHome }}
+
+        {{ $pageTitle = printf "%s — %s" .Site.Title .Site.Params.tagline }}
+
+    {{ else if and (eq .Kind "term") (eq .Data.Plural "fragmentthemes") }}
+
+        {{ $pageTitle = printf "%s Fragments — %s" .Title .Site.Title }}
+
+    {{ else if and (eq .Kind "term") (eq .Data.Plural "themes") }}
+
+        {{ $pageTitle = printf "%s Essays — %s" .Title .Site.Title }}
+
+    {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
+
+        {{ $pageTitle = printf "%s — %s" (.Date.Format "2 January 2006") .Site.Title }}
+
+    {{ else }}
+
+        {{ $pageTitle = printf "%s — %s" .Title .Site.Title }}
+
+    {{ end }}
+
+    <title>{{ $pageTitle }}</title>
+
     <meta property="og:title"
-          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else if eq .Section "fragments" }}{{ .Date.Format "2 January 2006" }} — {{ .Site.Title }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+          content="{{ $pageTitle }}">
 
     <meta property="og:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
@@ -82,7 +110,7 @@
           content="@AnuragNEEV">
 
     <meta name="twitter:title"
-          content="{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Params.tagline }}{{ else if eq .Section "fragments" }}{{ .Date.Format "2 January 2006" }} — {{ .Site.Title }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+          content="{{ $pageTitle }}">
 
     <meta name="twitter:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
@@ -106,16 +134,6 @@
 
     <meta name="theme-color"
           content="#F8F5EF">
-
-    <title>
-        {{ if .IsHome }}
-            {{ .Site.Title }} — {{ .Site.Params.tagline }}
-        {{ else if eq .Section "fragments" }}
-            {{ .Date.Format "2 January 2006" }} — {{ .Site.Title }}
-        {{ else }}
-            {{ .Title }} — {{ .Site.Title }}
-        {{ end }}
-    </title>
 
     <link rel="canonical"
           href="{{ strings.TrimSuffix "/" .Permalink }}">

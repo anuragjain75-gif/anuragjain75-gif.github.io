@@ -4,11 +4,15 @@
 
     <header class="page-header">
 
-        <h1 class="page-title">
-            {{ .Title }}
-        </h1>
+    <h1 class="page-title">
+        {{ .Title }}
+    </h1>
 
-    </header>
+    <p class="page-description">
+        Essays on {{ lower .Title }}.
+    </p>
+
+</header>
 
     {{ partial "theme-navigation.html" . }}
 

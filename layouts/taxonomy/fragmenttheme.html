@@ -1,0 +1,64 @@
+{{ define "main" }}
+
+<header class="page-header fragments-header">
+
+    <h1>{{ .Title }}</h1>
+
+    <p class="page-description">
+        Brief observations on {{ lower .Title }}.
+    </p>
+
+    
+    {{ partial "fragment-theme-navigation.html" . }}
+
+</header>
+
+<section class="fragments-list">
+
+    {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 20 }}
+
+    {{ range $paginator.Pages }}
+
+    <article class="fragment">
+
+        <a class="fragment-date-link" href="{{ .RelPermalink }}">
+            <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
+                {{ .Date.Format "2 January 2006" }}
+            </time>
+        </a>
+
+        <div class="fragment-content">
+            {{ .Content }}
+        </div>
+
+        <div class="fragment-divider">⁂</div>
+
+    </article>
+
+    {{ end }}
+
+</section>
+
+{{ if gt $paginator.TotalPages 1 }}
+
+<nav class="pagination">
+
+    {{ if $paginator.HasPrev }}
+        <a class="pagination-prev" href="{{ $paginator.Prev.URL }}">
+            ← Newer Fragments
+        </a>
+    {{ else }}
+        <span></span>
+    {{ end }}
+
+    {{ if $paginator.HasNext }}
+        <a class="pagination-next" href="{{ $paginator.Next.URL }}">
+            Older Fragments →
+        </a>
+    {{ end }}
+
+</nav>
+
+{{ end }}
+
+{{ end }}

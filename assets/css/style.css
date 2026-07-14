@@ -450,8 +450,19 @@ main img {
     text-decoration:none;
 
     transition:color .25s ease;
+}
+
+.essay-themes a.active-theme {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+
+.essay-themes a.active-theme:hover {
+    color: var(--color-text);
 
 }
+
 
 .essay-themes a:hover{
 
@@ -1413,4 +1424,47 @@ main img {
 .fragments-header .search-wrapper {
     margin-top: 2.5rem;
     margin-bottom: 4rem;
+}
+
+/* ----------------------------------------------------------
+   Fragment Themes
+---------------------------------------------------------- */
+
+.taxonomy-list {
+    max-width: 42rem;
+    margin: 3rem auto 5rem;
+}
+
+.taxonomy-item {
+    border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+.taxonomy-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 1rem 0;
+
+    text-decoration: none;
+    color: var(--color-text);
+}
+
+.taxonomy-link:hover {
+
+    color: var(--color-accent);
+
+}
+
+.taxonomy-name {
+
+    font-size: 1.05rem;
+
+}
+
+.taxonomy-count {
+
+    color: var(--color-text-light);
+    font-size: .9rem;
+
 }

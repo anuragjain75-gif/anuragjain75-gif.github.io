@@ -2,29 +2,32 @@
     Browse by Theme
 </div>
 
+{{ $current := "" }}
+
+{{ if eq .Kind "term" }}
+    {{ $current = lower .Title }}
+{{ end }}
+
 <nav class="essay-themes" data-pagefind-ignore>
 
-    <a href="/fragments/">All</a>
+    <a href="/fragments/"
+       {{ if and (eq .Section "fragments") (ne .Kind "term") }}class="active-theme"{{ end }}>
+        All
+    </a>
+
     <span>·</span>
 
-    <a href="/fragment-themes/childhood/">Childhood</a>
-    <span>·</span>
+    {{ range .Site.Taxonomies.fragmentthemes.Alphabetical }}
 
-    <a href="/fragment-themes/fatherhood/">Fatherhood</a>
-    <span>·</span>
+        <a href="{{ .Page.RelPermalink }}"
+           {{ if eq (lower .Page.Title) $current }}class="active-theme"{{ end }}>
+            {{ .Page.Title }}
+        </a>
 
-    <a href="/fragment-themes/nature/">Nature</a>
-    <span>·</span>
+        {{ if not (eq .Page.Title ((index $.Site.Taxonomies.fragmentthemes.Alphabetical (sub (len $.Site.Taxonomies.fragmentthemes.Alphabetical) 1)).Page.Title)) }}
+            <span>·</span>
+        {{ end }}
 
-    <a href="/fragment-themes/gardens/">Gardens</a>
-    <span>·</span>
-
-    <a href="/fragment-themes/books/">Books</a>
-    <span>·</span>
-
-    <a href="/fragment-themes/solitude/">Solitude</a>
-    <span>·</span>
-
-    <a href="/fragment-themes/memoir/">Memoir</a>
+    {{ end }}
 
 </nav>
