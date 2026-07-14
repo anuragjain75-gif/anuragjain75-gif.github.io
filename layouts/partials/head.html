@@ -16,72 +16,43 @@
     {{ $pageTitle := "" }}
 
     {{ if .IsHome }}
-
         {{ $pageTitle = printf "%s — %s" .Site.Title .Site.Params.tagline }}
-
     {{ else if and (eq .Kind "term") (eq .Data.Plural "fragmentthemes") }}
-
         {{ $pageTitle = printf "%s Fragments — %s" .Title .Site.Title }}
-
     {{ else if and (eq .Kind "term") (eq .Data.Plural "themes") }}
-
         {{ $pageTitle = printf "%s Essays — %s" .Title .Site.Title }}
-
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
-
         {{ $pageTitle = printf "%s — %s" (.Date.Format "2 January 2006") .Site.Title }}
-
     {{ else }}
-
         {{ $pageTitle = printf "%s — %s" .Title .Site.Title }}
-
     {{ end }}
 
     <title>{{ $pageTitle }}</title>
 
-    <meta property="og:title"
-          content="{{ $pageTitle }}">
-
+    <meta property="og:title" content="{{ $pageTitle }}">
     <meta property="og:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
-
     <meta property="og:type"
           content="{{ if .IsHome }}website{{ else if or (eq .Section "essays") (eq .Section "fragments") }}article{{ else }}website{{ end }}">
-
     <meta property="og:url"
           content="{{ strings.TrimSuffix "/" .Permalink }}">
-
     <meta property="og:site_name"
           content="{{ .Site.Title }}">
 
+    {{/* ---------- Social Image ---------- */}}
+
+    {{ $socialImage := "/images/og-default.jpg" | absURL }}
+
     {{ if .Params.social_image }}
-
-        <meta property="og:image"
-              content="{{ .Params.social_image | absURL }}">
-
-        <meta property="og:image:width"
-              content="1200">
-
-        <meta property="og:image:height"
-              content="630">
-
+        {{ $socialImage = .Params.social_image | absURL }}
+    {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
+        {{ $socialImage = (printf "/images/social/fragments/%s.png" .File.TranslationBaseName) | absURL }}
     {{ else if .Params.image }}
-
-        <meta property="og:image"
-              content="{{ .Params.image | absURL }}">
-
-        <meta property="og:image:width"
-              content="1200">
-
-        <meta property="og:image:height"
-              content="630">
-
-    {{ else }}
-
-        <meta property="og:image"
-              content="{{ "images/og-default.jpg" | absURL }}">
-
+        {{ $socialImage = .Params.image | absURL }}
     {{ end }}
+
+    <meta property="og:image"
+          content="{{ $socialImage }}">
 
     {{ with .Params.description }}
     <meta property="og:image:alt"
@@ -92,48 +63,23 @@
           content="en_IN">
 
     {{ if and (not .IsHome) (or (eq .Section "essays") (eq .Section "fragments")) }}
-
         <meta property="article:published_time"
               content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
-
         {{ with .Lastmod }}
         <meta property="article:modified_time"
               content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
         {{ end }}
-
     {{ end }}
 
-    <meta name="twitter:card"
-          content="summary_large_image">
-
-    <meta name="twitter:site"
-          content="@AnuragNEEV">
-
-    <meta name="twitter:title"
-          content="{{ $pageTitle }}">
-
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@AnuragNEEV">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
     <meta name="twitter:description"
           content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+    <meta name="twitter:image"
+          content="{{ $socialImage }}">
 
-    {{ if .Params.social_image }}
-
-        <meta name="twitter:image"
-              content="{{ .Params.social_image | absURL }}">
-
-    {{ else if .Params.image }}
-
-        <meta name="twitter:image"
-              content="{{ .Params.image | absURL }}">
-
-    {{ else }}
-
-        <meta name="twitter:image"
-              content="{{ "images/og-default.jpg" | absURL }}">
-
-    {{ end }}
-
-    <meta name="theme-color"
-          content="#F8F5EF">
+    <meta name="theme-color" content="#F8F5EF">
 
     <link rel="canonical"
           href="{{ strings.TrimSuffix "/" .Permalink }}">
@@ -142,25 +88,11 @@
     <link rel="stylesheet"
           href="{{ $style.RelPermalink }}">
 
-    <link rel="icon"
-          href="/favicon.ico"
-          sizes="any">
-
-    <link rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png">
-
-    <link rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png">
-
-    <link rel="apple-touch-icon"
-          href="/apple-touch-icon.png">
-
-    <link rel="manifest"
-          href="/site.webmanifest">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
 
     {{ partial "analytics.html" . }}
 

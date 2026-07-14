@@ -11,11 +11,13 @@
             "id": "4dee1c2dbe64e2f0",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "static/images/social/fragments/the-rain.png"
+                "file": "content/fragments/the-rain.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
+              "icon": "lucide-file",
               "title": "the-rain"
             }
           }
@@ -183,9 +185,12 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "content/fragments/the-library.md",
+    "content/fragments/moon.md",
+    "static/images/social/fragments/the-rain.png",
+    "layouts/partials/head.html",
     "static/images/social/fragments/the-library.png",
     "static/images/social/fragments/moon.png",
-    "static/images/social/fragments/the-rain.png",
     "scripts/fragment_renderer.py",
     "scripts/fragment_renderer_v7.py",
     "scripts/fragment_renderer_v6.py",
@@ -195,11 +200,8 @@
     "assets/fonts/CormorantGaramond-VariableFont_wght.ttf",
     "assets/fonts/CormorantGaramond-Italic-VariableFont_wght.ttf",
     "assets/fonts/CormorantGaramond-SemiBoldItalic.ttf",
-    "assets/fonts/CormorantGaramond-SemiBold.ttf",
     "content/essays/first-essay.md",
     "content/fragments/the-rain.md",
-    "content/fragments/the-library.md",
-    "content/fragments/moon.md",
     "public/favicon.svg",
     "public/web-app-manifest-512x512.png",
     "public/images/social/first-essay-v2.png",
