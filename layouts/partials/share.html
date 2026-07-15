@@ -25,6 +25,15 @@
 
         </a>
 
+        <a href="https://bsky.app/intent/compose?text={{ printf "%s %s" .Title .Permalink | urlquery }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Share on Bluesky">
+
+            {{ partial "icon.html" "bluesky" }}
+
+        </a>
+
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ .Permalink | urlquery }}"
            target="_blank"
            rel="noopener"
