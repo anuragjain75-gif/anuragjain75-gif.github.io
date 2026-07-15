@@ -18,3 +18,15 @@ npm-debug.log*
 
 # JetBrains
 .idea/
+# Obsidian
+.obsidian/
+
+# Python virtual environment
+.venv/
+
+# Downloaded installers
+*.deb
+
+# VS Code workspace (optional)
+# Uncomment the next line if you don't want to track it.
+# *.code-workspace
