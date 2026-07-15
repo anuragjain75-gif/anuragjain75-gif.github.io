@@ -347,23 +347,30 @@ main img {
 
 }
 
-.essay-content{
+/*==================================================
+    READING TYPOGRAPHY
+==================================================*/
+
+.essay-content,
+.page-content{
 
     font-size:1.18rem;
 
-    line-height:2.0;
+    line-height:2;
 
     color:#3C3A36;
 
 }
 
-.essay-content p{
+.essay-content p,
+.page-content p{
 
     margin:0 0 2em;
 
 }
 
-.essay-content a{
+.essay-content a,
+.page-content a{
 
     color:#6E7451;
 
@@ -375,14 +382,17 @@ main img {
 
 }
 
-.essay-content a:hover{
+.essay-content a:hover,
+.page-content a:hover{
 
     color:#2F2D2A;
+
     border-bottom-color:#6E7451;
 
 }
 
-.essay-content blockquote{
+.essay-content blockquote,
+.page-content blockquote{
 
     margin:3em 0;
 
@@ -396,7 +406,8 @@ main img {
 
 }
 
-.essay-content h2{
+.essay-content h2,
+.page-content h2{
 
     margin-top:3rem;
 
@@ -408,7 +419,8 @@ main img {
 
 }
 
-.essay-content h3{
+.essay-content h3,
+.page-content h3{
 
     margin:2.5em 0 .8em;
 
@@ -700,29 +712,7 @@ main img {
 
 }
 
-/*==================================================
-    PAGE CONTENT RULES
-==================================================*/
 
-.page-content a{
-
-    color:#6E7451;
-
-    text-decoration:none;
-
-    border-bottom:1px solid rgba(110,116,81,.35);
-
-    transition:all .25s ease;
-
-}
-
-.page-content a:hover{
-
-    color:#2F2D2A;
-
-    border-bottom-color:#6E7451;
-
-}
 
 /*==================================================
     ESSAY PAGINATION
@@ -1472,5 +1462,33 @@ main img {
 
     color: var(--color-text-light);
     font-size: .9rem;
+
+}
+
+
+
+/*==================================================
+    STATIC PAGES
+==================================================*/
+
+.page{
+
+    max-width:700px;
+
+    margin:0 auto;
+
+}
+
+.page-title{
+
+    text-align:center;
+
+    font-size:4rem;
+
+    font-weight:400;
+
+    line-height:1.1;
+
+    margin:90px 0 60px;
 
 }

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/essays/first-essay.md",
+                "file": "content/books/_index.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "first-essay"
+              "title": "_index"
             }
           }
         ]
@@ -185,6 +185,14 @@
   },
   "active": "4dee1c2dbe64e2f0",
   "lastOpenFiles": [
+    "public/css/style.min.e84f4fa7fbeabd170cd723f77252322ab9c99e94ddc3e4d909813c92f9cf4719.css",
+    "assets/css/style.css",
+    "assets/css/style..css",
+    "public/css/style.min.bbe114269c6c32661f1b086602b9e108e80bba5e7d12c188ae31dc363421b1bb.css",
+    "public/books/index.xml",
+    "public/books/index.html",
+    "public/books",
+    "content/essays/first-essay.md",
     "public/css/style.min.a0073bdb92a4057790e38b1c29ceea614b560152545c8a18136be56769336b63.css",
     "public/css/style.min.85b4a8d69adc4615ec08f2544ba3de8f3c9be5050aab482d465d017e6203f939.css",
     "public/css/style.min.37b6c5fe58be8b943a3fabb68edb47075a57ee57dcca4f9c739a569acd7ae72e.css",
@@ -194,17 +202,9 @@
     "static/images/social/fragments/the-library.png",
     "static/images/social/fragments/moon.png",
     "scripts/fragment_renderer.py",
-    "scripts/fragment_renderer_v9(1).py",
-    "scripts/fragment_renderer_v9_from_v7.py",
-    "scripts/fragment_renderer_v9.py",
-    "scripts/fragment_renderer_v8.py",
     "content/fragments/the-rain.md",
     "content/fragments/the-library.md",
     "content/fragments/moon.md",
-    "layouts/partials/head.html",
-    "scripts/fragment_renderer_v7.py",
-    "scripts/fragment_renderer_v6.py",
-    "content/essays/first-essay.md",
     "public/favicon.svg",
     "public/web-app-manifest-512x512.png",
     "public/images/social/first-essay-v2.png",
