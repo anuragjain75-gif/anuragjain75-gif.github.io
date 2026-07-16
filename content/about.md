@@ -4,18 +4,16 @@ title: "About"
 
 ![Anurag Jain](/images/about-portrait.png)
 
-**The Lilamaya** began with an observation: the extraordinary is rarely found elsewhere. It is hidden within ordinary life.
+The Lilamaya is my literary home.
 
-Most of our lives are spent waiting for remarkable moments, while quietly overlooking the countless ordinary ones that shape us far more deeply. A child discovering the world for the first time. Rain falling on a familiar garden. The remembered fragrance of an old home. A tree that has stood unnoticed for years. A book that returns to us at different stages of life and seems to reveal something new each time we open it. These are the moments that have gradually come to occupy my attention.
+For many years I have been a student of literature, philosophy, and the contemplative traditions of the world. Although my understanding has been deeply shaped by Advaita Vedānta, I have increasingly found myself drawn to writing about subjects that philosophy alone cannot adequately express: childhood, memory, fatherhood, nature, books, gardens, education, solitude, and the quiet beauty hidden within ordinary life.
 
-The Lilamaya is a home for that attention.
+These essays are not intended as philosophical instruction. If philosophy appears here, it does so naturally—as one thread among many, illuminating experience rather than replacing it. I have always been interested in the way an understanding transforms perception.
 
-Here I write essays, fragments, and books about childhood, memory, fatherhood, nature, books, gardens, education, silence, and the unnoticed rhythms of everyday life. Although my understanding has been deeply shaped by the tradition of Advaita Vedānta, these writings are not intended as philosophical instruction. Philosophy remains present, but quietly—less as a subject to be explained than as a way of seeing the world. My hope is that it illuminates these pages without ever overshadowing the ordinary experiences from which they arise.
+Much of my time is spent reading, writing, tending a garden, making things with my hands, and watching my young son discover the world with the freshness that adulthood so easily forgets. These are not simply subjects I write about; they are the life from which the writing grows.
 
-Beyond writing, I find equal satisfaction in reading, tending a garden, making things with my hands, and watching my young son discover the world with fresh eyes. These activities are not separate from my writing; they are the soil from which it grows. They remind me, day after day, that attention is perhaps the simplest and most profound form of gratitude.
+Alongside The Lilamaya, I also write and teach through the [NEEV Community for Self-Inquiry](https://neevselfinquiry.in/), where my work is devoted more directly to Self-Inquiry and Advaita Vedānta. Although the two websites serve different purposes, they complement one another. NEEV explores the philosophical foundations of non-duality. The Lilamaya explores how that understanding quietly expresses itself in the texture of everyday life.
 
-The Lilamaya is only one part of my work. Those interested in the philosophical foundations that quietly inform many of these essays may wish to visit the [NEEV Community for Self-Inquiry](https://neevselfinquiry.in/), where my writing and teaching are devoted to Self-Inquiry and Advaita Vedānta. Although the two websites have different purposes, they arise from the same way of seeing. NEEV asks, “What is Reality?” The Lilamaya asks, “How does that understanding illuminate ordinary life?”
+I do not think of this website as a collection of articles so much as a place that gradually grows over time. My hope is that readers will return to these pages as they might return to a favourite garden or an old library—not in search of constant novelty, but with the quiet expectation of finding something familiar seen in a new light.
 
-If these pages encourage you to pause a little longer, to notice a little more carefully, or to rediscover the extraordinary hidden within your own ordinary life, then The Lilamaya will have fulfilled its purpose.
-
-This website is not intended to be read from beginning to end. Wander. Follow your curiosity. Return whenever you wish.
+Thank you for visiting.
