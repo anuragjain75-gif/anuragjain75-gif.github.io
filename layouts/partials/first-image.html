@@ -1,0 +1,7 @@
+{{- $match := findRE `!\[[^\]]*]\(([^)]+)\)` .RawContent 1 -}}
+
+{{- if gt (len $match) 0 -}}
+
+{{- replaceRE `!\[[^\]]*]\(([^)]+)\)` `$1` (index $match 0) -}}
+
+{{- end -}}

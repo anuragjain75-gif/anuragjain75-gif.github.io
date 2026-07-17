@@ -2,13 +2,15 @@
 title: The First Essay
 date: 2026-07-03
 draft: false
-image: images/peepal-tree1.png
 social_image: images/social/first-essay-v2.png
 themes:
   - fatherhood
   - childhood
 description: On a quiet night beneath an old peepal tree, an unexpected memory transforms into a meditation on childhood, belonging, and the mysterious ways in which ordinary moments call us back to ourselves. A reflective literary essay about memory, landscape, and home.
 ---
+![](/images/peepal-tree.png)
+
+
 This is a normal paragraph. The purpose of this page is to test the typography of Lilamaya. Reading should feel calm, spacious, and effortless.
 
 ## A Second-Level Heading
