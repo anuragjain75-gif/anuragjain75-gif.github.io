@@ -279,15 +279,6 @@ nav a:hover {
 
 }
 
-.essay-card__media {
-    outline: 2px solid red;
-}
-
-.essay-card__content {
-    outline: 2px solid blue;
-}
-
-
 /*==================================================
     SINGLE ESSAY
 ==================================================*/
@@ -425,6 +416,20 @@ nav a:hover {
 
     font-weight: 400;
 
+}
+
+/*==================================================
+    BROWSE BY THEME
+==================================================*/
+
+.browse-themes {
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8A6D45;
+    margin: 0 0 2rem;
 }
 
 /*==================================================
@@ -1488,8 +1493,4 @@ nav a:hover {
 
     margin: 90px 0 60px;
 
-}
-
-body {
-    background: hotpink !important;
 }
