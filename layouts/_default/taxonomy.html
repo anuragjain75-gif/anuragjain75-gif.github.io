@@ -4,15 +4,15 @@
 
     <header class="page-header">
 
-    <h1 class="page-title">
-        {{ .Title }}
-    </h1>
+        <h1 class="page-title">
+            {{ .Data.Term }}
+        </h1>
 
-    <p class="page-description">
-        Essays on {{ lower .Title }}.
-    </p>
+        <p class="page-description">
+            Essays on {{ lower .Data.Term }}.
+        </p>
 
-</header>
+    </header>
 
     {{ partial "theme-navigation.html" . }}
 
@@ -21,7 +21,7 @@
         {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 1 }}
 
         {{ range $paginator.Pages }}
-            {{ partial "essay-card.html" . }}
+        {{ partial "essay-card.html" . }}
         {{ end }}
 
     </section>
@@ -31,17 +31,17 @@
     <nav class="pagination">
 
         {{ if $paginator.HasNext }}
-            <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
-                ← Older Essays
-            </a>
+        <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
+            ← Older Essays
+        </a>
         {{ else }}
-            <span></span>
+        <span></span>
         {{ end }}
 
         {{ if $paginator.HasPrev }}
-            <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
-                Newer Essays →
-            </a>
+        <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
+            Newer Essays →
+        </a>
         {{ end }}
 
     </nav>

@@ -1,12 +1,12 @@
-{{ with .Params.image }}
+{{ $hero := .Resources.GetMatch "hero.*" }}
+
+{{ with $hero }}
 
 <div class="essay-card__media">
 
     <a class="essay-card__image" href="{{ $.RelPermalink }}">
 
-        <img
-            src="{{ . | relURL }}"
-            alt="{{ $.Title }}">
+        <img src="{{ .RelPermalink }}" alt="{{ $.Title }}">
 
     </a>
 
@@ -15,7 +15,7 @@
     <div class="essay-card__themes">
 
         {{ range $index, $theme := . }}
-            {{ if gt $index 0 }}, {{ end }}{{ $theme }}
+        {{ if gt $index 0 }} · {{ end }}{{ $theme }}
         {{ end }}
 
     </div>

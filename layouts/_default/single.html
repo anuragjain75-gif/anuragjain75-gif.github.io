@@ -22,15 +22,19 @@
 
     </header>
 
-    {{ with .Params.image }}
+    {{ $hero := .Resources.GetMatch "hero.*" }}
+
+    {{ with $hero }}
+
     <figure class="essay-hero">
-        <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+
+        <img src="{{ .RelPermalink }}" alt="{{ $.Title }}">
+
     </figure>
+
     {{ end }}
 
-    <article
-        class="essay-content"
-        data-pagefind-body>
+    <article class="essay-content" data-pagefind-body>
 
         {{ .Content }}
 
@@ -43,11 +47,11 @@
         <div class="essay-pagination__previous">
 
             {{ with .Prev }}
-                {{ if eq .Section "essays" }}
-                    <a href="{{ .RelPermalink }}" class="essay-pagination__link">
-                        ← {{ .Title }}
-                    </a>
-                {{ end }}
+            {{ if eq .Section "essays" }}
+            <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                ← {{ .Title }}
+            </a>
+            {{ end }}
             {{ end }}
 
         </div>
@@ -55,9 +59,9 @@
         <div class="essay-pagination__next">
 
             {{ with .Next }}
-                <a href="{{ .RelPermalink }}" class="essay-pagination__link">
-                    {{ .Title }} →
-                </a>
+            <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                {{ .Title }} →
+            </a>
             {{ end }}
 
         </div>
@@ -78,13 +82,11 @@
 
     </h1>
 
-    <article
-        class="page-content"
-        data-pagefind-body>
+    <article class="page-content" data-pagefind-body>
 
         {{ .Content }}
 
-            </article>
+    </article>
 
 </main>
 

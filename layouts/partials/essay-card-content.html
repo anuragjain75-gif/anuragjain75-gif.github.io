@@ -1,30 +1,40 @@
 <div class="essay-card__content">
 
     <h2 class="essay-card__title">
-
         <a href="{{ .RelPermalink }}">
-
             {{ .Title }}
-
         </a>
-
     </h2>
 
     <p class="essay-card__excerpt">
 
         {{ with .Params.description }}
-            {{ . | truncate 180 }}
+
+        {{ . | truncate 180 }}
+
         {{ else }}
-            {{ .Summary | truncate 180 }}
+
+        {{ with .Summary }}
+
+        {{ . | plainify | truncate 180 }}
+
+        {{ else }}
+
+        <span class="essay-card__placeholder">
+            An essay in progress…
+        </span>
+
+        {{ end }}
+
         {{ end }}
 
     </p>
 
     <div class="essay-card__meta">
 
-        <span>Essay</span>
+        <time>{{ .Date.Format "2 January 2006" }}</time>
 
-        <span> • </span>
+        <span> · </span>
 
         <span>{{ .ReadingTime }} min read</span>
 
