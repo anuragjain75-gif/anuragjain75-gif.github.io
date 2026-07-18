@@ -2,8 +2,7 @@
 title: "Receive Before You Reveal"
 date: 2026-07-18T13:51:26+05:30
 draft: false
-tags: []
-themes:
+fragmentthemes:
   - Human Nature
   - Perception
   - Writing

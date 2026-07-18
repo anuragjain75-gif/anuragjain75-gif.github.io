@@ -5,7 +5,7 @@
     <h1>{{ .Title }}</h1>
 
     {{ with .Description }}
-        <p class="page-description">{{ . }}</p>
+    <p class="page-description">{{ . }}</p>
     {{ end }}
 
     {{ partial "search.html" . }}
@@ -18,24 +18,9 @@
 
     {{ range .RegularPages.ByDate.Reverse }}
 
-    <article class="fragment">
-
-        <a class="fragment-date-link" href="{{ .RelPermalink }}">
-            <time class="fragment-date" datetime="{{ .Date.Format "2006-01-02" }}">
-                {{ .Date.Format "2 January 2006" }}
-            </time>
-        </a>
-
-        <div class="fragment-content">
-            {{ .Content }}
-        </div>
-
-        <div class="fragment-divider">⁂</div>
-
-    </article>
+    {{ partial "fragment-card.html" . }}
 
     {{ end }}
-
 </section>
 
 {{ end }}

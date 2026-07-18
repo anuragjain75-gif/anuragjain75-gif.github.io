@@ -1,0 +1,39 @@
+{{ define "main" }}
+
+<header class="page-header fragments-header">
+
+    <h1>Fragment Themes</h1>
+
+    <p class="page-description">
+
+        Browse notebook entries by theme.
+
+    </p>
+
+</header>
+
+<ul class="taxonomy-list">
+
+    {{ range .Data.Terms.Alphabetical }}
+
+    <li>
+
+        <a href="{{ .Page.RelPermalink }}">
+
+            {{ .Page.Title }}
+
+        </a>
+
+        <span>
+
+            ({{ .Count }})
+
+        </span>
+
+    </li>
+
+    {{ end }}
+
+</ul>
+
+{{ end }}

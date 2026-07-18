@@ -1,0 +1,53 @@
+{{ define "main" }}
+
+<main class="essays-page">
+
+    <header class="page-header">
+
+        <h1 class="page-title">
+            {{ .Data.Term }}
+        </h1>
+
+        <p class="page-description">
+            Fragments on {{ lower .Data.Term }}.
+        </p>
+
+    </header>
+
+    {{ partial "fragment-theme-navigation.html" . }}
+
+    <section class="essay-list">
+
+        {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 1 }}
+
+        {{ range $paginator.Pages }}
+        {{ partial "fragment-card.html" . }}
+        {{ end }}
+
+    </section>
+
+    {{ if gt $paginator.TotalPages 1 }}
+
+    <nav class="pagination">
+
+        {{ if $paginator.HasNext }}
+        <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
+            ← Older Fragments
+        </a>
+        {{ else }}
+        <span></span>
+        {{ end }}
+
+        {{ if $paginator.HasPrev }}
+        <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
+            Newer Fragments →
+        </a>
+        {{ end }}
+
+    </nav>
+
+    {{ end }}
+
+</main>
+
+{{ end }}

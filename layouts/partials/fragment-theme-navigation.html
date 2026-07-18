@@ -16,14 +16,14 @@
 
     <span>·</span>
 
-    {{ range .Site.Taxonomies.themes.Alphabetical }}
+    {{ range .Site.Taxonomies.fragmentthemes.Alphabetical }}
 
     <a href="{{ .Page.RelPermalink }}" {{ if eq (lower .Page.Title) $current }}class="active-theme" {{ end }}>
         {{ .Page.Title }}
     </a>
 
-    {{ if not (eq .Page.Title ((index $.Site.Taxonomies.themes.Alphabetical (sub (len
-    $.Site.Taxonomies.themes.Alphabetical) 1)).Page.Title)) }}
+    {{ if not (eq .Page.Title ((index $.Site.Taxonomies.fragmentthemes.Alphabetical (sub (len
+    $.Site.Taxonomies.fragmentthemes.Alphabetical) 1)).Page.Title)) }}
     <span>·</span>
     {{ end }}
 
