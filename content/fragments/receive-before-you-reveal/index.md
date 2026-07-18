@@ -8,7 +8,7 @@ themes:
   - Perception
   - Writing
 ---
->Receive before you reveal.
+>Receive before you reveal.<br>
 >Witness before you widen.
 
 A writer's first task is not to reveal truth, but to let the reader feel that their own glimpse of truth has been seen. Before leading the reader further, let them know they have already arrived somewhere.
