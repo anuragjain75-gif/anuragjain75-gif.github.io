@@ -4,7 +4,6 @@ title = "The Lilamaya"
 
 [taxonomies]
 theme = "themes"
-fragmenttheme = "fragmentthemes"
 
 [params]
 tagline = "Essays on the extraordinary hidden within ordinary life"
@@ -22,5 +21,10 @@ term = ["HTML"]
 
 [permalinks]
   fragments = "/fragments/:year/:month/:day/"
+
+  [markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
 
 

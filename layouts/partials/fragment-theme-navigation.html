@@ -5,28 +5,27 @@
 {{ $current := "" }}
 
 {{ if eq .Kind "term" }}
-    {{ $current = lower .Title }}
+{{ $current = lower .Title }}
 {{ end }}
 
 <nav class="essay-themes" data-pagefind-ignore>
 
-    <a href="/fragments/"
-       {{ if and (eq .Section "fragments") (ne .Kind "term") }}class="active-theme"{{ end }}>
+    <a href="/fragments/" {{ if and (eq .Section "fragments" ) (ne .Kind "term" ) }}class="active-theme" {{ end }}>
         All
     </a>
 
     <span>·</span>
 
-    {{ range .Site.Taxonomies.fragmentthemes.Alphabetical }}
+    {{ range .Site.Taxonomies.themes.Alphabetical }}
 
-        <a href="{{ .Page.RelPermalink }}"
-           {{ if eq (lower .Page.Title) $current }}class="active-theme"{{ end }}>
-            {{ .Page.Title }}
-        </a>
+    <a href="{{ .Page.RelPermalink }}" {{ if eq (lower .Page.Title) $current }}class="active-theme" {{ end }}>
+        {{ .Page.Title }}
+    </a>
 
-        {{ if not (eq .Page.Title ((index $.Site.Taxonomies.fragmentthemes.Alphabetical (sub (len $.Site.Taxonomies.fragmentthemes.Alphabetical) 1)).Page.Title)) }}
-            <span>·</span>
-        {{ end }}
+    {{ if not (eq .Page.Title ((index $.Site.Taxonomies.themes.Alphabetical (sub (len
+    $.Site.Taxonomies.themes.Alphabetical) 1)).Page.Title)) }}
+    <span>·</span>
+    {{ end }}
 
     {{ end }}
 
