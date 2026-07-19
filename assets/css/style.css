@@ -206,11 +206,31 @@ nav a:hover {
 
     margin-top: 0.9rem;
 
-    color: var(--olive);
+    color: #6E7451;
 
     font-size: 0.95rem;
 
     line-height: 1.4;
+
+}
+
+.essay-card__themes a {
+
+    color: inherit;
+
+    text-decoration: none;
+
+    transition: color .25s ease;
+
+}
+
+.essay-card__themes a:hover {
+
+    color: #2F2D2A;
+
+    text-decoration: underline;
+
+    text-underline-offset: 2px;
 
 }
 
@@ -1529,4 +1549,46 @@ nav a:hover {
     color: var(--muted-olive);
 
     letter-spacing: 0.15em;
+}
+
+/*==================================================
+    FRAGMENT THEME LINKS
+==================================================*/
+
+.fragment-themes {
+
+    margin-top: 2.75rem;
+
+    font-size: .95rem;
+
+    color: #7A7468;
+
+}
+
+.fragment-themes-label {
+
+    font-style: italic;
+
+    margin-right: .35rem;
+
+}
+
+.fragment-themes a {
+
+    color: #6E7451;
+
+    text-decoration: none;
+
+    transition: color .25s ease;
+
+}
+
+.fragment-themes a:hover {
+
+    color: #2F2D2A;
+
+    text-decoration: underline;
+
+    text-underline-offset: 2px;
+
 }

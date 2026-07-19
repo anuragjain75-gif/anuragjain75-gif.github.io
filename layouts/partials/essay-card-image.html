@@ -15,7 +15,15 @@
     <div class="essay-card__themes">
 
         {{ range $index, $theme := . }}
-        {{ if gt $index 0 }} · {{ end }}{{ $theme }}
+
+        {{ if gt $index 0 }} · {{ end }}
+
+        {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
+        <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+        {{ else }}
+        {{ $theme }}
+        {{ end }}
+
         {{ end }}
 
     </div>

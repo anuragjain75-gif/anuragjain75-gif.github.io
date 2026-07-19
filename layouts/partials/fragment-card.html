@@ -10,6 +10,27 @@
         {{ .Content }}
     </div>
 
+    {{ with .Params.fragmentthemes }}
+    <div class="fragment-themes">
+
+        <span class="fragment-themes-label">
+            {{ if eq (len .) 1 }}Theme:{{ else }}Themes:{{ end }}
+        </span>
+
+        {{ range $index, $theme := . }}
+        {{ if gt $index 0 }} · {{ end }}
+
+        {{ with site.GetPage (printf "/fragmentthemes/%s" ($theme | urlize)) }}
+        <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+        {{ else }}
+        {{ $theme }}
+        {{ end }}
+
+        {{ end }}
+
+    </div>
+    {{ end }}
+
     <div class="fragment-divider">⁂</div>
 
 </article>
