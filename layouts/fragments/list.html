@@ -1,26 +1,35 @@
 {{ define "main" }}
 
-<header class="page-header fragments-header">
+<main class="essays-page">
 
-    <h1>{{ .Title }}</h1>
+    <header class="page-header">
 
-    {{ with .Description }}
-    <p class="page-description">{{ . }}</p>
-    {{ end }}
+        <h1 class="page-title">
+            Fragments
+        </h1>
+
+        <p class="page-introduction">
+            Brief literary reflections, moments of insight, and
+            quiet observations that stand complete in themselves—
+            yet often become the seeds from which longer essays grow.
+        </p>
+
+    </header>
 
     {{ partial "search.html" . }}
 
     {{ partial "fragment-theme-navigation.html" . }}
 
-</header>
+    <section class="essay-list fragments-list">
 
-<section class="fragments-list">
+        {{ range .RegularPages.ByDate.Reverse }}
 
-    {{ range .RegularPages.ByDate.Reverse }}
+        {{ partial "fragment-card.html" . }}
 
-    {{ partial "fragment-card.html" . }}
+        {{ end }}
 
-    {{ end }}
-</section>
+    </section>
+
+</main>
 
 {{ end }}

@@ -67,19 +67,17 @@
 
         <div class="essay-pagination__previous">
 
-            {{ with .Prev }}
-            {{ if eq .Section "essays" }}
+            {{ with .PrevInSection }}
             <a href="{{ .RelPermalink }}" class="essay-pagination__link">
                 ← {{ .Title }}
             </a>
-            {{ end }}
             {{ end }}
 
         </div>
 
         <div class="essay-pagination__next">
 
-            {{ with .Next }}
+            {{ with .NextInSection }}
             <a href="{{ .RelPermalink }}" class="essay-pagination__link">
                 {{ .Title }} →
             </a>
