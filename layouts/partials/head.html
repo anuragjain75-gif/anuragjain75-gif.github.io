@@ -17,6 +17,8 @@
     {{ $pageTitle = printf "%s Essays — %s" .Title .Site.Title }}
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
     {{ $pageTitle = printf "%s — %s" (.Date.Format "2 January 2006") .Site.Title }}
+    {{ else if and (eq .Section "essays") (eq .Kind "page") }}
+    {{ $pageTitle = .Title }}
     {{ else }}
     {{ $pageTitle = printf "%s — %s" .Title .Site.Title }}
     {{ end }}
