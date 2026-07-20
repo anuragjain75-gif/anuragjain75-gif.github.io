@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 import frontmatter
 
@@ -19,45 +18,54 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------------------------------------------
-# Markdown Image Extraction
+# Supported hero image extensions
 # ----------------------------------------------------
 
-IMAGE_PATTERN = re.compile(r"!\[[^\]]*]\(([^)]+)\)")
-
-
-def find_first_image(markdown_text: str):
-    match = IMAGE_PATTERN.search(markdown_text)
-
-    if not match:
-        return None
-
-    image_path = match.group(1)
-
-    return image_path
+IMAGE_EXTENSIONS = (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".gif",
+)
 
 
 # ----------------------------------------------------
 # Generate Cards
 # ----------------------------------------------------
 
-for md_file in sorted(ESSAYS_DIR.glob("*.md")):
+for bundle in sorted(ESSAYS_DIR.iterdir()):
 
-    if md_file.name.startswith("_"):
+    if not bundle.is_dir():
+        continue
+
+    md_file = bundle / "index.md"
+
+    if not md_file.exists():
         continue
 
     post = frontmatter.load(md_file)
 
     title = post["title"]
 
-    slug = md_file.stem
+    hero = None
 
-    image = find_first_image(post.content)
+    for ext in IMAGE_EXTENSIONS:
+        candidate = bundle / f"hero{ext}"
+
+        if candidate.exists():
+            hero = candidate
+            break
+
+    if hero is None:
+        print(f"Skipping {bundle.name}: no hero image found.")
+        continue
 
     render(
         title=title,
-        image=image,
+        image=hero,
         markdown_file=md_file,
-        output_file=OUTPUT_DIR / f"{slug}.png",
+        output_file=OUTPUT_DIR / f"{bundle.name}.png",
     )
 
-    print(f"Rendered {slug}")
+    print(f"Rendered {bundle.name}")
