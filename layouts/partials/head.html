@@ -35,9 +35,9 @@
     <!-- Open Graph Image -->
     {{ if and (eq .Section "essays") (eq .Kind "page") }}
     {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir) }}
-    <meta property="og:image" content="{{ (printf " images/social/essays/%s.png" $slug) | absURL }}">
+    <meta property="og:image" content="{{ printf " images/social/essays/%s.png" $slug | absURL }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
-    <meta property="og:image" content="{{ (printf " images/social/fragments/%s.png" .File.TranslationBaseName) | absURL
+    <meta property="og:image" content="{{ printf " images/social/fragments/%s.png" .File.TranslationBaseName | absURL
         }}">
     {{ else if $og := .Resources.GetMatch "hero-og.*" }}
     <meta property="og:image" content="{{ $og.Permalink }}">
@@ -67,9 +67,9 @@
     <!-- Twitter Image -->
     {{ if and (eq .Section "essays") (eq .Kind "page") }}
     {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir) }}
-    <meta name="twitter:image" content="{{ (printf " images/social/essays/%s.png" $slug) | absURL }}">
+    <meta name="twitter:image" content="{{ printf " images/social/essays/%s.png" $slug | absURL }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
-    <meta name="twitter:image" content="{{ (printf " images/social/fragments/%s.png" .File.TranslationBaseName) | absURL
+    <meta name="twitter:image" content="{{ printf " images/social/fragments/%s.png" .File.TranslationBaseName | absURL
         }}">
     {{ else if $og := .Resources.GetMatch "hero-og.*" }}
     <meta name="twitter:image" content="{{ $og.Permalink }}">
