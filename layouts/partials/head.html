@@ -34,8 +34,8 @@
 
     <!-- Open Graph Image -->
     {{ if and (eq .Section "essays") (eq .Kind "page") }}
-    <meta property="og:image" content="{{ (printf " images/social/essays/%s.png" .File.TranslationBaseName) | absURL
-        }}">
+    {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir) }}
+    <meta property="og:image" content="{{ (printf " images/social/essays/%s.png" $slug) | absURL }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
     <meta property="og:image" content="{{ (printf " images/social/fragments/%s.png" .File.TranslationBaseName) | absURL
         }}">
@@ -66,8 +66,8 @@
 
     <!-- Twitter Image -->
     {{ if and (eq .Section "essays") (eq .Kind "page") }}
-    <meta name="twitter:image" content="{{ (printf " images/social/essays/%s.png" .File.TranslationBaseName) | absURL
-        }}">
+    {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir) }}
+    <meta name="twitter:image" content="{{ (printf " images/social/essays/%s.png" $slug) | absURL }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
     <meta name="twitter:image" content="{{ (printf " images/social/fragments/%s.png" .File.TranslationBaseName) | absURL
         }}">
