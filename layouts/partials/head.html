@@ -4,7 +4,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
-
     <meta name="author" content="{{ .Site.Params.author }}">
 
     {{ $pageTitle := "" }}
@@ -33,13 +32,15 @@
     <meta property="og:url" content="{{ strings.TrimSuffix " /" .Permalink }}">
     <meta property="og:site_name" content="{{ .Site.Title }}">
 
-    {{ $og := .Resources.GetMatch "hero-og.*" }}
-
-    {{ if $og }}
-    <meta property="og:image" content="{{ $og.Permalink }}">
+    <!-- Open Graph Image -->
+    {{ if and (eq .Section "essays") (eq .Kind "page") }}
+    <meta property="og:image" content="{{ (printf " images/social/essays/%s.png" .File.TranslationBaseName) | absURL
+        }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
     <meta property="og:image" content="{{ (printf " images/social/fragments/%s.png" .File.TranslationBaseName) | absURL
         }}">
+    {{ else if $og := .Resources.GetMatch "hero-og.*" }}
+    <meta property="og:image" content="{{ $og.Permalink }}">
     {{ else }}
     <meta property="og:image" content="{{ " images/og-default.jpg" | absURL }}">
     {{ end }}
@@ -63,11 +64,15 @@
     <meta name="twitter:description"
         content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
 
-    {{ if $og }}
-    <meta name="twitter:image" content="{{ $og.Permalink }}">
+    <!-- Twitter Image -->
+    {{ if and (eq .Section "essays") (eq .Kind "page") }}
+    <meta name="twitter:image" content="{{ (printf " images/social/essays/%s.png" .File.TranslationBaseName) | absURL
+        }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
     <meta name="twitter:image" content="{{ (printf " images/social/fragments/%s.png" .File.TranslationBaseName) | absURL
         }}">
+    {{ else if $og := .Resources.GetMatch "hero-og.*" }}
+    <meta name="twitter:image" content="{{ $og.Permalink }}">
     {{ else }}
     <meta name="twitter:image" content="{{ " images/og-default.jpg" | absURL }}">
     {{ end }}
@@ -75,6 +80,7 @@
     <meta name="theme-color" content="#F8F5EF">
 
     <link rel="canonical" href="{{ strings.TrimSuffix " /" .Permalink }}">
+
     {{ $style := resources.Get "css/style.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $style.RelPermalink }}">
 
