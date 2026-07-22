@@ -1653,3 +1653,45 @@ nav a:hover {
     text-underline-offset: 2px;
 
 }
+
+/*==================================================
+    MOBILE ESSAY LIST
+==================================================*/
+
+@media (max-width: 768px) {
+
+    .essay-card {
+        display: flex;
+        flex-direction: column;
+        gap: 1.6rem;
+        padding: 3rem 0;
+    }
+
+    .essay-card__image {
+        order: 1;
+    }
+
+    .essay-card__content {
+        order: 2;
+    }
+
+    .essay-card__image img {
+        width: 100%;
+        max-width: none;
+        padding-left: 0;
+        aspect-ratio: 4 / 3;
+    }
+
+    .essay-card__title {
+        margin-bottom: 1rem;
+        font-size: 1.7rem;
+    }
+
+    .essay-card__excerpt {
+        margin-bottom: 1.4rem;
+    }
+
+    .essay-card__themes {
+        margin-top: 1rem;
+    }
+}
