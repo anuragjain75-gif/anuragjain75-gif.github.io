@@ -150,7 +150,7 @@ nav a:hover {
 
 .essays-page {
 
-    max-width: 1100px;
+    max-width: var(--width-list);
 
     margin: 80px auto;
 
@@ -201,7 +201,7 @@ nav a:hover {
 
     display: grid;
 
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 300px 1fr;
 
     column-gap: 3.2rem;
 
@@ -577,7 +577,7 @@ nav a:hover {
 
 .essay-list {
 
-    max-width: var(--width-list);
+    max-width: calc(var(--width-list) - 60px);
 
     margin: 35px auto 0;
 
@@ -764,13 +764,12 @@ nav a:hover {
 }
 
 .footer-copyright {
-
+    display: block;
+    width: 100%;
     margin: 0;
-
+    text-align: center;
     font-size: .88rem;
-
     color: #999;
-
 }
 
 .footer-asterism {
@@ -1763,4 +1762,21 @@ nav a:hover {
         object-fit: contain;
     }
 
+}
+
+/*==================================================
+    LIST PAGE WIDTH OVERRIDES
+==================================================*/
+
+.essays-page,
+.fragments-page {
+    max-width: var(--width-list);
+}
+
+.essay-list,
+.fragment-list,
+.taxonomy-list {
+    max-width: calc(var(--width-list) - 60px);
+    margin-left: auto;
+    margin-right: auto;
 }
