@@ -2,90 +2,112 @@
 
 {{ if eq .Section "essays" }}
 
-<main class="essay">
+<main>
 
-    <header class="essay-header">
+    <section class="essay">
 
-        {{ partial "pagefind-meta.html" . }}
+        <header class="essay-header">
 
-        <h1 class="essay-title">
+            {{ partial "pagefind-meta.html" . }}
 
-            {{ .Title }}
+            <h1 class="essay-title">
+                {{ .Title }}
+            </h1>
 
-        </h1>
+            <div class="essay-meta">
+                <time>{{ .Date.Format "2 January 2006" }}</time>
+                <span> · </span>
+                <span>{{ .ReadingTime }} min read</span>
+            </div>
 
-        <div class="essay-meta">
-            <time>{{ .Date.Format "2 January 2006" }}</time>
-            <span> · </span>
-            <span>{{ .ReadingTime }} min read</span>
-        </div>
+        </header>
 
-    </header>
+    </section>
 
-    {{ $hero := .Resources.GetMatch "hero.*" }}
-
-    {{ with $hero }}
-
+    {{ with .Resources.GetMatch "hero.*" }}
     <figure class="essay-hero">
-
         <img src="{{ .RelPermalink }}" alt="{{ $.Title }}">
+    </figure>
+    {{ end }}
 
+    <section class="essay">
+
+        <article class="essay-content" data-pagefind-body>
+
+            {{ .Content }}
+
+        </article>
+
+        {{ with .Params.themes }}
+        <div class="fragment-themes">
+
+            <span class="fragment-themes-label">
+                {{ if eq (len .) 1 }}Theme:{{ else }}Themes:{{ end }}
+            </span>
+
+            {{ range $index, $theme := . }}
+            {{ if gt $index 0 }} · {{ end }}
+            {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
+            <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+            {{ else }}
+            {{ $theme }}
+            {{ end }}
+            {{ end }}
+
+        </div>
+        {{ end }}
+
+        {{ partial "share.html" . }}
+
+        <nav class="essay-pagination">
+
+            <div class="essay-pagination__previous">
+                {{ with .PrevInSection }}
+                <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                    ← {{ .Title }}
+                </a>
+                {{ end }}
+            </div>
+
+            <div class="essay-pagination__next">
+                {{ with .NextInSection }}
+                <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                    {{ .Title }} →
+                </a>
+                {{ end }}
+            </div>
+
+        </nav>
+
+    </section>
+
+</main>
+
+{{ else if eq .Title "About" }}
+
+<main>
+
+    {{ partial "pagefind-meta.html" . }}
+
+    <section class="about-header">
+
+        <h1 class="page-title">{{ .Title }}</h1>
+
+    </section>
+
+    <figure class="about-hero">
+        <img src="/images/about-portrait.png" alt="Anurag Jain">
     </figure>
 
-    {{ end }}
+    <section class="page">
 
-    <article class="essay-content" data-pagefind-body>
+        <article class="page-content" data-pagefind-body>
 
-        {{ .Content }}
+            {{ replace .Content "<p><img src=\"/images/about-portrait.png\" alt=\"Anurag Jain\"></p>" "" | safeHTML }}
 
-    </article>
+        </article>
 
-    {{ with .Params.themes }}
-    <div class="fragment-themes">
-
-        <span class="fragment-themes-label">
-            {{ if eq (len .) 1 }}Theme:{{ else }}Themes:{{ end }}
-        </span>
-
-        {{ range $index, $theme := . }}
-        {{ if gt $index 0 }} · {{ end }}
-
-        {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
-        <a href="{{ .RelPermalink }}">{{ $theme }}</a>
-        {{ else }}
-        {{ $theme }}
-        {{ end }}
-
-        {{ end }}
-
-    </div>
-    {{ end }}
-
-    {{ partial "share.html" . }}
-
-    <nav class="essay-pagination">
-
-        <div class="essay-pagination__previous">
-
-            {{ with .PrevInSection }}
-            <a href="{{ .RelPermalink }}" class="essay-pagination__link">
-                ← {{ .Title }}
-            </a>
-            {{ end }}
-
-        </div>
-
-        <div class="essay-pagination__next">
-
-            {{ with .NextInSection }}
-            <a href="{{ .RelPermalink }}" class="essay-pagination__link">
-                {{ .Title }} →
-            </a>
-            {{ end }}
-
-        </div>
-
-    </nav>
+    </section>
 
 </main>
 
@@ -95,11 +117,7 @@
 
     {{ partial "pagefind-meta.html" . }}
 
-    <h1 class="page-title">
-
-        {{ .Title }}
-
-    </h1>
+    <h1 class="page-title">{{ .Title }}</h1>
 
     <article class="page-content" data-pagefind-body>
 
