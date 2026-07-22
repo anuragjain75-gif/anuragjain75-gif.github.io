@@ -75,7 +75,7 @@ LOGO_SIZE = 44
 
 LOGO_GAP = 12
 
-INVOCATION_BOX_WIDTH = 700
+INVOCATION_BOX_WIDTH = 860
 INVOCATION_BOX_HEIGHT = 180
 
 REFLECTION_BOX_WIDTH = 760
@@ -344,7 +344,7 @@ def draw_centered_block(
     for line in fitted["lines"]:
 
         if line == "":
-            y += fitted["line_height"] // 2
+            y += fitted["line_height"] // 2 
             continue
 
         w = line_width(draw, line, font)
@@ -361,7 +361,7 @@ def draw_centered_block(
         )
 
         y += fitted["line_height"] + fitted["spacing"]
-        
+    return y
 # --------------------------------------------------------------------
 # Background
 # --------------------------------------------------------------------
@@ -571,13 +571,13 @@ def render(
         invocation_fit["spacing"] = 2   # Try 2, 3 or 4
         
     
-        draw_centered_block(
+        invocation_bottom = draw_centered_block(
             draw=draw,
             x_center=WIDTH // 2,
             top=INVOCATION_TOP,
             fitted=invocation_fit,
             colour=TEXT,
-            column_width=620,
+            
         
         )
         # --------------------------------------------------------------------
