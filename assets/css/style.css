@@ -731,23 +731,24 @@ nav a:hover {
 }
 
 .footer-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
 
     margin-top: 22px;
-
     margin-bottom: 36px;
 
+    gap: 32px;
 }
 
 .footer-nav a {
-
-    margin: 0 16px;
+    margin: 0;
 
     color: #6E7451;
-
     text-decoration: none;
 
     transition: color .25s ease;
-
 }
 
 .footer-nav a:hover {
