@@ -75,7 +75,7 @@ LOGO_SIZE = 44
 
 LOGO_GAP = 12
 
-INVOCATION_BOX_WIDTH = 860
+INVOCATION_BOX_WIDTH = 700
 INVOCATION_BOX_HEIGHT = 180
 
 REFLECTION_BOX_WIDTH = 760
@@ -322,31 +322,47 @@ def draw_centered_block(
     top: int,
     fitted,
     colour: str,
+    column_width: int | None = None,
 ):
+    """
+    Draw a centred block.
+
+    If column_width is supplied, the text is centred inside a narrower
+    invisible column while the column itself remains centred on the page.
+    """
+
     y = top
     font = fitted["font"]
     is_bold = fitted.get("bold", False)
 
+    if column_width is None:
+        column_left = 0
+        column_width = WIDTH
+    else:
+        column_left = x_center - column_width / 2
+
     for line in fitted["lines"]:
+
         if line == "":
-            y += fitted["line_height"]
+            y += fitted["line_height"] // 2
             continue
 
         w = line_width(draw, line, font)
 
+        x = column_left + (column_width - w) / 2
+
         draw.text(
-            (x_center - w / 2, y),
+            (x, y),
             line,
             font=font,
             fill=colour,
-            # Simulates bold weight if no distinct bold font file is available
             stroke_width=1 if is_bold else 0,
             stroke_fill=colour if is_bold else None,
         )
 
         y += fitted["line_height"] + fitted["spacing"]
-
- # --------------------------------------------------------------------
+        
+# --------------------------------------------------------------------
 # Background
 # --------------------------------------------------------------------
 
@@ -553,6 +569,7 @@ def render(
             font_path=BOLD_ITALIC_FONT,
         )
         invocation_fit["spacing"] = 2   # Try 2, 3 or 4
+        
     
         draw_centered_block(
             draw=draw,
@@ -560,6 +577,8 @@ def render(
             top=INVOCATION_TOP,
             fitted=invocation_fit,
             colour=TEXT,
+            column_width=620,
+        
         )
         # --------------------------------------------------------------------
         # Decorative separator dot
