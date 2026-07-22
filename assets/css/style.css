@@ -386,10 +386,10 @@ nav a:hover {
 .about-header {
     max-width: 900px;
     margin: 0 auto;
+    text-align: center;
 }
 
 .about-header .page-title {
-    text-align: left;
     margin-bottom: 40px;
 }
 
