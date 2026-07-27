@@ -1,22 +1,16 @@
+{{ if .IsHome }}
+    {{ $shareURL := site.Home.Permalink }}
+    {{ $shareTitle := site.Title }}
+
 <div class="share-section">
 
     <p class="share-heading">
-
-{{ if eq .Section "fragments" }}
-
-    If this fragment stayed with you, consider sharing it.
-
-{{ else }}
-
-    If this essay resonated with you, consider sharing it with someone who may enjoy a slow read.
-
-{{ end }}
-
-</p>
+        If Lilamaya feels like a place someone you know would enjoy, consider sharing it.
+    </p>
 
     <div class="share-links">
 
-        <a href="https://twitter.com/intent/tweet?text={{ .Title | urlquery }}&url={{ .Permalink | urlquery }}"
+        <a href="https://twitter.com/intent/tweet?text={{ $shareTitle | urlquery }}&url={{ $shareURL | urlquery }}"
            target="_blank"
            rel="noopener"
            aria-label="Share on X">
@@ -25,7 +19,7 @@
 
         </a>
 
-        <a href="https://bsky.app/intent/compose?text={{ printf "%s %s" .Title .Permalink | urlquery }}"
+        <a href="https://bsky.app/intent/compose?text={{ printf "%s %s" $shareTitle $shareURL | urlquery }}"
            target="_blank"
            rel="noopener noreferrer"
            aria-label="Share on Bluesky">
@@ -34,7 +28,7 @@
 
         </a>
 
-        <a href="https://www.facebook.com/sharer/sharer.php?u={{ .Permalink | urlquery }}"
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareURL | urlquery }}"
            target="_blank"
            rel="noopener"
            aria-label="Share on Facebook">
@@ -43,7 +37,7 @@
 
         </a>
 
-        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ .Permalink | urlquery }}"
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ $shareURL | urlquery }}"
            target="_blank"
            rel="noopener"
            aria-label="Share on LinkedIn">
@@ -52,7 +46,16 @@
 
         </a>
 
-        <a href="mailto:?subject={{ .Title | urlquery }}&body={{ .Permalink }}"
+        <a href="https://wa.me/?text={{ printf "%s %s" $shareTitle $shareURL | urlquery }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Share on WhatsApp">
+
+            {{ partial "icon.html" "whatsapp" }}
+
+        </a>
+
+        <a href="mailto:?subject={{ $shareTitle | urlquery }}&body={{ $shareURL }}"
            aria-label="Share by Email">
 
             {{ partial "icon.html" "email" }}
@@ -60,7 +63,7 @@
         </a>
 
         <button id="copy-link"
-                data-url="{{ .Permalink }}"
+                data-url="{{ $shareURL }}"
                 aria-label="Copy link">
 
             <span class="copy-icon">
@@ -80,3 +83,102 @@
     </div>
 
 </div>
+
+{{ else }}
+
+    {{ $shareURL := .Permalink }}
+    {{ $shareTitle := .Title }}
+
+<div class="share-section">
+
+    <p class="share-heading">
+
+    {{ if eq .Section "fragments" }}
+
+        If this fragment stayed with you, consider sharing it.
+
+    {{ else }}
+
+        If this essay resonated with you, consider sharing it with someone who may enjoy a slow read.
+
+    {{ end }}
+
+    </p>
+
+    <div class="share-links">
+
+        <a href="https://twitter.com/intent/tweet?text={{ $shareTitle | urlquery }}&url={{ $shareURL | urlquery }}"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on X">
+
+            {{ partial "icon.html" "x" }}
+
+        </a>
+
+        <a href="https://bsky.app/intent/compose?text={{ printf "%s %s" $shareTitle $shareURL | urlquery }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Share on Bluesky">
+
+            {{ partial "icon.html" "bluesky" }}
+
+        </a>
+
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareURL | urlquery }}"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on Facebook">
+
+            {{ partial "icon.html" "facebook" }}
+
+        </a>
+
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ $shareURL | urlquery }}"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on LinkedIn">
+
+            {{ partial "icon.html" "linkedin" }}
+
+        </a>
+
+        <a href="https://wa.me/?text={{ printf "%s %s" $shareTitle $shareURL | urlquery }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Share on WhatsApp">
+
+            {{ partial "icon.html" "whatsapp" }}
+
+        </a>
+
+        <a href="mailto:?subject={{ $shareTitle | urlquery }}&body={{ $shareURL }}"
+           aria-label="Share by Email">
+
+            {{ partial "icon.html" "email" }}
+
+        </a>
+
+        <button id="copy-link"
+                data-url="{{ $shareURL }}"
+                aria-label="Copy link">
+
+            <span class="copy-icon">
+                {{ partial "icon.html" "link" }}
+            </span>
+
+            <span class="check-icon">
+                {{ partial "icon.html" "check" }}
+            </span>
+
+        </button>
+
+    </div>
+
+    <div id="copy-toast">
+        Link copied.
+    </div>
+
+</div>
+
+{{ end }}
