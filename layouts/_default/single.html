@@ -46,12 +46,12 @@
             </span>
 
             {{ range $index, $theme := . }}
-            {{ if gt $index 0 }} · {{ end }}
-            {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
-            <a href="{{ .RelPermalink }}">{{ $theme }}</a>
-            {{ else }}
-            {{ $theme }}
-            {{ end }}
+                {{ if gt $index 0 }} · {{ end }}
+                {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
+                    <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+                {{ else }}
+                    {{ $theme }}
+                {{ end }}
             {{ end }}
 
         </div>
@@ -83,47 +83,21 @@
 
 </main>
 
-{{ else if eq .Title "About" }}
+{{ else }}
 
 <main>
 
     {{ partial "pagefind-meta.html" . }}
 
-    <section class="about-header">
-
-        <h1 class="page-title">{{ .Title }}</h1>
-
-    </section>
-
-    <figure class="about-hero">
-        <img src="/images/about-portrait.png" alt="Anurag Jain">
-    </figure>
-
     <section class="page">
 
-        <article class="page-content" data-pagefind-body>
-
-            {{ replace .Content "<p><img src=\"/images/about-portrait.png\" alt=\"Anurag Jain\"></p>" "" | safeHTML }}
-
-        </article>
-
-    </section>
-
-</main>
-
-{{ else }}
-
-<main class="page">
-
-    {{ partial "pagefind-meta.html" . }}
-
-    <h1 class="page-title">{{ .Title }}</h1>
-
-    <article class="page-content" data-pagefind-body>
+        <header class="page-header">
+            <h1 class="page-title">{{ .Title }}</h1>
+        </header>
 
         {{ .Content }}
 
-    </article>
+    </section>
 
 </main>
 

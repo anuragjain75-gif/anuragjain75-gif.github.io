@@ -1,6 +1,11 @@
 ---
 title: "About"
 ---
+<div class="page-hero">
+    <img src="/images/social/about/about-portrait.png" alt="Father standing with son">
+</div>
+
+<article class="page-content">
 
 The Lilamaya is my literary home.
 
@@ -15,3 +20,5 @@ Alongside The Lilamaya, I also write and teach through the [NEEV Community for S
 I do not think of this website as a collection of articles so much as a place that gradually grows over time. My hope is that readers will return to these pages as they might return to a favourite garden or an old library—not in search of constant novelty, but with the quiet expectation of finding something familiar seen in a new light.
 
 Thank you for visiting.
+
+</article>
