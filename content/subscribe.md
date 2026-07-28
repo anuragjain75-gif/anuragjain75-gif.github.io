@@ -1,14 +1,8 @@
 ---
 title: "Subscribe"
 description: "Receive new essays and fragments from Lilamaya."
-layout: "single"
+hero: "/images/social/subscribe/subscribe-hero.png"
 ---
-<div class="page-hero">
-    <img src="/images/social/subscribe/subscribe-hero.png"
-         alt="An open weathered gate leading into a misty landscape.">
-</div>
-
-<article class="page-content">
 
 Some essays take months to write.
 
@@ -29,19 +23,3 @@ No advertising.
 No promotions.
 
 Only new writing.
-
-<div class="subscribe-button-container">
-
-<a class="button subscribe-button"
-   href="https://anuragneev.substack.com"
-   target="_blank"
-   rel="noopener">
-    Subscribe
-</a>
-
-<div class="subscribe-note">
-    Email delivery is provided through Substack.
-</div>
-
-</div>
-</article>
