@@ -25,7 +25,7 @@ If you would like to help preserve this small literary home, you are warmly invi
 
 Not every contribution is financial.
 
-If an essay has stayed with you, consider sharing it with someone who may also find a home in these pages. You may also subscribe to receive new essays as they are published. Every thoughtful reader helps this quiet corner of the world continue to grow.
+If an essay has stayed with you, consider sharing it with someone who may also find a home in these pages. You may also [subscribe](/subscribe/) to receive new essays as they are published. Every thoughtful reader helps this quiet corner of the world continue to grow.
 
 Thank you for spending a little time here.
 
