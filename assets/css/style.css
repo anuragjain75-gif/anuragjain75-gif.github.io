@@ -778,6 +778,13 @@ nav a:hover {
 
 }
 
+.footer-blessing {
+    margin: 1.5rem 0 0.75rem;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--color-muted);
+}
+
 
 
 /*==================================================
@@ -1803,4 +1810,63 @@ nav a:hover {
 
     color: #7A7468;
 
+}
+
+/* ===========================================
+   Support Page
+   =========================================== */
+
+.support-button {
+    text-align: center;
+    margin: 4rem 0 5rem;
+}
+
+.support-button .button {
+    display: inline-block;
+
+    padding: 1rem 2.75rem;
+
+    background: #F4EFE6;
+    color: var(--color-olive);
+
+    text-decoration: none;
+
+    font-family: var(--font-serif);
+    font-size: 1.08rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+
+    border: 1px solid rgba(110, 118, 85, 0.20);
+    border-radius: 10px;
+
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.20s ease;
+}
+
+.support-button .button:hover {
+    background: var(--color-olive);
+    color: var(--color-bg);
+
+    border-color: var(--color-olive);
+
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+
+    transform: translateY(-2px);
+}
+
+.support-button .button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+}
+
+.support-button .button:focus-visible {
+    outline: 2px solid var(--color-forest);
+    outline-offset: 4px;
 }
