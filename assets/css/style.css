@@ -1196,22 +1196,15 @@ nav a:hover {
 }
 
 .share-heading {
+    margin: 0 auto 1.8rem;
+    max-width: 38rem;
 
-    margin-bottom: 1.6rem;
+    text-align: center;
 
     font-style: italic;
-
     font-size: .98rem;
-
-    color: #7A7468;
-
     line-height: 1.7;
-
-    max-width: 34rem;
-
-    margin: 0 auto 1.8rem;
-
-
+    color: #7A7468;
 }
 
 .share-links {
