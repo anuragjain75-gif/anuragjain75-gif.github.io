@@ -4,29 +4,84 @@
 
     {{ partial "pagefind-meta.html" . }}
 
-    <section class="page">
+    <section class="essay">
 
-        <header class="page-header">
-            <h1 class="page-title">{{ .Title }}</h1>
+        <header class="essay-header">
+
+            <h1 class="essay-title">
+                {{ .Title }}
+            </h1>
+
+            <div class="essay-meta">
+                <time>{{ .Date.Format "2 January 2006" }}</time>
+                <span> · </span>
+                <span>{{ .ReadingTime }} min read</span>
+            </div>
+
         </header>
 
-        {{ with .Params.hero }}
-        <figure class="page-hero">
-            <img
-                src="{{ . }}"
-                alt="{{ $.Title }}">
-        </figure>
-        {{ end }}
+    </section>
 
-        <article class="page-content" data-pagefind-body>
+    {{ with .Resources.GetMatch "hero.*" }}
+    <figure class="essay-hero">
+        <img src="{{ .RelPermalink }}" alt="{{ $.Title }}">
+    </figure>
+    {{ end }}
+
+    <section class="essay">
+
+        <article class="essay-content" data-pagefind-body>
 
             {{ .Content }}
 
-            {{ if eq .File.BaseFileName "subscribe" }}
-                {{ partial "subscribe-callout.html" . }}
+        </article>
+
+        {{ with .Params.themes }}
+        <div class="fragment-themes">
+
+            <span class="fragment-themes-label">
+                {{ if eq (len .) 1 }}Theme:{{ else }}Themes:{{ end }}
+            </span>
+
+            {{ range $index, $theme := . }}
+                {{ if gt $index 0 }} · {{ end }}
+
+                {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
+                    <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+                {{ else }}
+                    {{ $theme }}
+                {{ end }}
+
             {{ end }}
 
-        </article>
+        </div>
+        {{ end }}
+
+        {{ partial "share.html" . }}
+
+        <nav class="essay-pagination">
+
+            <div class="essay-pagination__previous">
+
+                {{ with .PrevInSection }}
+                <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                    ← {{ .Title }}
+                </a>
+                {{ end }}
+
+            </div>
+
+            <div class="essay-pagination__next">
+
+                {{ with .NextInSection }}
+                <a href="{{ .RelPermalink }}" class="essay-pagination__link">
+                    {{ .Title }} →
+                </a>
+                {{ end }}
+
+            </div>
+
+        </nav>
 
     </section>
 
