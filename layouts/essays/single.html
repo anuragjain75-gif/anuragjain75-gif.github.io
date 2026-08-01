@@ -1,0 +1,35 @@
+{{ define "main" }}
+
+<main>
+
+    {{ partial "pagefind-meta.html" . }}
+
+    <section class="page">
+
+        <header class="page-header">
+            <h1 class="page-title">{{ .Title }}</h1>
+        </header>
+
+        {{ with .Params.hero }}
+        <figure class="page-hero">
+            <img
+                src="{{ . }}"
+                alt="{{ $.Title }}">
+        </figure>
+        {{ end }}
+
+        <article class="page-content" data-pagefind-body>
+
+            {{ .Content }}
+
+            {{ if eq .File.BaseFileName "subscribe" }}
+                {{ partial "subscribe-callout.html" . }}
+            {{ end }}
+
+        </article>
+
+    </section>
+
+</main>
+
+{{ end }}
