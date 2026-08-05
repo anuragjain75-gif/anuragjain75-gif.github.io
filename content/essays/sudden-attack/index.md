@@ -1,12 +1,14 @@
 ---
 title: "Sudden Attack"
-date: 2026-07-20T17:06:01+05:30
+introduction: A journey into one of India's least-visited tiger reserves became an unexpected homecoming to a wilderness I thought I had long ago abandoned.
+date: 2026-06-16T17:06:01+05:30
 draft: false
 themes:
   - Memoir
   - Nature
   - Travel
 ---
+{{< introduction >}}
 The forest has a name that translates as sudden attack.
 
 I did not know this when we set out from Bilaspur in a cavalcade of three cars—my parents, uncles, aunts, and cousins—heading toward what everyone had described, with magnificent vagueness, as some natural place. Nobody had mentioned tigers. A tiger, I suppose, is very much part of nature, and so the others had not thought it necessary to single the animal out as a discrete element in the nature we were going to watch. As is the way with the great Indian family, there had been detailed conversation about the food, the stay arrangements, and the temples on the route.

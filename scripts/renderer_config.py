@@ -60,15 +60,13 @@ BOTTOM_MARGIN = 30
 
 IMAGE_HEIGHT_RATIO = 0.65
 
-TITLE_START = 50
+TITLE_START = 40
+TITLE_MIN = 28
 
-TITLE_MIN = 36
+TITLE_BOX_WIDTH = 820
+TITLE_BOX_HEIGHT = 180
 
-TITLE_BOX_WIDTH = 760
-
-TITLE_BOX_HEIGHT = 120
-
-TITLE_TOP_MARGIN = 24
+TITLE_TOP_MARGIN = 18
 
 TITLE_SIGNATURE_GAP = 28
 
@@ -77,8 +75,6 @@ DESCRIPTION_SIZE = 30
 
 # ----------------------------------------------------
 # Fragment Layout
-#
-# (Values will be introduced gradually.)
 # ----------------------------------------------------
 
 FRAGMENT_BODY_START = 64

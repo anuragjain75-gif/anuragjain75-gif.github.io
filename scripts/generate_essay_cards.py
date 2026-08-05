@@ -46,7 +46,12 @@ for bundle in sorted(ESSAYS_DIR.iterdir()):
 
     post = frontmatter.load(md_file)
 
-    title = post["title"]
+    # ------------------------------------------------
+    # Use the essay introduction if available;
+    # otherwise fall back to the title.
+    # ------------------------------------------------
+
+    display_text = post.get("introduction", post["title"])
 
     hero = None
 
@@ -62,10 +67,10 @@ for bundle in sorted(ESSAYS_DIR.iterdir()):
         continue
 
     render(
-        title=title,
-        image=hero,
-        markdown_file=md_file,
-        output_file=OUTPUT_DIR / f"{bundle.name}.png",
+    display_text,
+    hero,
+    md_file,
+    OUTPUT_DIR / f"{bundle.name}.png",
     )
-
+    
     print(f"Rendered {bundle.name}")

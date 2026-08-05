@@ -1,6 +1,7 @@
 ---
 title: "Leaving the Default Setting: How I Walked Away from the Matrix to Find True Freedom"
-date: 2026-07-20T16:34:51+05:30
+introduction: A childhood of sunlight, books, and wonder slowly gave way to the machinery of ambition. This is the story of walking away from the default setting of modern life.  
+date: 2026-05-28T16:34:51+05:30
 draft: false
 themes:
   - Books
@@ -9,6 +10,8 @@ themes:
   - Nature
   - Wonder
 ---
+{{< introduction >}}
+
 I wake up in the morning and toddle towards my parents’ bedroom when suddenly I see golden sunlight bursting through the window, bathing the room with an ethereal light.
 
 I have spent almost my whole life in this town called Tatanagar, the Pittsburgh of India. Built from scratch in the early 20th century as a model “company town,” it was engineered to combine heavy steel production with spacious public parks and tree-lined avenues. Growing up here meant that in my consciousness the images of smokestacks, furnaces, and heavy industry mingled with the golden glow of sunlight in well-planned homes; the fragrance of globe-shaped orange-yellow flowers of the Kadam trees along the roadside; and the spectacular vision of the Dalma Mountains looming on the horizon.

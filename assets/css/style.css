@@ -1863,3 +1863,53 @@ nav a:hover {
     outline: 2px solid var(--color-forest);
     outline-offset: 4px;
 }
+
+/* ===========================================
+   Poetry
+   =========================================== */
+   
+.poetry {
+    margin: 3rem auto;
+    padding-left: 2rem;
+    border-left: 2px solid var(--border-color);
+}
+
+.poetry pre {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.9;
+    font-style: italic;
+    color: inherit;
+
+    white-space: pre-wrap;
+}
+
+/* ==========================================================
+   Essay Introduction
+   ========================================================== */
+
+.essay-introduction {
+    max-width: 620px;
+    margin: 4.5rem auto 5rem;
+    text-align: center;
+}
+
+.essay-introduction-text {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.85rem;
+    line-height: 1.75;
+    font-style: italic;
+    font-weight: 400;
+    color: #7a746d;
+}
+
+.essay-introduction-text p {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+}

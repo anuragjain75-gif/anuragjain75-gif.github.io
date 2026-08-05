@@ -8,23 +8,15 @@
 
     <p class="essay-card__excerpt">
 
-        {{ with .Params.description }}
+        {{ with .Params.introduction }}
 
-        {{ . | truncate 180 }}
-
-        {{ else }}
-
-        {{ with .Summary }}
-
-        {{ . | plainify | truncate 180 }}
+            {{ . }}
 
         {{ else }}
 
-        <span class="essay-card__placeholder">
-            An essay in progress…
-        </span>
-
-        {{ end }}
+            <span class="essay-card__placeholder">
+                An essay in progress…
+            </span>
 
         {{ end }}
 
