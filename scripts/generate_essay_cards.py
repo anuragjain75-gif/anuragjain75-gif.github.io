@@ -13,12 +13,19 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 ESSAYS_DIR = PROJECT_ROOT / "content" / "essays"
 
-OUTPUT_DIR = PROJECT_ROOT / "static" / "images" / "social" / "essays"
+OUTPUT_DIR = (
+    PROJECT_ROOT
+    / "static"
+    / "images"
+    / "social"
+    / "essays"
+)
+
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------------------------------------------
-# Supported hero image extensions
+# Supported Hero Image Extensions
 # ----------------------------------------------------
 
 IMAGE_EXTENSIONS = (
@@ -28,6 +35,22 @@ IMAGE_EXTENSIONS = (
     ".webp",
     ".gif",
 )
+
+
+# ----------------------------------------------------
+# Find Hero Image
+# ----------------------------------------------------
+
+def find_hero(bundle: Path):
+
+    for ext in IMAGE_EXTENSIONS:
+
+        hero = bundle / f"hero{ext}"
+
+        if hero.exists():
+            return hero
+
+    return None
 
 
 # ----------------------------------------------------
@@ -46,31 +69,19 @@ for bundle in sorted(ESSAYS_DIR.iterdir()):
 
     post = frontmatter.load(md_file)
 
-    # ------------------------------------------------
-    # Use the essay introduction if available;
-    # otherwise fall back to the title.
-    # ------------------------------------------------
-
-    display_text = post.get("introduction", post["title"])
-
-    hero = None
-
-    for ext in IMAGE_EXTENSIONS:
-        candidate = bundle / f"hero{ext}"
-
-        if candidate.exists():
-            hero = candidate
-            break
+    hero = find_hero(bundle)
 
     if hero is None:
+
         print(f"Skipping {bundle.name}: no hero image found.")
+
         continue
 
     render(
-    display_text,
-    hero,
-    md_file,
-    OUTPUT_DIR / f"{bundle.name}.png",
+        title=post["title"],
+        image=hero,
+        markdown_file=md_file,
+        output_file=OUTPUT_DIR / f"{bundle.name}.png",
     )
-    
+
     print(f"Rendered {bundle.name}")
