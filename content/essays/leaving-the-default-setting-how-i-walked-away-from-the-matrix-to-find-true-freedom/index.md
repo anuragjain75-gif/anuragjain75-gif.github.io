@@ -1,6 +1,6 @@
 ---
 title: "Leaving the Default Setting: How I Walked Away from the Matrix to Find True Freedom"
-introduction: A childhood of sunlight, books, and wonder slowly gave way to the machinery of ambition. This is the story of walking away from the default setting of modern life.  
+introduction: "A childhood of sunlight, books, and wonder slowly gave way to the machinery of ambition. This is the story of walking away from the default setting of modern life."  
 date: 2026-05-28T16:34:51+05:30
 draft: false
 themes:

@@ -1,6 +1,6 @@
 ---
 title: "Sudden Attack"
-introduction: A journey into one of India's least-visited tiger reserves became an unexpected homecoming to a wilderness I thought I had long ago abandoned.
+introduction: "A journey into one of India's least-visited tiger reserves became an unexpected homecoming to a wilderness I thought I had long ago abandoned."
 date: 2026-06-16T17:06:01+05:30
 draft: false
 themes:

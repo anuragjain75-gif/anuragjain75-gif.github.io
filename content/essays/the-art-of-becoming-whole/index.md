@@ -1,6 +1,6 @@
 ---
 title: "The Art of Becoming Whole"
-introduction: A question asked in an engineering college led me through Buddhism, Krishnamurti, education, Marxism, and finally Advaita—only to discover that nothing had ever been broken.
+introduction: "A question asked in an engineering college led me through Buddhism, Krishnamurti, education, Marxism, and finally Advaita—only to discover that nothing had ever been broken."
 date: 2026-06-25T15:13:21+05:30
 draft: false
 themes:
