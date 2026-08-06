@@ -183,7 +183,7 @@ def render(
             (x, y),
             line,
             font=font,
-            fill=OLIVE
+            fill=(0, 0, 0)
         )
 
         y += line_height + line_gap
@@ -246,7 +246,7 @@ def render(
             ),
             brand,
             font=brand_font,
-            fill=MUTED
+            fill=(0, 0, 0)
         )
 
     output_file.parent.mkdir(
