@@ -84,4 +84,4 @@ for bundle in sorted(ESSAYS_DIR.iterdir()):
         output_file=OUTPUT_DIR / f"{bundle.name}.png",
     )
 
-    print(f"Rendered {bundle.name}")
+    print(f"Rendered {bundle.name}"
