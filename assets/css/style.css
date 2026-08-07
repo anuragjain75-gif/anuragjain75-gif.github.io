@@ -1926,3 +1926,35 @@ nav a:hover {
     opacity: 0.60;
     user-select: none;
 }
+
+/*==================================================
+    STICKY THEME NAVIGATION
+==================================================*/
+
+.theme-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    background: #F8F5EF;
+
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    border-bottom: 1px solid #E5DED1;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+@media (max-width:768px){
+
+    .theme-navigation{
+
+        position:static;
+
+        box-shadow:none;
+
+        border-bottom:none;
+
+    }
+
+}

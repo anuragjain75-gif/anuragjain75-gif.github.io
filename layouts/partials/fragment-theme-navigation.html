@@ -1,32 +1,35 @@
-<div class="browse-themes">
-    Browse by Theme
+<div class="theme-navigation">
+
+    <div class="browse-themes">
+        Browse by Theme
+    </div>
+
+    {{ $current := "" }}
+
+    {{ if eq .Kind "term" }}
+        {{ $current = lower .Title }}
+    {{ end }}
+
+    <nav class="essay-themes" data-pagefind-ignore>
+
+        <a href="/fragments/" {{ if and (eq .Section "fragments") (ne .Kind "term") }}class="active-theme"{{ end }}>
+            All
+        </a>
+
+        <span>·</span>
+
+        {{ range .Site.Taxonomies.fragmentthemes.Alphabetical }}
+
+            <a href="{{ .Page.RelPermalink }}" {{ if eq (lower .Page.Title) $current }}class="active-theme"{{ end }}>
+                {{ .Page.Title }}
+            </a>
+
+            {{ if not (eq .Page.Title ((index $.Site.Taxonomies.fragmentthemes.Alphabetical (sub (len $.Site.Taxonomies.fragmentthemes.Alphabetical) 1)).Page.Title)) }}
+                <span>·</span>
+            {{ end }}
+
+        {{ end }}
+
+    </nav>
+
 </div>
-
-{{ $current := "" }}
-
-{{ if eq .Kind "term" }}
-{{ $current = lower .Title }}
-{{ end }}
-
-<nav class="essay-themes" data-pagefind-ignore>
-
-    <a href="/fragments/" {{ if and (eq .Section "fragments" ) (ne .Kind "term" ) }}class="active-theme" {{ end }}>
-        All
-    </a>
-
-    <span>·</span>
-
-    {{ range .Site.Taxonomies.fragmentthemes.Alphabetical }}
-
-    <a href="{{ .Page.RelPermalink }}" {{ if eq (lower .Page.Title) $current }}class="active-theme" {{ end }}>
-        {{ .Page.Title }}
-    </a>
-
-    {{ if not (eq .Page.Title ((index $.Site.Taxonomies.fragmentthemes.Alphabetical (sub (len
-    $.Site.Taxonomies.fragmentthemes.Alphabetical) 1)).Page.Title)) }}
-    <span>·</span>
-    {{ end }}
-
-    {{ end }}
-
-</nav>
