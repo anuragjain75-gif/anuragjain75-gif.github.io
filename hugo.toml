@@ -21,7 +21,7 @@ taxonomy = ["HTML"]
 term = ["HTML"]
 
 [permalinks]
-  fragments = "/fragments/:year/:month/:day/"
+  fragments = "/fragments/:year/:month/:day/:slug/"
 
   [markup]
   [markup.goldmark]
