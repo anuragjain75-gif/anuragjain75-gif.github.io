@@ -15,6 +15,7 @@ Layout
     Reflection
         Smaller typography
         Independent text fitting
+        Maximum 250 characters for social cards
 
     Footer
         Divider
@@ -27,7 +28,6 @@ rather than a single flowing block of text.
 
 from __future__ import annotations
 
-import math
 import re
 from pathlib import Path
 
@@ -78,8 +78,15 @@ LOGO_GAP = 12
 INVOCATION_BOX_WIDTH = 860
 INVOCATION_BOX_HEIGHT = 180
 
-REFLECTION_BOX_WIDTH = 760
-REFLECTION_BOX_HEIGHT = 120
+REFLECTION_BOX_WIDTH = 800
+REFLECTION_BOX_HEIGHT = 125
+
+
+# --------------------------------------------------------------------
+# Reflection length
+# --------------------------------------------------------------------
+
+MAX_REFLECTION_CHARS = 250
 
 
 # --------------------------------------------------------------------
@@ -95,6 +102,7 @@ FOOTER_FONT = ImageFont.truetype(
     str(REGULAR_FONT),
     FOOTER_SIZE,
 )
+
 
 def load_font(
     size: int,
@@ -116,6 +124,7 @@ def load_font(
         size,
     )
 
+
 # --------------------------------------------------------------------
 # Parsing
 # --------------------------------------------------------------------
@@ -126,16 +135,40 @@ INVOCATION_PATTERN = re.compile(
 )
 
 
+def truncate_reflection(
+    text: str,
+    maximum: int = MAX_REFLECTION_CHARS,
+) -> str:
+
+    text = text.strip()
+
+    if len(text) <= maximum:
+        return text
+
+    suffix = "..."
+    cutoff = maximum - len(suffix)
+
+    candidate = text[:cutoff].rstrip()
+
+    # Prefer ending at a complete word.
+    last_space = candidate.rfind(" ")
+
+    if last_space > 0:
+        candidate = candidate[:last_space]
+
+    return candidate.rstrip(".,;:!? ") + suffix
+
+
 def parse_fragment(text: str) -> tuple[str, str]:
     """
     Returns
 
         invocation
         reflection
+
+    The reflection is deliberately shortened for the social card.
     """
 
-    # 1. Clean the HTML line breaks from the entire text first.
-    # We use a pattern that catches the tag with or without slashes/spaces.
     clean_text = re.sub(
         r"<\s*br\s*/?>",
         "\n",
@@ -143,16 +176,25 @@ def parse_fragment(text: str) -> tuple[str, str]:
         flags=re.IGNORECASE,
     )
 
-    # 2. Now search for the invocation block in the cleaned text.
     match = INVOCATION_PATTERN.search(clean_text)
 
     if not match:
-        return "", clean_text.strip()
+        return "", truncate_reflection(
+            clean_text
+        )
 
     invocation = match.group(1).strip()
-    reflection = clean_text[match.end():].strip()
+
+    reflection = clean_text[
+        match.end():
+    ].strip()
+
+    reflection = truncate_reflection(
+        reflection
+    )
 
     return invocation, reflection
+
 
 # --------------------------------------------------------------------
 # Text helpers
@@ -186,7 +228,8 @@ def line_height(
 
     return bottom - top
 
-    # --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
 # Word wrapping
 # --------------------------------------------------------------------
 
@@ -215,13 +258,25 @@ def wrap_text(
 
         for word in words:
 
-            trial = word if current == "" else current + " " + word
+            trial = (
+                word
+                if current == ""
+                else current + " " + word
+            )
 
-            if line_width(draw, trial, font) <= max_width:
+            if line_width(
+                draw,
+                trial,
+                font,
+            ) <= max_width:
+
                 current = trial
+
             else:
+
                 if current:
                     lines.append(current)
+
                 current = word
 
         if current:
@@ -255,7 +310,6 @@ def fit_text_block(
             size,
         )
 
-
         lines = wrap_text(
             draw,
             text,
@@ -263,9 +317,15 @@ def fit_text_block(
             box_width,
         )
 
-        lh = line_height(draw, font)
+        lh = line_height(
+            draw,
+            font,
+        )
 
-        spacing = max(2, size // 8)
+        spacing = max(
+            2,
+            size // 8,
+        )
 
         total_height = (
             len(lines) * lh +
@@ -283,6 +343,11 @@ def fit_text_block(
                 "size": size,
             }
 
+    # If the normal minimum does not fit,
+    # keep the minimum font size and tighten
+    # the spacing rather than shrinking the
+    # typography to an unattractive size.
+
     font = ImageFont.truetype(
         str(font_path),
         minimum_size,
@@ -295,9 +360,24 @@ def fit_text_block(
         box_width,
     )
 
-    lh = line_height(draw, font)
+    lh = line_height(
+        draw,
+        font,
+    )
 
-    spacing = max(6, minimum_size // 5)
+    if len(lines) > 1:
+
+        spacing = max(
+            0,
+            (
+                box_height -
+                len(lines) * lh
+            ) // (len(lines) - 1)
+        )
+
+    else:
+
+        spacing = 0
 
     total_height = (
         len(lines) * lh +
@@ -313,9 +393,11 @@ def fit_text_block(
         "size": minimum_size,
     }
 
+
 # --------------------------------------------------------------------
 # Draw centred text block
 # --------------------------------------------------------------------
+
 def draw_centered_block(
     draw: ImageDraw.ImageDraw,
     x_center: int,
@@ -324,56 +406,89 @@ def draw_centered_block(
     colour: str,
     column_width: int | None = None,
 ):
-    """
-    Draw a centred block.
-
-    If column_width is supplied, the text is centred inside a narrower
-    invisible column while the column itself remains centred on the page.
-    """
 
     y = top
+
     font = fitted["font"]
-    is_bold = fitted.get("bold", False)
+
+    is_bold = fitted.get(
+        "bold",
+        False,
+    )
 
     if column_width is None:
+
         column_left = 0
         column_width = WIDTH
+
     else:
-        column_left = x_center - column_width / 2
+
+        column_left = (
+            x_center -
+            column_width / 2
+        )
 
     for line in fitted["lines"]:
 
         if line == "":
-            y += fitted["line_height"] // 2 
+
+            y += (
+                fitted["line_height"] //
+                2
+            )
+
             continue
 
-        w = line_width(draw, line, font)
+        w = line_width(
+            draw,
+            line,
+            font,
+        )
 
-        x = column_left + (column_width - w) / 2
+        x = (
+            column_left +
+            (column_width - w) / 2
+        )
 
         draw.text(
             (x, y),
             line,
             font=font,
             fill=colour,
-            stroke_width=1 if is_bold else 0,
-            stroke_fill=colour if is_bold else None,
+            stroke_width=(
+                1
+                if is_bold
+                else 0
+            ),
+            stroke_fill=(
+                colour
+                if is_bold
+                else None
+            ),
         )
 
-        y += fitted["line_height"] + fitted["spacing"]
+        y += (
+            fitted["line_height"] +
+            fitted["spacing"]
+        )
+
     return y
+
+
 # --------------------------------------------------------------------
 # Background
 # --------------------------------------------------------------------
 
-def apply_washi_texture(canvas: Image.Image) -> Image.Image:
-    """
-    Applies a subtle paper texture if one has been configured.
+def apply_washi_texture(
+    canvas: Image.Image,
+) -> Image.Image:
 
-    The renderer still works perfectly if no texture exists.
-    """
-
-    texture_path = PROJECT_ROOT / "assets" / "textures" / "washi.png"
+    texture_path = (
+        PROJECT_ROOT /
+        "assets" /
+        "textures" /
+        "washi.png"
+    )
 
     if not texture_path.exists():
         return canvas
@@ -384,7 +499,6 @@ def apply_washi_texture(canvas: Image.Image) -> Image.Image:
         .resize(canvas.size)
     )
 
-    # Very subtle.
     texture.putalpha(14)
 
     return Image.alpha_composite(
@@ -401,6 +515,7 @@ def draw_header(
     canvas: Image.Image,
     draw: ImageDraw.ImageDraw,
 ):
+
     title = "The Lilamaya"
 
     title_width = line_width(
@@ -412,36 +527,80 @@ def draw_header(
     logo_exists = LOGO_PATH.exists()
 
     if logo_exists:
-        logo = Image.open(LOGO_PATH).convert("RGBA")
-        logo.thumbnail((LOGO_SIZE, LOGO_SIZE))
-        actual_logo_w, actual_logo_h = logo.size
+
+        logo = (
+            Image.open(LOGO_PATH)
+            .convert("RGBA")
+        )
+
+        logo.thumbnail(
+            (
+                LOGO_SIZE,
+                LOGO_SIZE,
+            )
+        )
+
+        actual_logo_w, actual_logo_h = (
+            logo.size
+        )
+
     else:
-        actual_logo_w, actual_logo_h = 0, 0
+
+        actual_logo_w = 0
+        actual_logo_h = 0
 
     total_width = (
         actual_logo_w +
-        (LOGO_GAP if logo_exists else 0) +
+        (
+            LOGO_GAP
+            if logo_exists
+            else 0
+        ) +
         title_width
     )
 
-    start_x = (WIDTH - total_width) / 2
+    start_x = (
+        WIDTH -
+        total_width
+    ) / 2
 
     if logo_exists:
-        # Calculate text height for vertical alignment
-        _, top, _, bottom = draw.textbbox((0, 0), title, font=HEADER_FONT)
-        text_height = bottom - top
 
-        # Centering the logo vertically with the text box
-        logo_y = HEADER_TOP + (text_height - actual_logo_h) // 2
+        _, top, _, bottom = draw.textbbox(
+            (0, 0),
+            title,
+            font=HEADER_FONT,
+        )
+
+        text_height = (
+            bottom - top
+        )
+
+        logo_y = (
+            HEADER_TOP +
+            (
+                text_height -
+                actual_logo_h
+            ) // 2
+        )
 
         canvas.paste(
             logo,
-            (int(start_x), int(logo_y)),
+            (
+                int(start_x),
+                int(logo_y),
+            ),
             logo,
         )
 
-        text_x = start_x + actual_logo_w + LOGO_GAP
+        text_x = (
+            start_x +
+            actual_logo_w +
+            LOGO_GAP
+        )
+
     else:
+
         text_x = start_x
 
     draw.text(
@@ -484,6 +643,7 @@ def draw_divider(
         width=1,
     )
 
+
 # --------------------------------------------------------------------
 # Footer
 # --------------------------------------------------------------------
@@ -513,7 +673,8 @@ def draw_footer(
         fill=MUTED,
     )
 
-    # --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
 # Main renderer
 # --------------------------------------------------------------------
 
@@ -553,10 +714,6 @@ def render(
     # Invocation
     # ------------------------------------------------------------
 
-   # ------------------------------------------------------------
-    # Invocation
-    # ------------------------------------------------------------
-
     if invocation.strip():
 
         invocation_fit = fit_text_block(
@@ -568,24 +725,28 @@ def render(
             box_height=INVOCATION_BOX_HEIGHT,
             font_path=BOLD_ITALIC_FONT,
         )
-        invocation_fit["spacing"] = 2   # Try 2, 3 or 4
-        
-    
-        invocation_bottom = draw_centered_block(
+
+        # Keep invocation spacing deliberately tight.
+        invocation_fit["spacing"] = 2
+
+        draw_centered_block(
             draw=draw,
             x_center=WIDTH // 2,
             top=INVOCATION_TOP,
             fitted=invocation_fit,
             colour=TEXT,
-            
-        
         )
-        # --------------------------------------------------------------------
+
+        # --------------------------------------------------------
         # Decorative separator dot
-        # --------------------------------------------------------------------
+        # --------------------------------------------------------
 
         DOT_RADIUS = 3
-        DOT_Y = REFLECTION_TOP - 26
+
+        DOT_Y = (
+            REFLECTION_TOP -
+            26
+        )
 
         draw.ellipse(
             (
@@ -596,7 +757,7 @@ def render(
             ),
             fill=TEXT,
         )
-        
+
     # ------------------------------------------------------------
     # Reflection
     # ------------------------------------------------------------
@@ -615,16 +776,11 @@ def render(
 
         reflection_top = REFLECTION_TOP
 
-        #
-        # If there is no invocation,
-        # lift the reflection upward
-        # so the card remains visually balanced.
-        #
-
         if not invocation.strip():
 
             reflection_top = (
-                INVOCATION_TOP + 20
+                INVOCATION_TOP +
+                20
             )
 
         draw_centered_block(
@@ -647,15 +803,18 @@ def render(
         draw,
         date_text,
     )
-     
+
     output_path.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    canvas.save(output_path)
+    canvas.save(
+        output_path,
+    )
 
-    # --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
 # Convenience wrapper
 # --------------------------------------------------------------------
 
@@ -664,12 +823,19 @@ def render_fragment_card(
     date_text: str,
     output_path,
 ):
+
     """
     Convenience wrapper used by generate_fragment_cards.py.
     """
 
-    if not isinstance(output_path, Path):
-        output_path = Path(output_path)
+    if not isinstance(
+        output_path,
+        Path,
+    ):
+
+        output_path = Path(
+            output_path
+        )
 
     render(
         fragment_text=fragment_text,
