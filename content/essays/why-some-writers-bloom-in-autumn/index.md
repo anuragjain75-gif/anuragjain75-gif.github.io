@@ -80,14 +80,14 @@ But let us also be honest. For every Saramago who bloomed at sixty, there are th
 ## Not Every Autumn Is Witnessed
 Hours have melted into the shadow of night, and the darkness breathes deeply as I write these final words. In this hermit’s silence, I watch them appear upon the screen—a flowering rising from roots that have quietly grown underground for decades. My eyes wander to the bookshelf where a row of journals rests, chronicling my life from my college days into my early forties.
 
->*If you don’t write your books, nobody else will do it for you. No one else has lived your life.*
+>*If you don’t write your books, nobody else will do it for you. No one else has lived your life.*<p>
 >*— José Saramago*
 
 The question, for me now, is not whether I am too late to write. The question is whether anyone will read what I have written. And here I find myself returning to my roots—to Indian philosophy.
 
 Lord Krishna tells Arjuna:
 
->*Your choice is in action alone, never in its fruits. Do not think yourself the author of the results of action, nor let your attachment be to inaction.*
+>*Your choice is in action alone, never in its fruits. Do not think yourself the author of the results of action, nor let your attachment be to inaction.*<p>
 >*— Bhagavad Gita 2.47*
 
 Not every autumn is witnessed. It is autumn nonetheless.

@@ -13,7 +13,7 @@ fragmentthemes:
 This is, ultimately, a book about the world. It inquires about the world’s meaning. It attempts to do unlicensed metaphysics in a teacup. The teacup at hand, in this case, is contemporary fiction.
 {{< /invocation >}}
 
-Thess are the opening words by Annie Dillard in her book *Living By Fiction*. Normally people would read books on philosophy, science or psychology to understand the world. But in her book Annie explores an interesting premise: can we understand the world through contemporary fiction?
+Thess are the opening words by Annie Dillard in her book *Living By Fiction*. Normally people read books on philosophy, science or psychology to understand the world. But in her book Annie explores an interesting premise: can we understand the world through contemporary fiction?
 
 Later in her introduction to the book she writes:
 
