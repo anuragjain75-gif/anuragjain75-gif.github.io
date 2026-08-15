@@ -1,6 +1,6 @@
 ---
 title: "Why Some Writers Bloom in Autumn"
-date: 2026-08-13T10:57:36+05:30
+date: 2026-06-27T10:57:36+05:30
 draft: false
 
 introduction: >
