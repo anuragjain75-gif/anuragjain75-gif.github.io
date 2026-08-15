@@ -11,6 +11,7 @@ themes:
   - Perception
   - Suffering
   - Writing
+  - Books
 ---
 
 {{< introduction >}}
