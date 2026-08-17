@@ -1962,3 +1962,305 @@ nav a:hover {
     }
 
 }
+
+/* =========================================================
+   PAINTINGS
+   ========================================================= */
+
+.paintings-page {
+    max-width: 760px;
+
+    margin: 80px auto;
+
+    padding: 0 30px;
+
+    position: relative;
+    isolation: isolate;
+
+    /*
+     * Extremely subtle paper-like atmosphere.
+     * The underlying Lilamaya ivory remains dominant.
+     */
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(120, 105, 80, 0.025) 0,
+            transparent 45%
+        ),
+        radial-gradient(
+            circle at 80% 70%,
+            rgba(120, 105, 80, 0.018) 0,
+            transparent 50%
+        ),
+        #F8F5EF;
+}
+
+.paintings-header {
+    position: relative;
+}
+
+
+
+.painting-list {
+    width: 100%;
+}
+
+.painting-card {
+    width: 100%;
+    margin: 0 0 90px;
+}
+
+.painting-card__image-link {
+    display: block;
+    width: 100%;
+}
+
+.painting-card__image {
+    width: 100%;
+    margin: 0 0 34px;
+    padding: 0;
+}
+
+.painting-card__image img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    margin: 0;
+
+    /*
+     * Deliberately no fixed height and no object-fit.
+     * Every painting retains its original proportions.
+     */
+    border-radius: 0;
+
+    transition: opacity 0.25s ease;
+}
+
+.painting-card__image-link:hover img {
+    opacity: 0.92;
+}
+
+.painting-card__content {
+    width: 100%;
+}
+
+.painting-card__title {
+    margin: 0 0 12px;
+}
+
+.painting-card__title a {
+    text-decoration: none;
+}
+
+.painting-card__description {
+    max-width: 760px;
+    margin: 0 0 16px;
+}
+
+.painting-card__themes,
+.painting-themes {
+    font-size: 0.95em;
+}
+
+.painting-themes-label {
+    opacity: 0.72;
+}
+
+.painting-card__themes a,
+.painting-themes a {
+    text-decoration: none;
+}
+
+.painting-card__themes a:hover,
+.painting-themes a:hover {
+    text-decoration: underline;
+}
+
+
+/* Individual painting */
+
+.painting-single-page {
+    position: relative;
+}
+
+.painting {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.painting-header {
+    text-align: center;
+}
+
+.painting-title {
+    margin-bottom: 12px;
+}
+
+.painting-meta {
+    opacity: 0.68;
+    font-size: 0.95em;
+}
+
+.painting-hero {
+    width: 100%;
+    max-width: 1100px;
+    margin: 55px auto 70px;
+}
+
+.painting-hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+}
+
+.painting-content {
+    width: 100%;
+}
+
+.painting-themes {
+    margin-top: 55px;
+}
+
+.painting-pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 70px;
+}
+
+.painting-pagination__previous,
+.painting-pagination__next {
+    flex: 1;
+}
+
+.painting-pagination__next {
+    text-align: right;
+}
+
+.painting-pagination__link {
+    text-decoration: none;
+}
+
+.painting-pagination__link:hover {
+    text-decoration: underline;
+}
+
+
+/* Painting theme archive */
+
+.painting-theme-page .painting-list {
+    margin-top: 10px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .painting-card {
+        margin-bottom: 65px;
+    }
+
+    .painting-card__image {
+        margin-bottom: 26px;
+    }
+
+    .painting-card__description {
+        max-width: none;
+    }
+
+    .painting-hero {
+        margin-top: 40px;
+        margin-bottom: 50px;
+    }
+
+    .painting-pagination {
+        display: block;
+    }
+
+    .painting-pagination__previous,
+    .painting-pagination__next {
+        text-align: left;
+    }
+
+    .painting-pagination__next {
+        margin-top: 25px;
+    }
+
+}
+
+
+/* =========================================================
+   PAINTING THEME NAVIGATION
+   Uses the same visual language as Essay themes
+   ========================================================= */
+
+.painting-theme-navigation .essay-themes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin: 0 auto 40px;
+    max-width: 900px;
+    font-size: 1rem;
+    color: #6E7451;
+}
+
+.painting-theme-navigation .essay-themes a {
+    color: #6E7451;
+    text-decoration: none;
+    transition: color .25s ease;
+}
+
+.painting-theme-navigation .essay-themes a:hover {
+    color: #2F2D2A;
+}
+
+.painting-theme-navigation .essay-themes a.active-theme {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.painting-theme-navigation .essay-themes a.active-theme:hover {
+    color: var(--color-text);
+}
+
+
+.painting-card__themes a,
+.painting-themes a {
+    color: #6E7451;
+    text-decoration: none;
+    transition: color .25s ease;
+}
+
+.painting-card__themes a:hover,
+.painting-themes a:hover {
+    color: #2F2D2A;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   PAINTING CARD TITLE
+   ========================================================= */
+
+.painting-card__title a {
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color .25s ease;
+}
+
+.painting-card__title a:hover {
+    color: #6E7451;
+    text-decoration: none;
+}
+
+
+/* Extra breathing room before the first painting */
+.painting-theme-navigation + .painting-list {
+    margin-top: 45px;
+}

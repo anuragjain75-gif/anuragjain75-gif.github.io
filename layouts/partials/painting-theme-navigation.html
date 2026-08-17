@@ -1,0 +1,33 @@
+<div class="theme-navigation painting-theme-navigation">
+
+    <div class="browse-themes">
+        Browse by Theme
+    </div>
+
+    <nav class="essay-themes" data-pagefind-ignore>
+
+        <a
+            href="/paintings/"
+            {{ if and (eq .Section "paintings") (ne .Kind "term") }}
+                class="active-theme"
+            {{ end }}
+        >
+            All
+        </a>
+
+        {{ range .Site.Taxonomies.paintingthemes.Alphabetical }}
+
+            <a
+                href="{{ .Page.RelPermalink }}"
+                {{ if eq (lower .Page.Title) (lower $.Title) }}
+                    class="active-theme"
+                {{ end }}
+            >
+                {{ .Page.Title }}
+            </a>
+
+        {{ end }}
+
+    </nav>
+
+</div>

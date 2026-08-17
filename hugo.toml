@@ -5,6 +5,7 @@ title = "The Lilamaya"
 [taxonomies]
 theme = "themes"
 fragmenttheme = "fragmentthemes"
+paintingtheme = "paintingthemes"
 
 [params]
 tagline = "Essays on the extraordinary hidden within ordinary life"

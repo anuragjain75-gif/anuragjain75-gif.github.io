@@ -1,0 +1,58 @@
+{{ define "main" }}
+
+<main class="paintings-page">
+
+    <header class="page-header paintings-header">
+
+        <h1 class="page-title">
+            Paintings
+        </h1>
+
+        <p class="page-introduction">
+            Reflections on paintings, painters, seeing, beauty,
+            memory, silence, and the mysteries that reveal
+            themselves when we look closely.
+        </p>
+
+        {{ partial "search.html" . }}
+
+
+    </header>
+
+    {{ partial "painting-theme-navigation.html" . }}
+
+    <section class="painting-list">
+
+        {{ $paginator := .Paginate (.RegularPages.ByDate.Reverse) 1 }}
+
+        {{ range $paginator.Pages }}
+            {{ partial "painting-card.html" . }}
+        {{ end }}
+
+    </section>
+
+    {{ if gt $paginator.TotalPages 1 }}
+
+    <nav class="pagination">
+
+        {{ if $paginator.HasPrev }}
+            <a class="pagination-prev" href="{{ $paginator.Prev.URL }}">
+                ← Newer Paintings
+            </a>
+        {{ else }}
+            <span></span>
+        {{ end }}
+
+        {{ if $paginator.HasNext }}
+            <a class="pagination-next" href="{{ $paginator.Next.URL }}">
+                Older Paintings →
+            </a>
+        {{ end }}
+
+    </nav>
+
+    {{ end }}
+
+</main>
+
+{{ end }}

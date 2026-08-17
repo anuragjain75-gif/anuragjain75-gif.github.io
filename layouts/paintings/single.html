@@ -1,0 +1,115 @@
+{{ define "main" }}
+
+<main class="painting-single-page">
+
+    {{ partial "pagefind-meta.html" . }}
+
+    <section class="painting">
+
+        <header class="painting-header">
+
+            <h1 class="painting-title">
+                {{ .Title }}
+            </h1>
+
+            {{ with .Params.artist }}
+            <div class="painting-meta">
+                {{ . }}
+                {{ with $.Params.year }}
+                    · {{ . }}
+                {{ end }}
+            </div>
+            {{ else }}
+
+                {{ with .Params.year }}
+                <div class="painting-meta">
+                    {{ . }}
+                </div>
+                {{ end }}
+
+            {{ end }}
+
+        </header>
+
+    </section>
+
+    {{ with .Resources.GetMatch "hero.*" }}
+
+    <figure class="painting-hero">
+        <img
+            src="{{ .RelPermalink }}"
+            alt="{{ $.Title }}"
+        >
+    </figure>
+
+    {{ end }}
+
+    <section class="painting">
+
+        <article class="painting-content" data-pagefind-body>
+
+            {{ .Content }}
+
+        </article>
+
+        {{ with .Params.paintingthemes }}
+
+        <div class="painting-themes">
+
+            <span class="painting-themes-label">
+                {{ if eq (len .) 1 }}Theme:{{ else }}Themes:{{ end }}
+            </span>
+
+            {{ range $index, $theme := . }}
+
+                {{ if gt $index 0 }} · {{ end }}
+
+                {{ with site.GetPage (printf "/paintingthemes/%s" ($theme | urlize)) }}
+                    <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+                {{ else }}
+                    {{ $theme }}
+                {{ end }}
+
+            {{ end }}
+
+        </div>
+
+        {{ end }}
+
+        {{ partial "share.html" . }}
+
+        <nav class="painting-pagination">
+
+            <div class="painting-pagination__previous">
+
+                {{ with .PrevInSection }}
+                <a
+                    href="{{ .RelPermalink }}"
+                    class="painting-pagination__link"
+                >
+                    ← {{ .Title }}
+                </a>
+                {{ end }}
+
+            </div>
+
+            <div class="painting-pagination__next">
+
+                {{ with .NextInSection }}
+                <a
+                    href="{{ .RelPermalink }}"
+                    class="painting-pagination__link"
+                >
+                    {{ .Title }} →
+                </a>
+                {{ end }}
+
+            </div>
+
+        </nav>
+
+    </section>
+
+</main>
+
+{{ end }}

@@ -1,0 +1,59 @@
+<article class="painting-card">
+
+    <a href="{{ .RelPermalink }}" class="painting-card__image-link">
+
+        {{ with .Resources.GetMatch "hero.*" }}
+
+        <figure class="painting-card__image">
+            <img
+                src="{{ .RelPermalink }}"
+                alt="{{ $.Title }}"
+                loading="lazy"
+            >
+        </figure>
+
+        {{ end }}
+
+    </a>
+
+    <div class="painting-card__content">
+
+        <h2 class="painting-card__title">
+            <a href="{{ .RelPermalink }}">
+                {{ .Title }}
+            </a>
+        </h2>
+
+        {{ with .Params.introduction }}
+        <p class="painting-card__description">
+            {{ . | plainify }}
+        </p>
+        {{ end }}
+
+        {{ with .Params.paintingthemes }}
+
+        <div class="painting-card__themes">
+
+            <span class="painting-themes-label">
+                {{ if eq (len .) 1 }}Theme:{{ else }}Themes:{{ end }}
+            </span>
+
+            {{ range $index, $theme := . }}
+
+                {{ if gt $index 0 }} · {{ end }}
+
+                {{ with site.GetPage (printf "/paintingthemes/%s" ($theme | urlize)) }}
+                    <a href="{{ .RelPermalink }}">{{ $theme }}</a>
+                {{ else }}
+                    {{ $theme }}
+                {{ end }}
+
+            {{ end }}
+
+        </div>
+
+        {{ end }}
+
+    </div>
+
+</article>

@@ -1,0 +1,34 @@
+{{ define "main" }}
+
+<main class="paintings-page">
+
+    <header class="page-header paintings-header">
+
+        <h1 class="page-title">
+            Painting Themes
+        </h1>
+
+        <p class="page-introduction">
+            Browse paintings by theme.
+        </p>
+
+
+    </header>
+
+    <ul class="taxonomy-list">
+
+        {{ range .Data.Terms.Alphabetical }}
+
+        <li>
+            <a href="{{ .Page.RelPermalink }}">
+                {{ .Page.Title }}
+            </a>
+        </li>
+
+        {{ end }}
+
+    </ul>
+
+</main>
+
+{{ end }}
