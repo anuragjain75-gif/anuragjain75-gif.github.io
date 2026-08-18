@@ -3,6 +3,8 @@ title: "About"
 hero: "/images/social/about/about-portrait.png"
 ---
 
+## Anurag Jain
+
 The Lilamaya is my literary home.
 
 For many years I have been a student of literature, philosophy, and the contemplative traditions of the world. Although my understanding has been deeply shaped by Advaita Vedānta, I have increasingly found myself drawn to writing about subjects that philosophy alone cannot adequately express: childhood, memory, fatherhood, nature, books, gardens, education, solitude, and the quiet beauty hidden within ordinary life.
