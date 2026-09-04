@@ -16,9 +16,13 @@
 
     </header>
 
-    {{ partial "theme-navigation.html" . }}
+    <div class="archive-layout">
 
-    <section class="essay-list">
+        <aside class="archive-sidebar">
+            {{ partial "theme-navigation.html" . }}
+        </aside>
+
+        <section class="essay-list">
 
         {{ $paginator := .Paginate (.RegularPages.ByDate.Reverse) 1 }}
 
@@ -26,7 +30,9 @@
             {{ partial "essay-card.html" . }}
         {{ end }}
 
-    </section>
+        </section>
+
+    </div>
 
     {{ if gt $paginator.TotalPages 1 }}
 

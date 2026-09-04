@@ -18,9 +18,13 @@
 
     {{ partial "search.html" . }}
 
-    {{ partial "fragment-theme-navigation.html" . }}
+    <div class="archive-layout">
 
-    <section class="essay-list fragments-list">
+        <aside class="archive-sidebar">
+            {{ partial "fragment-theme-navigation.html" . }}
+        </aside>
+
+        <section class="essay-list fragments-list">
 
         {{ range .RegularPages.ByDate.Reverse }}
 
@@ -28,7 +32,9 @@
 
         {{ end }}
 
-    </section>
+        </section>
+
+    </div>
 
 </main>
 

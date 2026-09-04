@@ -149,7 +149,7 @@ nav a:hover {
 
 .essays-page {
 
-    max-width: 760px;
+    max-width: 1100px;
 
     margin: 80px auto;
 
@@ -491,83 +491,140 @@ nav a:hover {
 }
 
 /*==================================================
-    BROWSE BY THEME
+    ARCHIVE LAYOUT
 ==================================================*/
 
-.browse-themes {
-    text-align: center;
-    font-size: 1.05rem;
-    font-weight: 400;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: #8A6D45;
-    margin: 0 0 2rem;
+.archive-layout {
+
+    display: grid;
+
+    grid-template-columns: 190px minmax(0, 1fr);
+
+    column-gap: 70px;
+
+    align-items: start;
+
 }
 
 /*==================================================
-    ESSAY THEMES
+    BROWSE BY THEME
 ==================================================*/
 
-.essay-themes {
+.archive-sidebar {
+
+    position: sticky;
+
+    top: 40px;
+
+    min-width: 0;
+
+}
+
+.archive-sidebar .theme-navigation {
+
+    width: 100%;
+
+}
+
+.archive-sidebar nav {
+
+    width: 100%;
+
+    max-width: none;
+
+    margin: 0;
+
+}
+
+.browse-themes {
+
+    text-align: left;
+
+    font-size: .82rem;
+
+    font-weight: 400;
+
+    letter-spacing: .16em;
+
+    text-transform: uppercase;
+
+    color: #8A6D45;
+
+    margin: 0 0 1.35rem;
+
+}
+
+/*==================================================
+    THEME LINKS
+==================================================*/
+
+.archive-sidebar .essay-themes {
 
     display: flex;
 
-    justify-content: center;
+    flex-direction: column;
 
-    align-items: center;
-
-    flex-wrap: wrap;
+    align-items: flex-start;
 
     gap: .45rem;
 
-    margin: 0 auto 40px;
+    margin: 0;
 
-    max-width: 900px;
+    max-width: none;
 
-    font-size: 1rem;
+    font-size: .95rem;
+
+    line-height: 1.5;
 
     color: #6E7451;
 
 }
 
-.essay-themes a {
+.archive-sidebar .essay-themes a {
+
+    margin: 0;
 
     color: #6E7451;
 
     text-decoration: none;
 
     transition: color .25s ease;
+
 }
 
-.essay-themes a.active-theme {
+.archive-sidebar .essay-themes a.active-theme {
+
     color: var(--color-text);
+
     font-weight: 600;
+
 }
 
+.archive-sidebar .essay-themes a.active-theme:hover {
 
-.essay-themes a.active-theme:hover {
     color: var(--color-text);
 
 }
 
-
-.essay-themes a:hover {
+.archive-sidebar .essay-themes a:hover {
 
     color: #2F2D2A;
 
 }
 
-.essay-themes span {
+.archive-sidebar .essay-themes span {
 
-    color: #B5AEA1;
+    display: none;
 
 }
 
 .essay-list {
 
-    max-width: 760px;
+    width: 100%;
 
-    margin: 35px auto 0;
+    max-width: none;
+
+    margin: 0;
 
     padding-top: 30px;
 
@@ -1676,6 +1733,75 @@ nav a:hover {
 }
 
 /*==================================================
+    MOBILE ARCHIVE LAYOUT
+==================================================*/
+
+@media (max-width: 900px) {
+
+    .archive-layout {
+
+        grid-template-columns: 160px minmax(0, 1fr);
+
+        column-gap: 45px;
+
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .archive-layout {
+
+        display: block;
+
+    }
+
+    .archive-sidebar {
+
+        position: static;
+
+        margin-bottom: 3rem;
+
+    }
+
+    .browse-themes {
+
+        text-align: center;
+
+        margin-bottom: 1.25rem;
+
+    }
+
+    .essay-themes {
+
+        flex-direction: row;
+
+        justify-content: center;
+
+        align-items: center;
+
+        flex-wrap: wrap;
+
+        gap: .45rem;
+
+    }
+
+    .essay-themes span {
+
+        display: inline;
+
+    }
+
+    .essay-list {
+
+        margin-top: 0;
+
+    }
+
+}
+
+
+/*==================================================
     MOBILE ESSAY LIST
 ==================================================*/
 
@@ -1968,7 +2094,7 @@ nav a:hover {
    ========================================================= */
 
 .paintings-page {
-    max-width: 760px;
+    max-width: 1100px;
 
     margin: 80px auto;
 
@@ -2003,6 +2129,8 @@ nav a:hover {
 
 .painting-list {
     width: 100%;
+    padding-top: 30px;
+    border-top: 1px solid #E5DED1;
 }
 
 .painting-card {
@@ -2194,57 +2322,6 @@ nav a:hover {
 
 
 /* =========================================================
-   PAINTING THEME NAVIGATION
-   Uses the same visual language as Essay themes
-   ========================================================= */
-
-.painting-theme-navigation .essay-themes {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: .45rem;
-    margin: 0 auto 40px;
-    max-width: 900px;
-    font-size: 1rem;
-    color: #6E7451;
-}
-
-.painting-theme-navigation .essay-themes a {
-    color: #6E7451;
-    text-decoration: none;
-    transition: color .25s ease;
-}
-
-.painting-theme-navigation .essay-themes a:hover {
-    color: #2F2D2A;
-}
-
-.painting-theme-navigation .essay-themes a.active-theme {
-    color: var(--color-text);
-    font-weight: 600;
-}
-
-.painting-theme-navigation .essay-themes a.active-theme:hover {
-    color: var(--color-text);
-}
-
-
-.painting-card__themes a,
-.painting-themes a {
-    color: #6E7451;
-    text-decoration: none;
-    transition: color .25s ease;
-}
-
-.painting-card__themes a:hover,
-.painting-themes a:hover {
-    color: #2F2D2A;
-    text-decoration: none;
-}
-
-
-/* =========================================================
    PAINTING CARD TITLE
    ========================================================= */
 
@@ -2264,3 +2341,149 @@ nav a:hover {
 .painting-theme-navigation + .painting-list {
     margin-top: 45px;
 }
+
+/*==================================================
+    FINAL ARCHIVE LAYOUT
+    Essays / Fragments / Paintings
+==================================================*/
+
+/*
+ * The archive pages are deliberately wider than reading pages.
+ * The theme index occupies a quiet left-hand column.
+ */
+
+.essays-page,
+.paintings-page {
+    max-width: 1100px;
+}
+
+/* The complete archive is a two-column composition. */
+
+.archive-layout {
+    display: grid !important;
+    grid-template-columns: 190px minmax(0, 1fr) !important;
+    column-gap: 70px !important;
+    align-items: start !important;
+    width: 100%;
+}
+
+/*
+ * Theme navigation is now an ordinary part of the left column.
+ * The old sticky horizontal bar is retired.
+ */
+
+.archive-sidebar {
+    position: static !important;
+    width: 190px;
+    min-width: 0;
+}
+
+.archive-sidebar .theme-navigation {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    z-index: auto !important;
+}
+
+.archive-sidebar nav,
+.archive-sidebar .essay-themes {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+.archive-sidebar .browse-themes {
+    text-align: left;
+    margin: 0 0 1.35rem;
+    font-size: .82rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.archive-sidebar .essay-themes {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .45rem;
+    font-size: .95rem;
+    line-height: 1.5;
+}
+
+.archive-sidebar .essay-themes a {
+    margin: 0 !important;
+}
+
+.archive-sidebar .essay-themes span {
+    display: none;
+}
+
+/*
+ * The list occupies the entire right-hand column.
+ */
+
+.archive-layout > .essay-list,
+.archive-layout > .painting-list {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-top: 30px;
+    border-top: 1px solid #E5DED1;
+}
+
+/*
+ * Paintings use the same archive architecture.
+ */
+
+.archive-layout > .painting-list {
+    padding-top: 30px;
+}
+
+/*
+ * Mobile: return to a single-column archive.
+ * The theme index comes first, followed by the entries.
+ */
+
+@media (max-width: 768px) {
+
+    .archive-layout {
+        display: block !important;
+        width: 100%;
+    }
+
+    .archive-sidebar {
+        width: 100%;
+        margin-bottom: 3rem;
+    }
+
+    .archive-sidebar .theme-navigation {
+        position: static !important;
+    }
+
+    .archive-sidebar .browse-themes {
+        text-align: center;
+    }
+
+    .archive-sidebar .essay-themes {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .45rem;
+    }
+
+    .archive-sidebar .essay-themes span {
+        display: inline;
+    }
+
+    .archive-layout > .essay-list,
+    .archive-layout > .painting-list {
+        margin-top: 0;
+    }
+
+}
+

@@ -19,9 +19,13 @@
 
     </header>
 
-    {{ partial "painting-theme-navigation.html" . }}
+    <div class="archive-layout">
 
-    <section class="painting-list">
+        <aside class="archive-sidebar">
+            {{ partial "painting-theme-navigation.html" . }}
+        </aside>
+
+        <section class="painting-list">
 
         {{ $paginator := .Paginate (.RegularPages.ByDate.Reverse) 1 }}
 
@@ -29,7 +33,9 @@
             {{ partial "painting-card.html" . }}
         {{ end }}
 
-    </section>
+        </section>
+
+    </div>
 
     {{ if gt $paginator.TotalPages 1 }}
 
