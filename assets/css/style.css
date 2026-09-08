@@ -17,7 +17,7 @@ body {
     font-family: Georgia, serif;
     line-height: 1.8;
     color: #3C3A36;
-    background: #F8F5EF;
+    background: #fff9eb;
 }
 
 header,
@@ -827,7 +827,7 @@ nav a:hover {
 
     padding: 0 12px;
 
-    background: #F8F5EF;
+    background: #fff9eb;
 
     color: #B7AE9D;
 
@@ -2087,7 +2087,7 @@ nav a:hover {
             rgba(120, 105, 80, 0.018) 0,
             transparent 50%
         ),
-        #F8F5EF;
+        #fff9eb;
 }
 
 .paintings-header {
