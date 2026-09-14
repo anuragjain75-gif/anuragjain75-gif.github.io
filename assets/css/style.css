@@ -3085,6 +3085,22 @@ nav a:hover {
     color: #4a453e;
 }
 
+.new-document-form input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 15px;
+    border: 1px solid #9f8d74;
+    border-radius: 2px;
+    background: #e8d9c4;
+    color: #3f3b36;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.new-document-form input[type="file"]::file-selector-button:hover {
+    border-color: #6E7451;
+}
+
 .new-document-actions {
     display: flex;
     align-items: center;
@@ -3165,4 +3181,3 @@ nav a:hover {
     border-color: #9f8d74 !important;
     color: #40392f !important;
 }
-

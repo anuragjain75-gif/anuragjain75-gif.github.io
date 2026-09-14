@@ -79,6 +79,101 @@ async function updateGitHubFile(path, content, sha) {
   };
 }
 
+async function createGitHubFile(path, content) {
+  const url =
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": `Bearer ${process.env.GITHUB_TOKEN}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Create ${path}`,
+      content: Buffer.from(content, "utf8").toString("base64"),
+      branch: GITHUB_BRANCH
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || `GitHub error ${response.status}`);
+  }
+
+  return {
+    path: data.content.path,
+    sha: data.content.sha,
+    commit: data.commit.sha
+  };
+}
+
+async function createGitHubBinaryFile(path, base64Content) {
+  const url =
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": `Bearer ${process.env.GITHUB_TOKEN}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Create ${path}`,
+      content: base64Content,
+      branch: GITHUB_BRANCH
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || `GitHub error ${response.status}`);
+  }
+
+  return {
+    path: data.content.path,
+    sha: data.content.sha,
+    commit: data.commit.sha
+  };
+}
+
+async function deleteGitHubFile(path, sha) {
+  const url =
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": `Bearer ${process.env.GITHUB_TOKEN}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Delete ${path}`,
+      sha,
+      branch: GITHUB_BRANCH
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || `GitHub error ${response.status}`);
+  }
+
+  return {
+    path,
+    commit: data.commit.sha
+  };
+}
+
 async function listGitHubDocuments() {
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
@@ -180,6 +275,200 @@ const server = http.createServer(async (req, res) => {
         }));
       } catch (error) {
         console.error("GitHub write error:", error.message);
+
+        res.writeHead(500, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({error: error.message}));
+      }
+    });
+
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/api/delete-test-file") {
+    let body = "";
+
+    req.on("data", chunk => {
+      body += chunk;
+    });
+
+    req.on("end", async () => {
+      try {
+        const {path, sha} = JSON.parse(body);
+
+        const allowedTestFiles = new Set([
+          "content/essays/api-test-essay/index.md",
+          "content/essays/browser-test-essay-two/index.md",
+          "content/essays/browser-test-essay-two/hero.png",
+          "content/essays/brwoser-test-essay/index.md",
+          "content/essays/date-test-essay/index.md",
+          "content/essays/image-upload-test/index.md",
+          "content/essays/real-image-upload-test/index.md",
+          "content/essays/real-image-upload-test/hero.jpg"
+        ]);
+
+        if (!allowedTestFiles.has(path)) {
+          throw new Error("File is not an approved test file");
+        }
+
+        if (typeof sha !== "string" || !sha) {
+          throw new Error("Current file SHA is required");
+        }
+
+        const deleted = await deleteGitHubFile(path, sha);
+
+        console.log("Test file deleted:", deleted.path);
+        console.log("Commit:", deleted.commit);
+
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({
+          ok: true,
+          path: deleted.path,
+          commit: deleted.commit
+        }));
+
+      } catch (error) {
+        console.error("Test file deletion error:", error.message);
+
+        res.writeHead(500, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({error: error.message}));
+      }
+    });
+
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/api/upload-image") {
+    let body = "";
+
+    req.on("data", chunk => {
+      body += chunk;
+    });
+
+    req.on("end", async () => {
+      try {
+        const {path, content} = JSON.parse(body);
+
+        if (typeof path !== "string" || typeof content !== "string") {
+          throw new Error("path and content are required");
+        }
+
+        const allowedImagePath =
+          /^content\/essays\/[a-z0-9-]+\/hero\.(jpg|jpeg|png|webp)$/i;
+
+        if (!allowedImagePath.test(path)) {
+          throw new Error("Image path is not allowed");
+        }
+
+        if (!/^[A-Za-z0-9+/=\r\n]+$/.test(content)) {
+          throw new Error("Invalid image data");
+        }
+
+        const uploaded = await createGitHubBinaryFile(path, content);
+
+        console.log("Essay image uploaded:", uploaded.path);
+        console.log("Commit:", uploaded.commit);
+
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({
+          ok: true,
+          path: uploaded.path,
+          sha: uploaded.sha,
+          commit: uploaded.commit
+        }));
+
+      } catch (error) {
+        console.error("Image upload error:", error.message);
+
+        res.writeHead(500, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({error: error.message}));
+      }
+    });
+
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/api/new-essay") {
+    let body = "";
+
+    req.on("data", chunk => {
+      body += chunk;
+    });
+
+    req.on("end", async () => {
+      try {
+        const {title, introduction, themes, date} = JSON.parse(body);
+
+        if (typeof title !== "string" || !title.trim()) {
+          throw new Error("A title is required");
+        }
+
+        const cleanTitle = title.trim();
+        const cleanIntroduction =
+          typeof introduction === "string" ? introduction.trim() : "";
+
+        const cleanThemes = Array.isArray(themes)
+          ? themes
+              .filter(theme => typeof theme === "string")
+              .map(theme => theme.trim())
+              .filter(Boolean)
+          : [];
+
+        const slug = cleanTitle
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+        if (!slug) {
+          throw new Error("Could not create a valid slug from the title");
+        }
+
+        const essayPath = `content/essays/${slug}`;
+        const markdownPath = `${essayPath}/index.md`;
+
+        const essayDate =
+          typeof date === "string" && date.trim()
+            ? date.trim()
+            : new Date().toISOString();
+
+        let frontMatter = `---
+title: "${cleanTitle.replace(/"/g, '\\"')}"
+`;
+
+        if (cleanIntroduction) {
+          frontMatter += `introduction: "${cleanIntroduction.replace(/"/g, '\\"')}"
+`;
+        }
+
+        frontMatter += `date: ${essayDate}
+draft: true
+`;
+
+        if (cleanThemes.length) {
+          frontMatter += `themes:
+`;
+          for (const theme of cleanThemes) {
+            frontMatter += `  - ${theme.replace(/"/g, '\\"')}
+`;
+          }
+        }
+
+        frontMatter += `---
+
+`;
+
+        const created = await createGitHubFile(markdownPath, frontMatter);
+
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.end(JSON.stringify({
+          ok: true,
+          path: created.path,
+          sha: created.sha,
+          commit: created.commit,
+          slug
+        }));
+
+      } catch (error) {
+        console.error("New essay error:", error.message);
 
         res.writeHead(500, {"Content-Type": "application/json"});
         res.end(JSON.stringify({error: error.message}));

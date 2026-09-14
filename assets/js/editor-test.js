@@ -160,7 +160,7 @@ function renderDocumentSelector(documents) {
 }
 
 async function loadEssayThemes() {
-  const response = await fetch("/editor-data/essay-themes.json");
+  const response = await fetch(`${apiBase}/api/essay-themes`);
 
   if (!response.ok) {
     throw new Error(`Essay themes failed: ${response.status}`);
@@ -368,6 +368,139 @@ async function saveDocument() {
   }, 2000);
 }
 
+async function beginNewEssay() {
+  const newEssayForm = document.querySelector("#new-essay-form");
+  const documentSelector = document.querySelector("#document-selector");
+  const editorActions = document.querySelector(".editor-actions");
+  const codeMirrorEditor = document.querySelector("#codemirror-editor");
+
+  const titleInput = document.querySelector("#new-essay-title");
+  const introductionInput = document.querySelector("#new-essay-introduction");
+  const themesSelect = document.querySelector("#new-essay-themes");
+  const imageInput = document.querySelector("#new-essay-image");
+  const beginButton = document.querySelector("#begin-new-essay");
+
+  const title = titleInput.value.trim();
+  const introduction = introductionInput.value.trim();
+  const themes = [...themesSelect.selectedOptions].map(option => option.value);
+  const imageFile = imageInput.files[0] || null;
+
+  if (!title) {
+    titleInput.focus();
+    return;
+  }
+
+  beginButton.disabled = true;
+  beginButton.textContent = "Creating…";
+
+  try {
+    const response = await fetch(apiBase + "/api/new-essay", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title,
+        introduction,
+        themes,
+        date: (() => {
+          const now = new Date();
+          const offset = -now.getTimezoneOffset();
+          const sign = offset >= 0 ? "+" : "-";
+          const hours = String(Math.floor(Math.abs(offset) / 60)).padStart(2, "0");
+          const minutes = String(Math.abs(offset) % 60).padStart(2, "0");
+
+          const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 19);
+
+          return `${local}${sign}${hours}:${minutes}`;
+        })()
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || `Essay creation failed: ${response.status}`
+      );
+    }
+
+    if (imageFile) {
+      beginButton.textContent = "Uploading image…";
+
+      const extension = imageFile.name
+        .split(".")
+        .pop()
+        .toLowerCase();
+
+      const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
+
+      if (!allowedExtensions.includes(extension)) {
+        throw new Error(
+          "Please choose a JPG, JPEG, PNG, or WebP image."
+        );
+      }
+
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          resolve(dataUrl.split(",")[1]);
+        };
+
+        reader.onerror = () => {
+          reject(new Error("Could not read the selected image."));
+        };
+
+        reader.readAsDataURL(imageFile);
+      });
+
+      const imageResponse = await fetch(apiBase + "/api/upload-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          path: result.path.replace(
+            /index\.md$/,
+            `hero.${extension}`
+          ),
+          content: base64
+        })
+      });
+
+      const imageResult = await imageResponse.json();
+
+      if (!imageResponse.ok) {
+        throw new Error(
+          imageResult.error ||
+          `Image upload failed: ${imageResponse.status}`
+        );
+      }
+    }
+
+    newEssayMode = false;
+    newEssayForm.hidden = true;
+    documentSelector.hidden = false;
+    editorActions.hidden = false;
+    codeMirrorEditor.hidden = false;
+
+    await loadDocument(result.path);
+    await loadDocumentList();
+
+  } catch (error) {
+    console.error("New Essay error:", error);
+    alert(error.message);
+
+  } finally {
+    beginButton.disabled = false;
+    beginButton.textContent = "Begin Writing";
+  }
+}
+
 async function loadEditor() {
   const newEssayForm = document.querySelector("#new-essay-form");
   const newEssayButton = [...document.querySelectorAll(
@@ -408,6 +541,10 @@ async function loadEditor() {
   document
     .querySelector("#save-editor")
     .addEventListener("click", saveDocument);
+
+  document
+    .querySelector("#begin-new-essay")
+    .addEventListener("click", beginNewEssay);
 
   try {
     await loadDocument(documentPath);
