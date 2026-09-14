@@ -84,6 +84,12 @@ h1 {
 
 nav {
     margin-top: 40px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 14px 30px;
+    background: #fff9eb;
 }
 
 nav a {
@@ -1451,8 +1457,8 @@ nav a:hover {
     margin-bottom: 2.5rem;
 
     background: linear-gradient(180deg,
-            #FCFBF7 0%,
-            #FBF9F3 100%);
+            #F8F2E5 0%,
+            #F8F2E5 100%);
 
     border: 1px solid rgba(111, 101, 82, 0.10);
 
@@ -1712,7 +1718,7 @@ nav a:hover {
 
 .fragment-themes {
 
-    margin-top: 2.75rem;
+    margin-top: .65rem;
 
     font-size: .95rem;
 
