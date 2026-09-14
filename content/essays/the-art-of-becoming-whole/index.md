@@ -204,4 +204,3 @@ Advait is not about becoming one. It is realizing that you were never two.
 Adi and I often go out for walks together. He keeps flailing his little left hand in the air as though conducting an unseen orchestra. Squirrels chirp and dart up a palm tree. A dog yelps in the distance. An electric scooter glides past with its barely audible whirr. He follows it with his eyes for a while and then quietly looks into mine.
 
 Never two.
-TEST SAVE - DELETE ME
