@@ -1,0 +1,48 @@
+{{ define "main" }}
+<main class="editor-test-page">
+    <div class="editor-test-inner">
+        <h1>Writing Desk</h1>
+        <p class="editor-test-intro">A private test of the Lilamaya writing room.</p>
+
+        <div id="new-essay-form" class="new-document-form" hidden>
+            <h2>Begin a New Essay</h2>
+
+            <label for="new-essay-title">Title</label>
+            <input type="text" id="new-essay-title" autocomplete="off">
+
+            <label for="new-essay-introduction">Introduction</label>
+            <textarea id="new-essay-introduction" rows="3"></textarea>
+
+            <label for="new-essay-themes">Themes</label>
+            <select id="new-essay-themes" multiple></select>
+
+            <button type="button" id="add-essay-theme" class="secondary-action">
+                + Add new theme
+            </button>
+
+            <label for="new-essay-image">Image</label>
+            <input type="file" id="new-essay-image" accept="image/*">
+
+            <div class="new-document-actions">
+                <button type="button" id="begin-new-essay">Begin Writing</button>
+                <button type="button" id="cancel-new-essay" class="secondary-action">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <div id="document-selector" class="document-selector"></div>
+
+        <div class="editor-actions">
+            <button type="button" id="save-editor">Save</button>
+            <span id="save-status"></span>
+        </div>
+
+        <div id="codemirror-editor"></div>
+
+    </div>
+</main>
+
+{{ $editor := resources.Get "js/editor-test.js" | js.Build }}
+<script type="module" src="{{ $editor.RelPermalink }}"></script>
+{{ end }}
