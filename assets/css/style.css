@@ -82,7 +82,7 @@ h1 {
 
 }
 
-nav {
+.main-nav {
     margin-top: 40px;
     text-align: center;
     position: sticky;
@@ -218,6 +218,8 @@ nav a:hover {
 }
 
 .essay-card:first-child {
+
+    padding-top: 0;
 
     border-top: none;
 
@@ -576,6 +578,8 @@ nav a:hover {
 
     margin: 0;
 
+    padding-left: 0;
+
     max-width: none;
 
     font-size: .95rem;
@@ -632,9 +636,9 @@ nav a:hover {
 
     margin: 0;
 
-    padding-top: 30px;
+    padding-top: 0;
 
-    border-top: 1px solid #E5DED1;
+    border-top: none;
 
 }
 
@@ -2422,8 +2426,8 @@ nav a:hover {
     width: 100%;
     max-width: none;
     margin: 0;
-    padding-top: 30px;
-    border-top: 1px solid #E5DED1;
+    padding-top: 0;
+    border-top: none;
 }
 
 /*
@@ -2431,7 +2435,8 @@ nav a:hover {
  */
 
 .archive-layout > .painting-list {
-    padding-top: 30px;
+    padding-top: 0;
+    border-top: none;
 }
 
 /*
