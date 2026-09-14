@@ -24,6 +24,21 @@
             </a>
         </h2>
 
+        {{ with .Params.artist }}
+        <div class="painting-card__meta">
+            {{ . }}
+            {{ with $.Params.year }}
+                · {{ . }}
+            {{ end }}
+        </div>
+        {{ else }}
+            {{ with .Params.year }}
+            <div class="painting-card__meta">
+                {{ . }}
+            </div>
+            {{ end }}
+        {{ end }}
+
         {{ with .Params.introduction }}
         <p class="painting-card__description">
             {{ . | plainify }}

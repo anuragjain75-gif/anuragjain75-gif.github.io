@@ -8,40 +8,46 @@
             {{ .Data.Term }}
         </h1>
 
-        <p class="page-description">
+        <p class="page-introduction">
             Essays on {{ lower .Data.Term }}.
         </p>
 
     </header>
 
-    {{ partial "theme-navigation.html" . }}
+    <div class="archive-layout">
 
-    <section class="essay-list">
+        <aside class="archive-sidebar">
+            {{ partial "theme-navigation.html" . }}
+        </aside>
+
+        <section class="essay-list">
 
         {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 1 }}
 
         {{ range $paginator.Pages }}
-        {{ partial "essay-card.html" . }}
+            {{ partial "essay-card.html" . }}
         {{ end }}
 
-    </section>
+        </section>
+
+    </div>
 
     {{ if gt $paginator.TotalPages 1 }}
 
     <nav class="pagination">
 
-        {{ if $paginator.HasNext }}
-        <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
-            ← Older Essays
-        </a>
+        {{ if $paginator.HasPrev }}
+            <a class="pagination-prev" href="{{ $paginator.Prev.URL }}">
+                ← Newer Essays
+            </a>
         {{ else }}
-        <span></span>
+            <span></span>
         {{ end }}
 
-        {{ if $paginator.HasPrev }}
-        <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
-            Newer Essays →
-        </a>
+        {{ if $paginator.HasNext }}
+            <a class="pagination-next" href="{{ $paginator.Next.URL }}">
+                Older Essays →
+            </a>
         {{ end }}
 
     </nav>

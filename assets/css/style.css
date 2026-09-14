@@ -2710,3 +2710,33 @@ nav a:hover {
         drop-shadow(0 10px 20px rgba(70, 60, 45, 0.13));
 }
 
+
+/* Painting theme links — Lilamaya styling */
+.painting-card__themes a,
+.painting-themes a {
+    color: #6E7451;
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.painting-card__themes a:hover,
+.painting-themes a:hover {
+    color: #2F2D2A;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+
+/* Painting artist and year on archive cards */
+.painting-card__meta {
+    margin-bottom: 16px;
+    opacity: 0.68;
+    font-size: 0.95em;
+}
+
+
+/* Match individual essay page spacing on painting pages */
+.painting-header {
+    margin: 90px 0 60px;
+}
+

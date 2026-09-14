@@ -5,43 +5,51 @@
     <header class="page-header">
 
         <h1 class="page-title">
-            {{ .Data.Term }}
+            {{ title .Data.Term }}
         </h1>
 
-        <p class="page-description">
+        <p class="page-introduction">
             Fragments on {{ lower .Data.Term }}.
         </p>
 
     </header>
 
-    {{ partial "fragment-theme-navigation.html" . }}
+    {{ partial "search.html" . }}
 
-    <section class="essay-list">
+    <div class="archive-layout">
+
+        <aside class="archive-sidebar">
+            {{ partial "fragment-theme-navigation.html" . }}
+        </aside>
+
+        <section class="essay-list fragments-list">
 
         {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 1 }}
 
         {{ range $paginator.Pages }}
-        {{ partial "fragment-card.html" . }}
+            {{ partial "fragment-card.html" . }}
         {{ end }}
 
-    </section>
+        </section>
+
+    </div>
 
     {{ if gt $paginator.TotalPages 1 }}
 
     <nav class="pagination">
 
-        {{ if $paginator.HasNext }}
-        <a class="pagination-prev" href="{{ $paginator.Next.URL }}">
-            ← Older Fragments
-        </a>
+        {{ if $paginator.HasPrev }}
+            <a class="pagination-prev" href="{{ $paginator.Prev.URL }}">
+                ← Newer Fragments
+            </a>
         {{ else }}
-        <span></span>
+            <span></span>
         {{ end }}
 
-        {{ if $paginator.HasPrev }}
-        <a class="pagination-next" href="{{ $paginator.Prev.URL }}">
-            Newer Fragments →
-        </a>
+        {{ if $paginator.HasNext }}
+            <a class="pagination-next" href="{{ $paginator.Next.URL }}">
+                Older Fragments →
+            </a>
         {{ end }}
 
     </nav>

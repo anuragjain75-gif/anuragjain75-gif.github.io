@@ -1,21 +1,28 @@
 {{ define "main" }}
 
-<main class="paintings-page painting-theme-page">
+<main class="paintings-page">
 
     <header class="page-header paintings-header">
 
         <h1 class="page-title">
-            Paintings on {{ lower .Data.Term }}
+            {{ title .Data.Term }}
         </h1>
+
+        <p class="page-introduction">
+            Paintings on {{ lower .Data.Term }}.
+        </p>
 
         {{ partial "search.html" . }}
 
-
     </header>
 
-    {{ partial "painting-theme-navigation.html" . }}
+    <div class="archive-layout">
 
-    <section class="painting-list">
+        <aside class="archive-sidebar">
+            {{ partial "painting-theme-navigation.html" . }}
+        </aside>
+
+        <section class="painting-list">
 
         {{ $paginator := .Paginate (.Pages.ByDate.Reverse) 1 }}
 
@@ -23,7 +30,9 @@
             {{ partial "painting-card.html" . }}
         {{ end }}
 
-    </section>
+        </section>
+
+    </div>
 
     {{ if gt $paginator.TotalPages 1 }}
 
