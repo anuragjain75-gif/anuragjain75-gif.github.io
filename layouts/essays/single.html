@@ -63,6 +63,8 @@
 
             <div class="essay-pagination__previous">
 
+                <div class="essay-pagination__label">Previous Essay</div>
+
                 {{ with .PrevInSection }}
                 <a href="{{ .RelPermalink }}" class="essay-pagination__link">
                     ← {{ .Title }}
@@ -72,6 +74,8 @@
             </div>
 
             <div class="essay-pagination__next">
+
+                <div class="essay-pagination__label">Next Essay</div>
 
                 {{ with .NextInSection }}
                 <a href="{{ .RelPermalink }}" class="essay-pagination__link">
