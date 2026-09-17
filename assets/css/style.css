@@ -94,7 +94,7 @@ h1 {
 
 nav a {
     margin: 0 15px;
-    color: #6E7451;
+    color: #2F2D2A;
     text-decoration: none;
     transition: color .25s ease;
 }
@@ -257,7 +257,7 @@ nav a:hover {
 
     margin-top: 0.9rem;
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     font-size: 0.95rem;
 
@@ -287,7 +287,7 @@ nav a:hover {
 
 .essay-card__themes span {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
 }
 
@@ -322,7 +322,7 @@ nav a:hover {
 
 .essay-card__title a:hover {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
 }
 
@@ -440,7 +440,7 @@ nav a:hover {
 .essay-content a,
 .page-content a {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     text-decoration: none;
 
@@ -455,7 +455,7 @@ nav a:hover {
 
     color: #2F2D2A;
 
-    border-bottom-color: #6E7451;
+    border-bottom-color: #2F2D2A;
 
 }
 
@@ -586,7 +586,7 @@ nav a:hover {
 
     line-height: 1.5;
 
-    color: #6E7451;
+    color: #2F2D2A;
 
 }
 
@@ -594,7 +594,7 @@ nav a:hover {
 
     margin: 0;
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     text-decoration: none;
 
@@ -645,7 +645,7 @@ nav a:hover {
 
 .essay-sort a {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     text-decoration: none;
 
@@ -806,7 +806,7 @@ nav a:hover {
 .footer-nav a {
     margin: 0;
 
-    color: #6E7451;
+    color: #2F2D2A;
     text-decoration: none;
 
     transition: color .25s ease;
@@ -925,7 +925,7 @@ nav a:hover {
 
 .essay-pagination__link:hover {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
 }
 
@@ -951,7 +951,7 @@ nav a:hover {
 
 .pagination a {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     text-decoration: none;
 
@@ -1331,7 +1331,7 @@ nav a:hover {
 
     border: none;
 
-    color: #3C3A36;
+    color: rgb(138, 138, 138);
 
     cursor: pointer;
 
@@ -1356,7 +1356,7 @@ nav a:hover {
 
 .share-links button:hover {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     transform: translateY(-2px);
 
@@ -1531,7 +1531,7 @@ nav a:hover {
 }
 
 .fragment:hover .fragment-date {
-    color: #6E7451;
+    color: #2F2D2A;
 }
 
 .fragment-content > .invocation {
@@ -1574,7 +1574,7 @@ nav a:hover {
 
 .fragment:hover .fragment-read {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
 }
 
@@ -1777,7 +1777,7 @@ nav a:hover {
 
 .fragment-themes a {
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     text-decoration: none;
 
@@ -1936,7 +1936,7 @@ nav a:hover {
     position: relative;
     display: inline-block;
 
-    color: #6E7451;
+    color: #2F2D2A;
 
     font: inherit;
     font-size: 1.15rem;
@@ -2364,7 +2364,7 @@ nav a:hover {
 }
 
 .painting-card__title a:hover {
-    color: #6E7451;
+    color: #2F2D2A;
     text-decoration: none;
 }
 
@@ -2714,7 +2714,7 @@ nav a:hover {
 /* Painting theme links — Lilamaya styling */
 .painting-card__themes a,
 .painting-themes a {
-    color: #6E7451;
+    color: #2F2D2A;
     text-decoration: none;
     transition: color 0.25s ease;
 }
@@ -2771,7 +2771,7 @@ nav a:hover {
     padding: 3px 0;
     margin: 0;
     background: transparent;
-    color: #6E7451;
+    color: #2F2D2A;
     font-family: inherit;
     font-size: 0.82rem;
     letter-spacing: 0.02em;
@@ -2820,7 +2820,7 @@ nav a:hover {
 
 .editor-test-intro {
     text-align: center;
-    color: #6E7451;
+    color: #2F2D2A;
     margin-bottom: 45px;
 }
 
@@ -2944,7 +2944,7 @@ nav a:hover {
     border-radius: 2px;
     padding: 7px 18px;
     background: transparent;
-    color: #6E7451;
+    color: #2F2D2A;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 0.95rem;
     cursor: pointer;
@@ -2958,7 +2958,7 @@ nav a:hover {
 }
 
 #save-status {
-    color: #6E7451;
+    color: #2F2D2A;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 0.88rem;
 }
@@ -2988,7 +2988,7 @@ nav a:hover {
     font-weight: normal;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #6E7451;
+    color: #2F2D2A;
 }
 
 .document-selector-select {
@@ -3006,7 +3006,7 @@ nav a:hover {
 
 .document-selector-select:hover,
 .document-selector-select:focus {
-    border-color: #6E7451;
+    border-color: #2F2D2A;
     outline: none;
 }
 
@@ -3041,7 +3041,7 @@ nav a:hover {
 .new-document-form label {
     display: block;
     margin: 0 0 7px;
-    color: #6E7451;
+    color: #2F2D2A;
     font-size: 0.82rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -3075,7 +3075,7 @@ nav a:hover {
 .new-document-form input:focus,
 .new-document-form textarea:focus,
 .new-document-form select:focus {
-    border-color: #6E7451;
+    border-color: #2F2D2A;
     outline: none;
 }
 
@@ -3098,7 +3098,7 @@ nav a:hover {
 }
 
 .new-document-form input[type="file"]::file-selector-button:hover {
-    border-color: #6E7451;
+    border-color: #2F2D2A;
 }
 
 .new-document-actions {
@@ -3120,7 +3120,7 @@ nav a:hover {
 }
 
 .new-document-form button:hover {
-    border-color: #6E7451;
+    border-color: #2F2D2A;
 }
 
 .new-document-form .secondary-action {
@@ -3128,7 +3128,7 @@ nav a:hover {
     padding-left: 0;
     padding-right: 0;
     background: transparent;
-    color: #6E7451;
+    color: #2F2D2A;
 }
 
 @media (max-width: 700px) {
