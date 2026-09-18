@@ -14,21 +14,7 @@
 
     <div class="essay-card__themes">
 
-        {{ range $index, $theme := . }}
-
-        <span class="essay-card__theme">
-
-            {{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}
-            <a href="{{ .RelPermalink }}">{{ $theme }}</a>
-            {{ else }}
-            {{ $theme }}
-            {{ end }}
-
-            {{ if lt $index (sub (len $.Params.themes) 1) }} ·{{ end }}
-
-        </span>
-
-        {{ end }}
+        {{ range $index, $theme := . }}<span class="essay-card__theme">{{ with site.GetPage (printf "/themes/%s" ($theme | urlize)) }}<a href="{{ .RelPermalink }}">{{ $theme }}</a>{{ else }}{{ $theme }}{{ end }}{{ if lt $index (sub (len $.Params.themes) 1) }} ·{{ end }}</span>{{ end }}
 
     </div>
 
