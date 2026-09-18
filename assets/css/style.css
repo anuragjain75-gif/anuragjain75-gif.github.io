@@ -3387,6 +3387,7 @@ nav a:hover {
 
 
 .essay-card__themes .essay-card__theme {
+    display: inline-block;
     white-space: nowrap;
 }
 

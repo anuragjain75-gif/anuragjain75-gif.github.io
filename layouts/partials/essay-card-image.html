@@ -24,9 +24,7 @@
             {{ $theme }}
             {{ end }}
 
-            {{ if lt $index (sub (len $.Params.themes) 1) }}
-            ·
-            {{ end }}
+            {{ if lt $index (sub (len $.Params.themes) 1) }} ·{{ end }}
 
         </span>
 
