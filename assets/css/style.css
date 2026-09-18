@@ -3385,3 +3385,8 @@ nav a:hover {
 
 }
 
+
+.essay-card__themes .essay-card__theme {
+    white-space: nowrap;
+}
+
