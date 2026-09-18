@@ -20,6 +20,7 @@
 <a href="{{ "essays/" | relURL }}">Essays</a>
 
 <a href="{{ "fragments/" | relURL }}">Fragments</a>
+
 <a href="{{ "paintings/" | relURL }}">Paintings</a>
 
 <a href="{{ "books/" | relURL }}">Books</a>
@@ -30,4 +31,68 @@
 
 <a href="/support/">Support</a>
 
+<button class="nav-search"
+        type="button"
+        aria-label="Search Lilamaya"
+        aria-expanded="false"
+        aria-controls="global-search">
+
+    <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable="false">
+        <circle cx="10.8" cy="10.8" r="6.8"></circle>
+        <line x1="16" y1="16" x2="21" y2="21"></line>
+    </svg>
+
+</button>
+
 </nav>
+
+<div id="global-search" class="global-search" hidden data-pagefind-ignore>
+
+    {{ partial "search.html" . }}
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const button = document.querySelector(".nav-search");
+    const search = document.getElementById("global-search");
+    const input = document.getElementById("search-input");
+    const results = document.getElementById("search-results");
+
+    if (!button || !search || !input) return;
+
+    button.addEventListener("click", () => {
+
+        const isOpen = !search.hidden;
+
+        search.hidden = isOpen;
+
+        button.setAttribute(
+            "aria-expanded",
+            String(!isOpen)
+        );
+
+        if (!isOpen) {
+
+            requestAnimationFrame(() => {
+                input.focus();
+            });
+
+        } else {
+
+            input.value = "";
+
+            if (results) {
+                results.innerHTML = "";
+            }
+
+        }
+
+    });
+
+});
+</script>

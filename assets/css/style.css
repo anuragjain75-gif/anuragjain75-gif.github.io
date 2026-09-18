@@ -3181,3 +3181,207 @@ nav a:hover {
     border-color: #9f8d74 !important;
     color: #40392f !important;
 }
+
+/* ----------------------------------------------------------
+   Main Navigation Search
+----------------------------------------------------------- */
+
+.main-nav .nav-search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    margin-right: 15px;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+.main-nav .nav-search svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: #2F2D2A;
+    stroke-width: 1.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.main-nav .nav-search:hover svg {
+    opacity: 0.65;
+    transform: scale(1.08);
+}
+
+.main-nav .nav-search:focus-visible {
+    outline: 1px solid #6E7451;
+    outline-offset: 5px;
+}
+
+@media (max-width: 700px) {
+
+    .main-nav .nav-search {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .main-nav .nav-search svg {
+        width: 17px;
+        height: 17px;
+    }
+
+}
+
+
+/* ----------------------------------------------------------
+   Global Navigation Search
+----------------------------------------------------------- */
+
+.main-nav .nav-search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 24px;
+    margin-left: 10px;
+    margin-right: 15px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #2F2D2A;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.main-nav .nav-search svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.main-nav .nav-search:hover svg {
+    opacity: 0.65;
+    transform: scale(1.08);
+}
+
+.main-nav .nav-search:focus-visible {
+    outline: 1px solid #6E7451;
+    outline-offset: 5px;
+}
+
+.global-search[hidden] {
+    display: none;
+}
+
+.global-search {
+    max-width: 700px;
+    margin: 1.5rem auto 0;
+    padding: 0 15px 1rem;
+    text-align: left;
+}
+
+.global-search .search-wrapper {
+    max-width: none;
+    margin: 0;
+}
+
+.global-search #search-input {
+    font-size: 1rem;
+}
+
+.global-search #search-results {
+    margin-top: 2rem;
+}
+
+@media (max-width: 700px) {
+
+    .main-nav .nav-search {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .main-nav .nav-search svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .global-search {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+}
+
+
+/* ----------------------------------------------------------
+   Archive Divider
+----------------------------------------------------------- */
+
+.archive-divider {
+    width: 100%;
+    margin: 2.5rem auto 3.5rem;
+    border-top: 1px solid #d8d2c6;
+}
+
+
+/* ----------------------------------------------------------
+   Search Icon — Literary Tooltip
+----------------------------------------------------------- */
+
+.main-nav .nav-search {
+    position: relative;
+}
+
+.main-nav .nav-search::after {
+    content: "Search Lilamaya";
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+
+    padding: 0.35rem 0.7rem;
+
+    background: #fff9eb;
+    color: #5f5a52;
+
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+
+    border: 1px solid #ded6c8;
+    border-radius: 5px;
+    box-shadow: 0 4px 14px rgba(47, 45, 42, 0.07);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s ease;
+
+    z-index: 1100;
+}
+
+.main-nav .nav-search:hover::after,
+.main-nav .nav-search:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 700px) {
+
+    .main-nav .nav-search::after {
+        display: none;
+    }
+
+}
+
