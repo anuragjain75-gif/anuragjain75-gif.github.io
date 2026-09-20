@@ -3397,3 +3397,37 @@ nav a:hover {
     white-space: nowrap;
 }
 
+
+
+/* ----------------------------------------------------------
+   Literary Main Navigation
+   Inspired by the quiet typographic structure of
+   traditional literary websites.
+----------------------------------------------------------- */
+
+.main-nav {
+    border-top: 1px solid #d9d2c5;
+    border-bottom: 1px solid #d9d2c5;
+}
+
+.main-nav > a {
+    color: #2F2D2A;
+}
+
+.main-nav > a.active-page {
+    color: #9b3d3d;
+}
+
+.main-nav > a.active-page:hover {
+    color: #9b3d3d;
+}
+
+/* ----------------------------------------------------------
+   Standard Page Breathing Space
+----------------------------------------------------------- */
+
+.page,
+.page-container {
+    padding-top: 80px;
+}
+

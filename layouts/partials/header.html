@@ -15,21 +15,21 @@
 
 <nav class="main-nav">
 
-<a href="{{ "/" | relURL }}">Home</a>
+<a href="{{ "/" | relURL }}"{{ if .IsHome }} class="active-page" aria-current="page"{{ end }}>Home</a>
 
-<a href="{{ "essays/" | relURL }}">Essays</a>
+<a href="{{ "essays/" | relURL }}"{{ if eq .Section "essays" }} class="active-page" aria-current="page"{{ end }}>Essays</a>
 
-<a href="{{ "fragments/" | relURL }}">Fragments</a>
+<a href="{{ "fragments/" | relURL }}"{{ if eq .Section "fragments" }} class="active-page" aria-current="page"{{ end }}>Fragments</a>
 
-<a href="{{ "paintings/" | relURL }}">Paintings</a>
+<a href="{{ "paintings/" | relURL }}"{{ if eq .Section "paintings" }} class="active-page" aria-current="page"{{ end }}>Paintings</a>
 
-<a href="{{ "books/" | relURL }}">Books</a>
+<a href="{{ "books/" | relURL }}"{{ if eq .Section "books" }} class="active-page" aria-current="page"{{ end }}>Books</a>
 
-<a href="{{ "about/" | relURL }}">About</a>
+<a href="{{ "about/" | relURL }}"{{ if eq .RelPermalink "/about/" }} class="active-page" aria-current="page"{{ end }}>About</a>
 
-<a href="/subscribe/">Subscribe</a>
+<a href="/subscribe/"{{ if eq .RelPermalink "/subscribe/" }} class="active-page" aria-current="page"{{ end }}>Subscribe</a>
 
-<a href="/support/">Support</a>
+<a href="/support/"{{ if eq .RelPermalink "/support/" }} class="active-page" aria-current="page"{{ end }}>Support</a>
 
 <button class="nav-search"
         type="button"
