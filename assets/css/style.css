@@ -3446,3 +3446,101 @@ nav a,
 .site-footer a {
     font-size: 18px;
 }
+
+/* ==================================================
+   BODY TEXT LINKS — OLIVE DEFAULT, CHARCOAL ON HOVER
+   ================================================== */
+
+.essay-content a,
+.essay-content a:visited,
+.essay-content p a,
+.page-content a,
+.page-content a:visited,
+.page-content p a,
+.fragment-content a,
+.fragment-content a:visited,
+.fragment-content p a {
+    color: #6E7451 !important;
+    text-decoration-color: #6E7451 !important;
+    transition: color .25s ease, text-decoration-color .25s ease;
+}
+
+.essay-content a:hover,
+.essay-content a:focus-visible,
+.page-content a:hover,
+.page-content a:focus-visible,
+.fragment-content a:hover,
+.fragment-content a:focus-visible {
+    color: #2F2D2A !important;
+    text-decoration-color: #2F2D2A !important;
+}
+
+/* ==================================================
+   THEME LINKS — CONSISTENT HOVER EFFECT
+   ================================================== */
+
+/* Themes beneath essay cards */
+.essay-card__themes a,
+.essay-card__themes a:visited,
+
+/* Essay theme sidebar */
+.archive-sidebar .essay-themes a,
+.archive-sidebar .essay-themes a:visited,
+
+/* Fragment theme links and sidebars */
+.fragment-card__themes a,
+.fragment-card__themes a:visited,
+.fragment-sidebar a,
+.fragment-themes a,
+.fragment-themes a:visited {
+    color: #2F2D2A;
+    text-decoration-color: transparent;
+    transition: color .25s ease, text-decoration-color .25s ease;
+}
+
+/* Muted olive hover and underline */
+.essay-card__themes a:hover,
+.essay-card__themes a:focus-visible,
+.archive-sidebar .essay-themes a:hover,
+.archive-sidebar .essay-themes a:focus-visible,
+.fragment-card__themes a:hover,
+.fragment-card__themes a:focus-visible,
+.fragment-sidebar a:hover,
+.fragment-sidebar a:focus-visible,
+.fragment-themes a:hover,
+.fragment-themes a:focus-visible {
+    color: #6E7451;
+    text-decoration: underline;
+    text-decoration-color: #6E7451;
+    text-underline-offset: 2px;
+}
+
+/* Final correction: essay-card theme alignment and separators */
+.essay-card__themes {
+    padding-left: 14px;
+}
+
+.essay-card__themes .essay-card__separator {
+    display: inline-block;
+    margin: 0;
+    padding: 0 0.18em;
+    line-height: 1;
+    vertical-align: middle;
+    position: relative;
+    top: -0.08em;
+    transform: none;
+}
+
+/* Centre the theme separator horizontally between adjacent themes */
+.essay-card__themes .essay-card__separator {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 1em;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    line-height: 1;
+    vertical-align: middle;
+    position: relative;
+    top: -0.08em;
+}
