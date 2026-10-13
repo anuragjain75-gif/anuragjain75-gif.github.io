@@ -14,7 +14,8 @@ html {
 body {
     margin: 0;
     padding: 60px 30px;
-    font-family: Georgia, serif;
+    font-family: "Lora", serif;
+    font-size: 20px;
     line-height: 1.8;
     color: #3C3A36;
     background: #fff9eb;
@@ -100,8 +101,7 @@ nav a {
 }
 
 nav a:hover {
-    color: #2F2D2A;
-
+    color: #6E7451;
 }
 
 
@@ -322,7 +322,7 @@ nav a:hover {
 
 .essay-card__title a:hover {
 
-    color: #2F2D2A;
+    color: #6E7451;
 
 }
 
@@ -813,9 +813,7 @@ nav a:hover {
 }
 
 .footer-nav a:hover {
-
-    color: #2F2D2A;
-
+    color: #6E7451;
 }
 
 .footer-copyright {
@@ -924,9 +922,7 @@ nav a:hover {
 }
 
 .essay-pagination__link:hover {
-
-    color: #2F2D2A;
-
+    color: #6E7451;
 }
 
 /*==================================================
@@ -962,9 +958,7 @@ nav a:hover {
 }
 
 .pagination a:hover {
-
-    color: #2F2D2A;
-
+    color: #6E7451;
 }
 
 /*==================================================
@@ -3431,3 +3425,24 @@ nav a:hover {
     padding-top: 80px;
 }
 
+
+/* =========================================
+   LILAMAYA — Lora reading typography
+   ========================================= */
+.essay-content,
+.essay-content p,
+.page-content,
+.page-content p,
+.fragment-content,
+.fragment-content p {
+    font-family: "Lora", serif;
+    font-size: 20px;
+}
+
+/* Navigation and footer typography */
+nav,
+nav a,
+.site-footer,
+.site-footer a {
+    font-size: 18px;
+}
