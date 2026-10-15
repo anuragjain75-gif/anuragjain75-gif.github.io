@@ -18,7 +18,11 @@ body {
     font-size: 20px;
     line-height: 1.8;
     color: #3C3A36;
-    background: #fff9eb;
+    background-color: #fff9eb;
+    background-image: url("/images/bg-parchment-light-tile.jpg");
+    background-repeat: repeat;
+    background-position: top left;
+    background-attachment: scroll;
 }
 
 header,
@@ -90,7 +94,7 @@ h1 {
     top: 0;
     z-index: 1000;
     padding: 14px 30px;
-    background: #fff9eb;
+    background: transparent;
 }
 
 nav a {
