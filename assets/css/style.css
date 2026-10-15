@@ -839,7 +839,10 @@ nav a:hover {
 
     padding: 0 12px;
 
-    background: #fff9eb;
+    background-color: #fff9eb;
+    background-image: url("/images/bg-parchment-light-tile.jpg");
+    background-repeat: repeat;
+    background-position: top left;
 
     color: #B7AE9D;
 
