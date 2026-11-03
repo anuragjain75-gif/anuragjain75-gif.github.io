@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@1,7..72,400&display=swap");
+
 html {
     color-scheme: light;
 }
@@ -3551,3 +3553,19 @@ nav a,
     position: relative;
     top: -0.08em;
 }
+
+
+/* ==========================================
+   LILAMAYA-LITERATA-QUOTATIONS
+   Literary typography for quoted passages
+   ========================================== */
+
+blockquote,
+blockquote p,
+q {
+    font-family: "Literata", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-optical-sizing: auto;
+}
+
