@@ -1,0 +1,51 @@
+<main class="entity-index">
+
+    <header class="page-header entity-index-header">
+
+        <h1 class="page-title">{{ .Title }}</h1>
+
+        {{ with .Description }}
+            <p class="page-introduction entity-index-description">
+                {{ . }}
+            </p>
+        {{ end }}
+
+    </header>
+
+    <section class="entity-index-list" aria-label="{{ .Title }} directory">
+
+        {{ $entries := .RegularPages.ByTitle }}
+
+        {{ if $entries }}
+
+            <ul class="entity-index-items">
+
+                {{ range $entries }}
+
+                    <li class="entity-index-item">
+
+                        <h2>
+                            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+                        </h2>
+
+                        {{ with .Description }}
+                            <p>{{ . }}</p>
+                        {{ end }}
+
+                    </li>
+
+                {{ end }}
+
+            </ul>
+
+        {{ else }}
+
+            <p class="entity-index-empty">
+                Entries will appear here as the Lilamaya universe grows.
+            </p>
+
+        {{ end }}
+
+    </section>
+
+</main>

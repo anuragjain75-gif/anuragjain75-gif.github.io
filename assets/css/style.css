@@ -3569,3 +3569,454 @@ q {
     font-optical-sizing: auto;
 }
 
+
+
+/*==================================================
+    LILAMAYA LITVERSE — ENTITY PAGES
+==================================================*/
+
+.entity-page {
+
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 0 30px;
+
+}
+
+.entity-header {
+
+    margin-bottom: 58px;
+    text-align: center;
+
+}
+
+.entity-classification {
+
+    margin: 0 0 22px;
+
+    color: #6E7451;
+
+    font-size: .9rem;
+
+    letter-spacing: .14em;
+
+    text-transform: uppercase;
+
+}
+
+.entity-description {
+
+    max-width: 760px;
+
+    margin: 24px auto 0;
+
+}
+
+.entity-stage {
+
+    margin: 22px 0 0;
+
+    color: #888176;
+
+    font-size: .88rem;
+
+    letter-spacing: .04em;
+
+}
+
+.entity-content {
+
+    margin-top: 48px;
+
+}
+
+.entity-connections {
+
+    margin-top: 76px;
+
+    padding-top: 34px;
+
+    border-top: 1px solid #DDD5C8;
+
+}
+
+.entity-connections > h2 {
+
+    margin: 0 0 38px;
+
+    font-size: 1.9rem;
+
+    font-weight: 400;
+
+}
+
+.entity-connection-group {
+
+    margin-bottom: 42px;
+
+}
+
+.entity-connection-group h3 {
+
+    margin: 0 0 25px;
+
+    font-size: 1.2rem;
+
+    font-weight: 400;
+
+    color: #6E7451;
+
+}
+
+.entity-connection-list {
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+
+}
+
+.entity-connection {
+
+    margin: 0 0 30px;
+
+}
+
+.entity-connection > a {
+
+    font-size: 1.15rem;
+
+}
+
+.entity-connection__relation {
+
+    display: inline-block;
+
+    margin-left: 9px;
+
+    color: #777;
+
+    font-size: .95rem;
+
+}
+
+.entity-connection__note {
+
+    margin: 8px 0 5px;
+
+    color: #666;
+
+    font-size: 1rem;
+
+    line-height: 1.7;
+
+}
+
+.entity-connection__basis {
+
+    display: block;
+
+    color: #999;
+
+    font-size: .82rem;
+
+    letter-spacing: .025em;
+
+}
+
+@media (max-width: 700px) {
+
+    .entity-page {
+
+        margin: 48px auto;
+
+        padding: 0 22px;
+
+    }
+
+    .entity-header {
+
+        margin-bottom: 42px;
+
+    }
+
+    .entity-description {
+
+        font-size: 1.05rem;
+
+    }
+
+    .entity-connections {
+
+        margin-top: 55px;
+
+    }
+
+    .entity-connection__relation {
+
+        margin-left: 0;
+
+    }
+
+}
+
+
+/*==================================================
+    LITVERSE — CONNECTION LINK COLOURS
+==================================================*/
+
+.entity-connection > a,
+.entity-connection > a:visited {
+
+    color: #6E7451;
+
+    text-decoration: none;
+
+    border-bottom: 1px solid rgba(110, 116, 81, .35);
+
+}
+
+.entity-connection > a:hover,
+.entity-connection > a:focus-visible {
+
+    color: #2F2D2A;
+
+    border-bottom-color: #2F2D2A;
+
+}
+
+
+/*==================================================
+    LILAMAYA LITVERSE — ENTITY INDEXES
+==================================================*/
+
+.entity-index {
+
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 0 30px;
+
+}
+
+.entity-index-header {
+
+    margin-bottom: 68px;
+    text-align: center;
+
+}
+
+.entity-index-description {
+
+    max-width: 760px;
+    margin: 24px auto 0;
+
+}
+
+.entity-index-list {
+
+    max-width: 760px;
+    margin: 0 auto;
+
+}
+
+.entity-index-items {
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+}
+
+.entity-index-item {
+
+    margin: 0 0 42px;
+
+}
+
+.entity-index-item h2 {
+
+    margin: 0 0 8px;
+
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1.5;
+
+}
+
+.entity-index-item h2 a,
+.entity-index-item h2 a:visited {
+
+    color: #6E7451;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(110, 116, 81, .35);
+
+}
+
+.entity-index-item h2 a:hover,
+.entity-index-item h2 a:focus-visible {
+
+    color: #2F2D2A;
+    border-bottom-color: #2F2D2A;
+
+}
+
+.entity-index-item p {
+
+    margin: 0;
+
+    color: #777;
+    font-size: 1rem;
+    line-height: 1.8;
+
+}
+
+.entity-index-empty {
+
+    color: #888;
+    font-style: italic;
+
+}
+
+@media (max-width: 700px) {
+
+    .entity-index {
+
+        margin: 48px auto;
+        padding: 0 22px;
+
+    }
+
+    .entity-index-header {
+
+        margin-bottom: 48px;
+
+    }
+
+    .entity-index-item {
+
+        margin-bottom: 34px;
+
+    }
+
+}
+
+
+/* =========================================
+   LILAMAYA — MAIN NAVIGATION DROPDOWNS
+   ========================================= */
+
+.main-nav .nav-dropdown {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    margin: 0 15px;
+}
+
+.main-nav .nav-dropdown > summary {
+    display: inline-block;
+    list-style: none;
+    cursor: pointer;
+    color: #2F2D2A;
+    font-size: 18px;
+    user-select: none;
+}
+
+.main-nav .nav-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.main-nav .nav-dropdown > summary::after {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 8px;
+    margin-bottom: 3px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform .2s ease;
+}
+
+.main-nav .nav-dropdown[open] > summary::after {
+    transform: rotate(225deg);
+    margin-bottom: 0;
+}
+
+.main-nav .nav-dropdown > summary:hover,
+.main-nav .nav-dropdown > summary:focus-visible {
+    color: #6E7451;
+}
+
+.main-nav .nav-dropdown.active-page > summary {
+    color: #9b3d3d;
+}
+
+.main-nav .nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    min-width: 190px;
+    padding: 10px 0;
+    margin-top: 12px;
+    background: #F8F2E5;
+    border: 1px solid #d9d2c5;
+    text-align: left;
+    box-shadow: 0 7px 18px rgba(47, 45, 42, .08);
+}
+
+.main-nav .nav-dropdown[open] .nav-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-nav .nav-dropdown-menu a {
+    display: block;
+    margin: 0;
+    padding: 9px 20px;
+    color: #2F2D2A;
+    font-size: 16px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.main-nav .nav-dropdown-menu a:hover,
+.main-nav .nav-dropdown-menu a:focus-visible {
+    color: #6E7451;
+    background: rgba(110, 116, 81, .06);
+}
+
+@media (max-width: 700px) {
+
+    .main-nav .nav-dropdown {
+        margin: 0 10px;
+    }
+
+    .main-nav .nav-dropdown-menu {
+        min-width: 170px;
+    }
+
+}
+
+
+/* Desktop hover behaviour for navigation dropdowns */
+
+@media (hover: hover) and (pointer: fine) {
+
+    .main-nav .nav-dropdown:hover .nav-dropdown-menu,
+    .main-nav .nav-dropdown:focus-within .nav-dropdown-menu {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-nav .nav-dropdown:hover > summary::after {
+        transform: rotate(225deg);
+        margin-bottom: 0;
+    }
+
+}
