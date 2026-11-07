@@ -90,6 +90,10 @@ h1 {
 }
 
 .main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
     margin-top: 40px;
     text-align: center;
     position: sticky;
@@ -3909,6 +3913,10 @@ q {
    LILAMAYA — MAIN NAVIGATION DROPDOWNS
    ========================================= */
 
+/*==================================================
+    LILAMAYA — REFINED NAVIGATION DROPDOWNS
+==================================================*/
+
 .main-nav .nav-dropdown {
     display: inline-block;
     position: relative;
@@ -3956,6 +3964,8 @@ q {
     color: #9b3d3d;
 }
 
+/* Dropdown panel */
+
 .main-nav .nav-dropdown-menu {
     display: none;
     position: absolute;
@@ -3963,13 +3973,27 @@ q {
     left: 50%;
     transform: translateX(-50%);
     z-index: 1100;
-    min-width: 190px;
-    padding: 10px 0;
+    min-width: 205px;
+    padding: 12px 0;
     margin-top: 12px;
     background: #F8F2E5;
     border: 1px solid #d9d2c5;
+    border-radius: 5px;
     text-align: left;
-    box-shadow: 0 7px 18px rgba(47, 45, 42, .08);
+    box-shadow: 0 9px 24px rgba(47, 45, 42, .12);
+    overflow: hidden;
+}
+
+/* Fine olive accent */
+
+.main-nav .nav-dropdown-menu::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #6E7451;
 }
 
 .main-nav .nav-dropdown[open] .nav-dropdown-menu {
@@ -3977,20 +4001,52 @@ q {
     flex-direction: column;
 }
 
+/* Individual menu entries */
+
 .main-nav .nav-dropdown-menu a {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin: 0;
-    padding: 9px 20px;
-    color: #2F2D2A;
+    padding: 10px 20px;
+    color: #39362F;
     font-size: 16px;
+    line-height: 1.45;
     text-decoration: none;
     white-space: nowrap;
+    transition: color .2s ease, background-color .2s ease, padding .2s ease;
+}
+
+.main-nav .nav-dropdown-menu a::after {
+    content: "→";
+    color: #6E7451;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .2s ease, transform .2s ease;
 }
 
 .main-nav .nav-dropdown-menu a:hover,
 .main-nav .nav-dropdown-menu a:focus-visible {
     color: #6E7451;
-    background: rgba(110, 116, 81, .06);
+    background: rgba(110, 116, 81, .07);
+    padding-left: 24px;
+}
+
+.main-nav .nav-dropdown-menu a:hover::after,
+.main-nav .nav-dropdown-menu a:focus-visible::after {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Separate the overview link from the sections */
+
+.main-nav .nav-dropdown-menu a:first-child {
+    margin-bottom: 7px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ded6c8;
+    color: #6E7451;
+    font-size: 15px;
+    font-style: italic;
 }
 
 @media (max-width: 700px) {
@@ -4000,13 +4056,12 @@ q {
     }
 
     .main-nav .nav-dropdown-menu {
-        min-width: 170px;
+        min-width: 185px;
     }
 
 }
 
-
-/* Desktop hover behaviour for navigation dropdowns */
+/* Desktop hover behaviour */
 
 @media (hover: hover) and (pointer: fine) {
 
