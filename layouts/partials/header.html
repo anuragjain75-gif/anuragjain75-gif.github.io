@@ -14,11 +14,14 @@
 
 <nav class="main-nav" aria-label="Main navigation">
 
-    <details class="nav-dropdown{{ if in (slice "people" "works" "ideas" "traditions" "places") .Section }} active-page{{ end }}">
+    <a href="{{ "/" | relURL }}">Home</a>
+
+    <details class="nav-dropdown{{ if in (slice "explore" "people" "works" "ideas" "traditions" "places") .Section }} active-page{{ end }}">
 
         <summary>Explore</summary>
 
         <div class="nav-dropdown-menu">
+            <a href="{{ "explore/" | relURL }}">Explore all</a>
             <a href="{{ "people/" | relURL }}">People</a>
             <a href="{{ "works/" | relURL }}">Works</a>
             <a href="{{ "ideas/" | relURL }}">Ideas</a>
@@ -28,11 +31,12 @@
 
     </details>
 
-    <details class="nav-dropdown{{ if in (slice "essays" "fragments" "paintings" "books") .Section }} active-page{{ end }}">
+    <details class="nav-dropdown{{ if in (slice "writings" "essays" "fragments" "paintings" "books") .Section }} active-page{{ end }}">
 
         <summary>Writings</summary>
 
         <div class="nav-dropdown-menu">
+            <a href="{{ "writings/" | relURL }}">All writings</a>
             <a href="{{ "essays/" | relURL }}">Essays</a>
             <a href="{{ "fragments/" | relURL }}">Fragments</a>
             <a href="{{ "paintings/" | relURL }}">Paintings</a>

@@ -6,7 +6,7 @@
 
     <p class="footer-title">
 
-        <a href="/" class="footer-brand">
+        <a href="{{ "/" | relURL }}" class="footer-brand">
 
             <img src="/images/tree-logo.png" alt="" class="footer-logo">
 
@@ -16,22 +16,15 @@
 
     </p>
 
-    <nav class="footer-nav">
+    <nav class="footer-nav" aria-label="Footer navigation">
 
-        <a href="/">Home</a>
-
-        <a href="/essays/">Essays</a>
-
-        <a href="/fragments/">Fragments</a>
-        <a href="/paintings/">Paintings</a>
-
-        <a href="/books/">Books</a>
-
-        <a href="/about/">About</a>
-
-         <a href="/subscribe/">Subscribe</a>
-
-         <a href="/support/">Support</a>
+        <a href="{{ "/" | relURL }}">Home</a>
+        <a href="{{ "explore/" | relURL }}">Explore</a>
+        <a href="{{ "writings/" | relURL }}">Writings</a>
+        <a href="{{ "journeys/" | relURL }}">Journeys</a>
+        <a href="{{ "about/" | relURL }}">About</a>
+        <a href="{{ "subscribe/" | relURL }}">Subscribe</a>
+        <a href="{{ "support/" | relURL }}">Support</a>
 
     </nav>
 
@@ -40,9 +33,7 @@
     </p>
 
     <p class="footer-copyright">
-
         © {{ now.Year }} Lilamaya. All rights reserved.
-
     </p>
 
 </footer>

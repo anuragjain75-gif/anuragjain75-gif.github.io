@@ -1,0 +1,171 @@
+{{ define "main" }}
+
+<main class="explore-page">
+
+    <header class="page-header explore-header">
+
+        <h1 class="page-title">Explore</h1>
+
+        <p class="page-introduction explore-introduction">
+            Lilamaya is a landscape of literary encounters, intellectual
+            discoveries and personal associations. These seven entrances
+            offer different ways of wandering through it.
+        </p>
+
+    </header>
+
+    <section class="explore-mosaic" aria-label="Explore the Lilamaya Litverse">
+
+        <div class="explore-column">
+
+            <article class="explore-entry explore-entry-people">
+                <a class="explore-entry-link" href="{{ "people/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/self-portrait-grey-felt-hat.webp" | relURL }}"
+                            alt="Vincent van Gogh's Self-Portrait with Grey Felt Hat"
+                            loading="eager"
+                            fetchpriority="high"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>People</h2>
+                        <p>
+                            Writers, poets, philosophers, artists, naturalists
+                            and other lives that have shaped the intellectual
+                            landscape of Lilamaya.
+                        </p>
+                    </div>
+                </a>
+            </article>
+
+            <article class="explore-entry explore-entry-traditions">
+                <a class="explore-entry-link" href="{{ "traditions/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/self-portrait-as-painter.webp" | relURL }}"
+                            alt="Vincent van Gogh's Self-Portrait as a Painter"
+                            loading="lazy"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>Traditions</h2>
+                        <p>
+                            Literary movements, philosophical schools and
+                            artistic traditions through which ideas take shape
+                            and travel.
+                        </p>
+                    </div>
+                </a>
+            </article>
+
+
+        </div>
+
+        <div class="explore-column">
+
+            <article class="explore-entry explore-entry-works">
+                <a class="explore-entry-link" href="{{ "works/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/still-life-french-novels-rose.webp" | relURL }}"
+                            alt="Vincent van Gogh's Still Life with French Novels and a Rose"
+                            loading="lazy"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>Works</h2>
+                        <p>
+                            Books, poems, essays, paintings, music and other
+                            creations encountered along the way.
+                        </p>
+                    </div>
+                </a>
+            </article>
+
+            <article class="explore-entry explore-entry-journeys">
+                <a class="explore-entry-link" href="{{ "journeys/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/carriage-and-train.webp" | relURL }}"
+                            alt="Vincent van Gogh's Landscape with a Carriage and a Train"
+                            loading="lazy"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>Journeys</h2>
+                        <p>
+                            Sustained explorations that follow a subject across
+                            people, works, ideas, places and time.
+                        </p>
+                    </div>
+                </a>
+            </article>
+            <article class="explore-entry explore-entry-writings">
+                <a class="explore-entry-link" href="{{ "writings/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/man-writing-facing-left.webp" | relURL }}"
+                            alt="Vincent van Gogh's Man Writing Facing Left"
+                            loading="lazy"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>Writings</h2>
+                        <p>
+                            Essays, fragments, reflections and longer works
+                            emerging from my own encounters with this world.
+                        </p>
+                    </div>
+                </a>
+            </article>
+
+        </div>
+
+        <div class="explore-column">
+
+            <article class="explore-entry explore-entry-ideas">
+                <a class="explore-entry-link" href="{{ "ideas/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/portrait-dr-gachet.webp" | relURL }}"
+                            alt="Vincent van Gogh's Portrait of Dr. Gachet"
+                            loading="lazy"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>Ideas</h2>
+                        <p>
+                            Concepts, questions, philosophical problems and
+                            literary themes worth exploring.
+                        </p>
+                    </div>
+                </a>
+            </article>
+
+            <article class="explore-entry explore-entry-places">
+                <a class="explore-entry-link" href="{{ "places/" | relURL }}">
+                    <figure class="explore-entry-image">
+                        <img
+                            src="{{ "images/explore/optimized/starry-night-rhone.webp" | relURL }}"
+                            alt="Vincent van Gogh's Starry Night over the Rhône"
+                            loading="lazy"
+                            decoding="async">
+                    </figure>
+                    <div class="explore-entry-text">
+                        <h2>Places</h2>
+                        <p>
+                            Landscapes, cities, gardens and places that hold
+                            literary, historical or personal significance.
+                        </p>
+                    </div>
+                </a>
+            </article>
+
+        </div>
+
+    </section>
+
+</main>
+
+{{ end }}

@@ -12,6 +12,11 @@ themes:
   - Suffering
   - Writing
   - Books
+
+connections:
+  - target: "/journeys/annie-dillard/"
+    relation: "belongs-to"
+    basis: "documented"
 ---
 
 {{< introduction >}}

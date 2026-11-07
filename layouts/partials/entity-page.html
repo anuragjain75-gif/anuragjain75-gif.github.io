@@ -55,6 +55,10 @@
         {{ .Content }}
     </article>
 
+    {{ if eq .Section "journeys" }}
+        {{ partial "journey-writings.html" . }}
+    {{ end }}
+
     {{ if or .Params.connections $incoming }}
 
         <section class="entity-connections">
@@ -132,6 +136,8 @@
                                 {{ $reverseLabel = "influenced by" }}
                             {{ else if eq $relation "disagrees-with" }}
                                 {{ $reverseLabel = "disagreed with by" }}
+                            {{ else if eq $relation "belongs-to" }}
+                                {{ $reverseLabel = "part of this journey" }}
                             {{ end }}
 
                             <li class="entity-connection">
