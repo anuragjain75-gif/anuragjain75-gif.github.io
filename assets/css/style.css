@@ -117,8 +117,8 @@ nav a:hover {
 
 .page-hero,
 .essay-hero {
-    max-width: 900px;
-    margin: 60px auto 90px;
+    max-width: 1200px;
+    margin: 60px auto 35px;
 }
 
 .page-hero img,
@@ -413,7 +413,8 @@ nav a:hover {
     margin-bottom: 40px;
 }
 
-.essay-hero img {
+.essay-hero img,
+.page-hero img {
     display: block;
     width: 100%;
     height: clamp(500px, 55vw, 760px);
@@ -1910,7 +1911,8 @@ nav a:hover {
 
 @media (max-width: 768px) {
 
-    .essay-hero img {
+    .essay-hero img,
+    .page-hero img {
         height: auto;
         object-fit: contain;
     }
@@ -3569,3 +3571,1118 @@ q {
     font-optical-sizing: auto;
 }
 
+
+
+/*==================================================
+    LILAMAYA LITVERSE — ENTITY PAGES
+==================================================*/
+
+.entity-page {
+
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 0 30px;
+
+}
+
+.entity-header {
+
+    margin-bottom: 58px;
+    text-align: center;
+
+}
+
+.entity-classification {
+
+    margin: 0 0 22px;
+
+    color: #6E7451;
+
+    font-size: .9rem;
+
+    letter-spacing: .14em;
+
+    text-transform: uppercase;
+
+}
+
+.entity-description {
+
+    max-width: 760px;
+
+    margin: 24px auto 0;
+
+}
+
+.entity-stage {
+
+    margin: 22px 0 0;
+
+    color: #888176;
+
+    font-size: .88rem;
+
+    letter-spacing: .04em;
+
+}
+
+.entity-content {
+
+    margin-top: 48px;
+
+}
+
+.entity-connections {
+
+    margin-top: 76px;
+
+    padding-top: 34px;
+
+    border-top: 1px solid #DDD5C8;
+
+}
+
+.entity-connections > h2 {
+
+    margin: 0 0 38px;
+
+    font-size: 1.9rem;
+
+    font-weight: 400;
+
+}
+
+.entity-connection-group {
+
+    margin-bottom: 42px;
+
+}
+
+.entity-connection-group h3 {
+
+    margin: 0 0 25px;
+
+    font-size: 1.2rem;
+
+    font-weight: 400;
+
+    color: #6E7451;
+
+}
+
+.entity-connection-list {
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+
+}
+
+.entity-connection {
+
+    margin: 0 0 30px;
+
+}
+
+.entity-connection > a {
+
+    font-size: 1.15rem;
+
+}
+
+.entity-connection__relation {
+
+    display: inline-block;
+
+    margin-left: 9px;
+
+    color: #777;
+
+    font-size: .95rem;
+
+}
+
+.entity-connection__note {
+
+    margin: 8px 0 5px;
+
+    color: #666;
+
+    font-size: 1rem;
+
+    line-height: 1.7;
+
+}
+
+.entity-connection__basis {
+
+    display: block;
+
+    color: #999;
+
+    font-size: .82rem;
+
+    letter-spacing: .025em;
+
+}
+
+@media (max-width: 700px) {
+
+    .entity-page {
+
+        margin: 48px auto;
+
+        padding: 0 22px;
+
+    }
+
+    .entity-header {
+
+        margin-bottom: 42px;
+
+    }
+
+    .entity-description {
+
+        font-size: 1.05rem;
+
+    }
+
+    .entity-connections {
+
+        margin-top: 55px;
+
+    }
+
+    .entity-connection__relation {
+
+        margin-left: 0;
+
+    }
+
+}
+
+
+/*==================================================
+    LITVERSE — CONNECTION LINK COLOURS
+==================================================*/
+
+.entity-connection > a,
+.entity-connection > a:visited {
+
+    color: #6E7451;
+
+    text-decoration: none;
+
+    border-bottom: 1px solid rgba(110, 116, 81, .35);
+
+}
+
+.entity-connection > a:hover,
+.entity-connection > a:focus-visible {
+
+    color: #2F2D2A;
+
+    border-bottom-color: #2F2D2A;
+
+}
+
+
+/*==================================================
+    LILAMAYA LITVERSE — ENTITY INDEXES
+==================================================*/
+
+.entity-index {
+
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 0 30px;
+
+}
+
+.entity-index-header {
+
+    margin-bottom: 68px;
+    text-align: center;
+
+}
+
+.entity-index-description {
+
+    max-width: 760px;
+    margin: 24px auto 0;
+
+}
+
+.entity-index-list {
+
+    max-width: 760px;
+    margin: 0 auto;
+
+}
+
+.entity-index-items {
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+}
+
+.entity-index-item {
+
+    margin: 0 0 42px;
+
+}
+
+.entity-index-item h2 {
+
+    margin: 0 0 8px;
+
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1.5;
+
+}
+
+.entity-index-item h2 a,
+.entity-index-item h2 a:visited {
+
+    color: #6E7451;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(110, 116, 81, .35);
+
+}
+
+.entity-index-item h2 a:hover,
+.entity-index-item h2 a:focus-visible {
+
+    color: #2F2D2A;
+    border-bottom-color: #2F2D2A;
+
+}
+
+.entity-index-item p {
+
+    margin: 0;
+
+    color: #777;
+    font-size: 1rem;
+    line-height: 1.8;
+
+}
+
+.entity-index-empty {
+
+    color: #888;
+    font-style: italic;
+
+}
+
+@media (max-width: 700px) {
+
+    .entity-index {
+
+        margin: 48px auto;
+        padding: 0 22px;
+
+    }
+
+    .entity-index-header {
+
+        margin-bottom: 48px;
+
+    }
+
+    .entity-index-item {
+
+        margin-bottom: 34px;
+
+    }
+
+}
+
+
+/* =========================================
+   LILAMAYA — MAIN NAVIGATION DROPDOWNS
+   ========================================= */
+
+.main-nav .nav-dropdown {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    margin: 0 15px;
+}
+
+.main-nav .nav-dropdown > summary {
+    display: inline-block;
+    list-style: none;
+    cursor: pointer;
+    color: #2F2D2A;
+    font-size: 18px;
+    user-select: none;
+}
+
+.main-nav .nav-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.main-nav .nav-dropdown > summary::after {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 8px;
+    margin-bottom: 3px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform .2s ease;
+}
+
+.main-nav .nav-dropdown[open] > summary::after {
+    transform: rotate(225deg);
+    margin-bottom: 0;
+}
+
+.main-nav .nav-dropdown > summary:hover,
+.main-nav .nav-dropdown > summary:focus-visible {
+    color: #6E7451;
+}
+
+.main-nav .nav-dropdown.active-page > summary {
+    color: #9b3d3d;
+}
+
+.main-nav .nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    min-width: 190px;
+    padding: 10px 0;
+    margin-top: 12px;
+    background: #F8F2E5;
+    border: 1px solid #d9d2c5;
+    text-align: left;
+    box-shadow: 0 7px 18px rgba(47, 45, 42, .08);
+}
+
+.main-nav .nav-dropdown[open] .nav-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-nav .nav-dropdown-menu a {
+    display: block;
+    margin: 0;
+    padding: 9px 20px;
+    color: #2F2D2A;
+    font-size: 16px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.main-nav .nav-dropdown-menu a:hover,
+.main-nav .nav-dropdown-menu a:focus-visible {
+    color: #6E7451;
+    background: rgba(110, 116, 81, .06);
+}
+
+@media (max-width: 700px) {
+
+    .main-nav .nav-dropdown {
+        margin: 0 10px;
+    }
+
+    .main-nav .nav-dropdown-menu {
+        min-width: 170px;
+    }
+
+}
+
+
+/* Desktop hover behaviour for navigation dropdowns */
+
+@media (hover: hover) and (pointer: fine) {
+
+    .main-nav .nav-dropdown:hover .nav-dropdown-menu,
+    .main-nav .nav-dropdown:focus-within .nav-dropdown-menu {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-nav .nav-dropdown:hover > summary::after {
+        transform: rotate(225deg);
+        margin-bottom: 0;
+    }
+
+}
+
+
+/*==================================================
+    HOMEPAGE PATHWAYS
+==================================================*/
+
+.home-pathways {
+    max-width: 760px;
+    margin: 76px auto 0;
+}
+
+.home-pathway {
+    padding: 30px 0 34px;
+    border-top: 1px solid #d8d2c6;
+}
+
+.home-pathway h2 {
+    margin: 0 0 10px;
+    font-size: 1.35rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #3C3A36;
+}
+
+.home-pathway p {
+    margin: 0 0 17px;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #666057;
+}
+
+.home-pathway-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 25px;
+}
+
+.home-pathway-links a {
+    color: #6E7451;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color .25s ease;
+}
+
+.home-pathway-links a:hover {
+    color: #3C3A36;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.home-share {
+    max-width: 760px;
+    margin: 20px auto 0;
+}
+
+
+@media (max-width: 600px) {
+
+    .home-pathways {
+        margin-top: 55px;
+    }
+
+    .home-pathway {
+        padding: 25px 0 28px;
+    }
+
+    .home-pathway-links {
+        gap: 9px 19px;
+    }
+
+}
+
+
+/*==================================================
+    LILAMAYA — LITVERSE HOMEPAGE
+==================================================*/
+
+.litverse-intro {
+    margin-bottom: 0;
+}
+
+.litverse-entrances {
+    max-width: 760px;
+    margin: 48px auto 54px;
+}
+
+.litverse-entry {
+    padding: 21px 0 23px;
+    border-top: 1px solid #d8d2c6;
+}
+
+.litverse-entry:last-child {
+    border-bottom: 1px solid #d8d2c6;
+}
+
+.litverse-entry h2 {
+    margin: 0 0 5px;
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.litverse-entry h2 a {
+    color: #6E7451;
+    text-decoration: none;
+    transition: color .25s ease;
+}
+
+.litverse-entry h2 a:hover {
+    color: #3C3A36;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.litverse-entry p {
+    max-width: 720px;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #666057;
+}
+
+.litverse-conclusion {
+    margin-top: 0;
+}
+
+.litverse-welcome {
+    margin-top: 30px;
+    font-style: italic;
+}
+
+
+@media (max-width: 600px) {
+
+    .litverse-entrances {
+        margin-top: 36px;
+        margin-bottom: 42px;
+    }
+
+    .litverse-entry {
+        padding: 18px 0 20px;
+    }
+
+}
+
+
+/*==================================================
+    LITVERSE ENTRANCES — TYPOGRAPHY AND ICONS
+==================================================*/
+
+.litverse-entry {
+    padding: 25px 0 27px;
+}
+
+.litverse-entry-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 8px;
+    font-size: 1.45rem;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.litverse-entry-heading svg {
+    display: block;
+    flex: 0 0 27px;
+    width: 27px;
+    height: 27px;
+    fill: none;
+    stroke: #7b805d;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.litverse-entry p {
+    margin: 0 0 0 41px;
+    max-width: 690px;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #666057;
+}
+
+
+@media (max-width: 600px) {
+
+    .litverse-entry {
+        padding: 21px 0 23px;
+    }
+
+    .litverse-entry-heading {
+        gap: 11px;
+        font-size: 1.3rem;
+    }
+
+    .litverse-entry-heading svg {
+        flex-basis: 25px;
+        width: 25px;
+        height: 25px;
+    }
+
+    .litverse-entry p {
+        margin-left: 36px;
+        font-size: 1rem;
+    }
+
+}
+
+
+/* Match Litverse entrance descriptions to the body font */
+
+.litverse-entry p {
+    font-size: 22.5px;
+}
+
+@media (max-width: 600px) {
+    .litverse-entry p {
+        font-size: 22.5px;
+    }
+}
+
+
+/* Deep forest green — Litverse entrance links and icons */
+
+.litverse-entry-heading a {
+    color: #355B38;
+}
+
+.litverse-entry-heading a:hover {
+    color: #24452A;
+}
+
+.litverse-entry-heading svg {
+    stroke: #355B38;
+}
+
+
+/* Definitive Litverse entrance colour override */
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a {
+    color: #28552F !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a:hover {
+    color: #183D21 !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading svg {
+    stroke: #28552F !important;
+}
+
+
+/* Stronger visual hierarchy for Litverse entrances */
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading {
+    font-size: 25px;
+    font-weight: 600;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a {
+    font-size: 25px;
+    font-weight: 600;
+    color: #28552F !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading svg {
+    width: 28px;
+    height: 28px;
+    stroke: #28552F !important;
+    stroke-width: 2.2;
+}
+
+
+/* Litverse entrances — unified charcoal hover */
+
+.litverse-entrances .litverse-entry-heading a {
+    transition: color 0.25s ease;
+}
+
+.litverse-entrances .litverse-entry-heading svg {
+    transition: stroke 0.25s ease;
+}
+
+.litverse-entrances .litverse-entry-heading:hover a {
+    color: #3C3A36 !important;
+}
+
+.litverse-entrances .litverse-entry-heading:hover svg {
+    stroke: #3C3A36 !important;
+}
+
+
+/* Litverse — definitive charcoal hover for links and icons */
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a:hover {
+    color: #3C3A36 !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a:hover svg {
+    stroke: #3C3A36 !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a svg {
+    transition: stroke 0.25s ease;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a {
+    transition: color 0.25s ease;
+}
+
+
+/* Restore horizontal alignment of Litverse icons and titles */
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 14px !important;
+    color: #28552F !important;
+    font-size: 25px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a svg {
+    flex: 0 0 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    stroke: currentColor !important;
+    stroke-width: 2.2 !important;
+}
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a:hover {
+    color: #3C3A36 !important;
+}
+
+@media (max-width: 600px) {
+    .litverse-entrances .litverse-entry h2.litverse-entry-heading a {
+        gap: 11px !important;
+    }
+}
+
+
+/* Stronger charcoal hover for Litverse entrance links and icons */
+
+.litverse-entrances .litverse-entry h2.litverse-entry-heading a:hover {
+    color: #1F211F !important;
+}
+
+
+/*==================================================
+    LILAMAYA LITVERSE — HOMEPAGE TITLE
+==================================================*/
+
+.litverse-page-title {
+    margin: 0 0 22px;
+    text-align: left;
+    font-size: 2.4rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #3C3A36;
+}
+
+@media (max-width: 600px) {
+    .litverse-page-title {
+        font-size: 1.7rem;
+        margin-bottom: 32px;
+    }
+}
+
+/* Centre the homepage sharing invitation precisely */
+.litverse-conclusion .share-section .share-heading {
+    display: block;
+    width: 100%;
+    max-width: 38rem;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center !important;
+    box-sizing: border-box;
+}
+
+
+/* HOMEPAGE TITLE — LITVERSE ICON */
+.litverse-page-title {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.litverse-title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #28552F;
+    flex: 0 0 auto;
+}
+
+.litverse-title-icon svg {
+    width: 34px;
+    height: 34px;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+@media (max-width: 600px) {
+    .litverse-title-icon svg {
+        width: 25px;
+        height: 25px;
+    }
+
+    .litverse-page-title {
+        gap: 10px;
+    }
+}
+
+
+/*==================================================
+    LILAMAYA LITVERSE — CONSTELLATION DIAGRAM
+==================================================*/
+
+.litverse-map {
+    max-width: 700px;
+    margin: 38px auto 42px;
+}
+
+.litverse-map svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.litverse-map-lines path {
+    fill: none;
+    stroke: #AAA88A;
+    stroke-width: 1.25;
+}
+
+.litverse-map-centre {
+    fill: none;
+    stroke: #6E7451;
+    stroke-width: 1.5;
+}
+
+.litverse-map-centre-text {
+    fill: #3C3A36;
+    font-family: Georgia, serif;
+    font-size: 19px;
+    text-anchor: middle;
+}
+
+.litverse-map-node circle {
+    fill: #6E7451;
+}
+
+.litverse-map-node text {
+    fill: #28552F;
+    font-family: Georgia, serif;
+    font-size: 20px;
+    text-anchor: middle;
+    transition: fill 0.2s ease;
+}
+
+.litverse-map-node a {
+    text-decoration: none;
+}
+
+.litverse-map-node a:hover text {
+    fill: #1F211F;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+.litverse-map-node a:focus-visible {
+    outline: none;
+}
+
+.litverse-map-node a:focus-visible text {
+    fill: #1F211F;
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .litverse-map {
+        margin: 25px auto 30px;
+    }
+
+    .litverse-map-node text {
+        font-size: 21px;
+    }
+}
+
+
+/* EXCALIDRAW LITVERSE ILLUSTRATION */
+.litverse-map {
+    max-width: 700px;
+    margin: 38px auto 42px;
+}
+
+.litverse-map img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+
+
+
+
+/*==================================================
+    LILAMAYA — EXPLORE EDITORIAL COLUMNS
+==================================================*/
+
+.explore-page {
+    max-width: 1320px;
+    margin: 76px auto 100px;
+    padding: 0 30px;
+}
+
+.explore-header {
+    margin-bottom: 54px;
+    text-align: center;
+}
+
+.explore-introduction {
+    max-width: 1120px;
+    margin: 24px auto 0;
+    font-size: 1.4rem;
+    line-height: 1.9;
+}
+
+/* Three deliberately composed vertical columns */
+
+.explore-mosaic {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 2px;
+}
+
+.explore-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.explore-entry {
+    min-width: 0;
+    padding: 8px;
+}
+
+.explore-entry-link {
+    display: block;
+    padding: 12px 12px 0;
+    background-color: #E5E2DA;
+    border-radius: 5px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+}
+
+.explore-entry-image {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.explore-entry-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    filter: grayscale(0%);
+    transition: filter 400ms ease;
+}
+
+.explore-entry-link:hover .explore-entry-image img,
+.explore-entry-link:focus-visible .explore-entry-image img {
+    filter: grayscale(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .explore-entry-image img {
+        transition: none;
+    }
+}
+
+.explore-entry-text {
+    padding: 12px 4px 30px;
+    background-color: #E5E2DA;
+}
+
+.explore-entry-text h2 {
+    display: block;
+    margin: 0 0 5px;
+    color: #6E7451;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.35;
+    transition: color 180ms ease;
+}
+
+.explore-entry-text p {
+    margin: 0;
+    color: #777;
+    font-size: 1.08rem;
+    line-height: 1.75;
+}
+
+.explore-entry-link:hover .explore-entry-text h2,
+.explore-entry-link:focus-visible .explore-entry-text h2 {
+    color: #2F2D2A;
+}
+
+.explore-entry-link:focus-visible {
+    outline: 2px solid #6E7451;
+    outline-offset: -2px;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+    .explore-page {
+        padding: 0 18px;
+    }
+
+    .explore-mosaic {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .explore-page {
+        margin: 48px auto 70px;
+        padding: 0 8px;
+    }
+
+    .explore-header {
+        padding: 0 14px;
+        margin-bottom: 36px;
+    }
+
+    .explore-mosaic {
+        grid-template-columns: 1fr;
+    }
+
+    .explore-entry {
+        padding: 8px;
+    }
+
+    .explore-entry-text {
+        padding: 10px 3px 14px;
+    }
+}

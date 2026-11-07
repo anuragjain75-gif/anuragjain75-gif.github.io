@@ -1,0 +1,46 @@
+{{ define "main" }}
+
+<main class="entity-index">
+
+    <header class="page-header entity-index-header">
+
+        <h1 class="page-title">Writings</h1>
+
+        <p class="page-introduction entity-index-description">
+            A collection of essays, brief reflections, encounters with
+            paintings, and longer works slowly taking shape.
+        </p>
+
+    </header>
+
+    <section class="entity-index-list" aria-label="Writings">
+
+        <ul class="entity-index-items">
+
+            <li class="entity-index-item">
+                <h2><a href="{{ "essays/" | relURL }}">Essays</a></h2>
+                <p>Reflections on memory, childhood, fatherhood, nature, books, gardens, solitude, and the quiet mysteries hidden within ordinary life.</p>
+            </li>
+
+            <li class="entity-index-item">
+                <h2><a href="{{ "fragments/" | relURL }}">Fragments</a></h2>
+                <p>Brief literary reflections, moments of insight, and quiet observations that stand complete in themselves—yet often become the seeds from which longer essays grow.</p>
+            </li>
+
+            <li class="entity-index-item">
+                <h2><a href="{{ "paintings/" | relURL }}">Paintings</a></h2>
+                <p>Reflections on paintings, painters, seeing, beauty, memory, silence, and the mysteries that reveal themselves when we look closely.</p>
+            </li>
+
+            <li class="entity-index-item">
+                <h2><a href="{{ "books/" | relURL }}">Books</a></h2>
+                <p>Longer works in progress and completed books. Some works ask to be written slowly.</p>
+            </li>
+
+        </ul>
+
+    </section>
+
+</main>
+
+{{ end }}

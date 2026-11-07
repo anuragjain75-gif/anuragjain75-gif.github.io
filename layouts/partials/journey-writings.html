@@ -1,0 +1,57 @@
+{{ $journey := . }}
+{{ $writings := slice }}
+
+{{ range site.RegularPages }}
+    {{ $source := . }}
+
+    {{ range .Params.connections }}
+        {{ if and
+            (eq .target $journey.RelPermalink)
+            (eq .relation "belongs-to")
+        }}
+            {{ $writings = $writings | append $source }}
+        {{ end }}
+    {{ end }}
+{{ end }}
+
+{{ if $writings }}
+
+    <section class="entity-connections journey-writings">
+
+        <h2>The Unfolding Exploration</h2>
+
+        <div class="entity-connection-group">
+
+            <ul class="entity-connection-list">
+
+                {{ range sort $writings "Date" }}
+
+                    <li class="entity-connection">
+
+                        <a href="{{ .RelPermalink }}">
+                            {{ .Title }}
+                        </a>
+
+                        {{ with .Params.introduction }}
+                            <p class="entity-connection__note">
+                                {{ . | plainify }}
+                            </p>
+                        {{ else }}
+                            {{ with .Description }}
+                                <p class="entity-connection__note">
+                                    {{ . }}
+                                </p>
+                            {{ end }}
+                        {{ end }}
+
+                    </li>
+
+                {{ end }}
+
+            </ul>
+
+        </div>
+
+    </section>
+
+{{ end }}

@@ -1,0 +1,179 @@
+{{ $current := . }}
+{{ $incoming := slice }}
+
+{{/* Discover incoming relationships automatically. */}}
+{{ range site.RegularPages }}
+    {{ $source := . }}
+
+    {{ range .Params.connections }}
+        {{ if eq .target $current.RelPermalink }}
+            {{ $incoming = $incoming | append (dict
+                "page" $source
+                "relation" .relation
+                "basis" .basis
+                "note" .note
+            ) }}
+        {{ end }}
+    {{ end }}
+{{ end }}
+
+<main class="entity-page">
+
+    {{ partial "pagefind-meta.html" . }}
+
+    <header class="page-header entity-header">
+
+        <p class="entity-classification">
+            {{ .Section | humanize | title }}
+        </p>
+
+        <h1 class="page-title">
+            {{ .Title }}
+        </h1>
+
+        {{ with .Params.description }}
+            <p class="page-description entity-description">
+                {{ . }}
+            </p>
+        {{ end }}
+
+        {{ with .Params.stage }}
+            <p class="entity-stage">
+                {{ . | humanize | title }} profile
+            </p>
+        {{ end }}
+
+    </header>
+
+    {{ with .Params.hero }}
+        <figure class="page-hero">
+            <img src="{{ . }}" alt="{{ $.Title }}">
+        </figure>
+    {{ end }}
+
+    <article class="page-content entity-content" data-pagefind-body>
+        {{ .Content }}
+    </article>
+
+    {{ if eq .Section "journeys" }}
+        {{ partial "journey-writings.html" . }}
+    {{ end }}
+
+    {{ if or .Params.connections $incoming }}
+
+        <section class="entity-connections">
+
+            <h2>Connections</h2>
+
+            {{ with .Params.connections }}
+
+                <div class="entity-connection-group">
+
+                    <h3>Connected from this entry</h3>
+
+                    <ul class="entity-connection-list">
+
+                        {{ range $current.Params.connections }}
+
+                            {{ $connection := . }}
+
+                            {{ with site.GetPage $connection.target }}
+
+                                <li class="entity-connection">
+
+                                    <a href="{{ .RelPermalink }}">
+                                        {{ .Title }}
+                                    </a>
+
+                                    <span class="entity-connection__relation">
+                                        {{ $connection.relation | humanize }}
+                                    </span>
+
+                                    {{ with $connection.note }}
+                                        <p class="entity-connection__note">
+                                            {{ . }}
+                                        </p>
+                                    {{ end }}
+
+                                    {{ with $connection.basis }}
+                                        <span class="entity-connection__basis">
+                                            {{ . | humanize }} relationship
+                                        </span>
+                                    {{ end }}
+
+                                </li>
+
+                            {{ end }}
+
+                        {{ end }}
+
+                    </ul>
+
+                </div>
+
+            {{ end }}
+
+            {{ if $incoming }}
+
+                <div class="entity-connection-group">
+
+                    <h3>Connected to this entry</h3>
+
+                    <ul class="entity-connection-list">
+
+                        {{ range $incoming }}
+
+                            {{ $source := .page }}
+                            {{ $relation := .relation }}
+
+                            {{ $reverseLabel := "related through" }}
+
+                            {{ if eq $relation "authored" }}
+                                {{ $reverseLabel = "authored by" }}
+                            {{ else if eq $relation "explores" }}
+                                {{ $reverseLabel = "explored through" }}
+                            {{ else if eq $relation "influenced" }}
+                                {{ $reverseLabel = "influenced by" }}
+                            {{ else if eq $relation "disagrees-with" }}
+                                {{ $reverseLabel = "disagreed with by" }}
+                            {{ else if eq $relation "belongs-to" }}
+                                {{ $reverseLabel = "part of this journey" }}
+                            {{ end }}
+
+                            <li class="entity-connection">
+
+                                <a href="{{ $source.RelPermalink }}">
+                                    {{ $source.Title }}
+                                </a>
+
+                                <span class="entity-connection__relation">
+                                    {{ $reverseLabel }}
+                                </span>
+
+                                {{ with .note }}
+                                    <p class="entity-connection__note">
+                                        {{ . }}
+                                    </p>
+                                {{ end }}
+
+                                {{ with .basis }}
+                                    <span class="entity-connection__basis">
+                                        {{ . | humanize }} relationship
+                                    </span>
+                                {{ end }}
+
+                            </li>
+
+                        {{ end }}
+
+                    </ul>
+
+                </div>
+
+            {{ end }}
+
+        </section>
+
+    {{ end }}
+
+</main>

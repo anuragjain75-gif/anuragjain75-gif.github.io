@@ -3,63 +3,231 @@
 <main>
 
     <div class="page-hero">
-    <img src="{{ "images/dusk.png" | relURL }}"
-         alt="Painting by Artist Phil Greenwood">
-   </div>
+        <img src="{{ "images/dusk.png" | relURL }}"
+             alt="Painting by Artist Phil Greenwood">
+    </div>
 
-    <article class="page-content">
+    <article class="page-content litverse-intro">
+
+        <h1 class="litverse-page-title">
+    <span class="litverse-title-icon" aria-hidden="true">
+        {{ partial "icon.html" "orbit" }}
+    </span>
+    <span>Lilamaya Litverse</span>
+</h1>
 
         <p>
-            There are moments that pass so quietly we scarcely notice them.
+            There are many ways of entering the vast universe of human thought and imagination. One may
+            begin with a writer and find oneself led to a forgotten philosopher; open a book and encounter
+            an entire intellectual tradition; follow an idea across centuries and discover its unexpected
+            appearances in literature, art and history. A painting may lead to a place, a place to a
+            memory, a memory to a question that has occupied the human mind for thousands of years.
         </p>
 
         <p>
-            A child absorbed in the patient examination of a fallen leaf. The fragrance of wet earth after the
-            first rain. The familiar path through a garden at dusk. An old book returning to our hands after
-            many years. A memory that unexpectedly rises into the present and changes the way we see our own
-            life.
+            Lilamaya Litverse is an attempt to bring these encounters together.
         </p>
 
         <p>
-            Nothing extraordinary appears to happen.
+            The word <em>Litverse</em> brings together literature and universe. But its meaning extends
+            beyond literature in the narrow sense. It describes an interconnected intellectual universe
+            encompassing literature, philosophy, art, history, ideas, traditions, places and the lives
+            of those who have shaped human imagination.
         </p>
 
         <p>
-            Yet somehow, the world has become larger.
+            It is a personal intellectual universe, an evolving landscape shaped by years of reading,
+            reflection and exploration. It brings together the people who have enlarged our understanding
+            of the world, the works through which their imaginations found expression, the ideas that have
+            travelled across cultures and centuries, and the traditions that continue to shape human thought.
         </p>
 
         <p>
-            The Lilamaya is a literary home for such moments.
+            But the Litverse is not simply a collection of information. Its deeper purpose lies in the
+            relationships between things: the affinities between writers, the conversations between
+            traditions, the recurrence of ideas in different ages, the influence of places upon imagination,
+            and the curious paths by which one discovery leads to another.
         </p>
 
         <p>
-            These pages are an invitation to slow down, to notice more carefully, and to rediscover the quiet
-            richness hidden within ordinary life. They wander through childhood and memory, fatherhood and
-            nature, books and gardens, solitude and education—not in search of novelty, but in the hope that
-            careful attention may reveal what has always been waiting to be seen.
+            Some connections are historical and documented; others emerge from interpretation, comparison
+            or personal affinity. Together, they form a landscape that can be explored not merely through an
+            index, but through curiosity.
         </p>
 
         <p>
-            Beneath these writings flows a quiet current of <a href="https://neevselfinquiry.in/"
-       target="_blank"
-       rel="noopener noreferrer">Advaita Vedānta</a>. It is rarely spoken of directly.
-            Rather, it remains in the background as a way of seeing that allows the ordinary world to reveal an
-            unexpected depth. Here, philosophy is not an end in itself but a light that falls gently upon
-            everyday life.
+            The Lilamaya Litverse has seven principal entrances:
+        </p>
+
+        <div class="litverse-map">
+    <img
+        src="{{ "images/lilamaya-litverse.svg" | relURL }}"
+        alt="The Lilamaya Litverse, with seven radial entrances: People, Works, Ideas, Traditions, Places, Writings and Journeys."
+        loading="lazy">
+</div>
+
+    </article>
+
+    <section class="litverse-entrances" aria-label="Seven entrances to Lilamaya">
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "people/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+        <span>People</span>
+    </a>
+</h2>
+            <p>
+                Writers, poets, philosophers, artists, thinkers and other individuals whose lives and work
+                have left a mark upon the human imagination.
+            </p>
+        </div>
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "works/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 7v14"/>
+                    <path d="M3 18V5a2 2 0 0 1 2-2h4a3 3 0 0 1 3 3 3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-4a3 3 0 0 0-3 2 3 3 0 0 0-3-2H5a2 2 0 0 1-2-2Z"/>
+                </svg>
+        <span>Works</span>
+    </a>
+</h2>
+            <p>
+                Books, essays, poems, paintings and other creations that invite sustained engagement.
+            </p>
+        </div>
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "ideas/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 18h6"/>
+                    <path d="M10 22h4"/>
+                    <path d="M15.09 14a6 6 0 1 0-6.18 0c.5.4.9 1.1 1.09 2h4c.19-.9.59-1.6 1.09-2Z"/>
+                </svg>
+        <span>Ideas</span>
+    </a>
+</h2>
+            <p>
+                Philosophical questions, literary themes, intellectual discoveries and enduring problems
+                of human existence.
+            </p>
+        </div>
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "traditions/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 21h18"/>
+                    <path d="M6 21V7l6-4 6 4v14"/>
+                    <path d="M9 21v-4h6v4"/>
+                    <path d="M9 10h.01M15 10h.01"/>
+                </svg>
+        <span>Traditions</span>
+    </a>
+</h2>
+            <p>
+                The schools of thought, literary movements, artistic currents and cultural inheritances
+                through which ideas take shape and travel.
+            </p>
+        </div>
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "places/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="2.5"/>
+                </svg>
+        <span>Places</span>
+    </a>
+</h2>
+            <p>
+                Cities, landscapes, gardens and geographical settings that possess literary, historical
+                or personal significance.
+            </p>
+        </div>
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "writings/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.24 12.24a6 6 0 0 0-8.48-8.48L3 12.5V21h8.5Z"/>
+                    <path d="m16 8-2 2"/>
+                    <path d="M9 15l-2 2"/>
+                    <path d="M14 6l4 4"/>
+                </svg>
+        <span>Writings</span>
+    </a>
+</h2>
+            <p>
+                Essays, fragments, reflections and longer works emerging from my own encounters with
+                this world.
+            </p>
+        </div>
+
+        <div class="litverse-entry">
+            <h2 class="litverse-entry-heading">
+    <a href="{{ "journeys/" | relURL }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="5" cy="19" r="2"/>
+                    <circle cx="19" cy="5" r="2"/>
+                    <path d="M7 19h3a4 4 0 0 0 4-4 4 4 0 0 1 4-4h1"/>
+                    <path d="m15 5 2 0"/>
+                    <path d="M19 7v2"/>
+                </svg>
+        <span>Journeys</span>
+    </a>
+</h2>
+            <p>
+                Extended explorations that follow particular writers, works, ideas or questions across
+                a landscape of intellectual connections.
+            </p>
+        </div>
+
+    </section>
+
+    <article class="page-content litverse-conclusion">
+
+        <p>
+            These entrances are not separate compartments. They are different ways of approaching the Litverse
+            whose elements continually intersect. A person may lead to a work, a work to an idea, an idea
+            to a tradition, and a tradition to another person altogether. Every path opens the possibility
+            of another.
         </p>
 
         <p>
-            This is not a website to be hurried through. Wander without a plan. Follow your curiosity. Return to
-            an essay months or years later and discover that it has quietly changed because you have.
+            The Litverse will grow gradually. Some entries will be brief introductions; others will develop
+            into substantial studies. Certain subjects will invite repeated exploration over the years.
+            New discoveries will lead to new connections, and the landscape will acquire greater depth as
+            it expands.
         </p>
 
         <p>
-            If, for a little while, these pages help the world appear a little wider, a little quieter, or a
-            little more mysterious than it seemed before, then they will have fulfilled their purpose.
+            The Litverse is necessarily personal. It reflects my own intellectual preoccupations,
+            enthusiasms, disagreements and discoveries. It does not claim to be an exhaustive account of
+            human knowledge, nor does it pretend to offer a final interpretation of the subjects it
+            explores. It is an invitation to encounter them, examine them and follow their connections.
         </p>
 
         <p>
-            Welcome.
+            You may arrive looking for a particular writer or book. You may leave having discovered an
+            unfamiliar philosophical tradition, an overlooked artist or an unexpected intellectual
+            companion. You may follow a carefully traced journey, or simply wander from one subject to
+            another.
+        </p>
+
+        <p>
+            There is no prescribed route.
+        </p>
+
+        <p class="litverse-welcome">
+            Welcome to the Lilamaya Litverse.
         </p>
 
         {{ partial "share.html" . }}

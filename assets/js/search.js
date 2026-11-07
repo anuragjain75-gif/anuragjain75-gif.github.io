@@ -6,136 +6,151 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     if (!input || !results || !template) return;
 
-    await pagefind.init();
+    try {
 
-    let timer;
+        const pagefind = await import("/pagefind/pagefind.js");
 
-    input.addEventListener("input", () => {
+        await pagefind.init();
 
-        clearTimeout(timer);
+        let timer;
 
-        timer = setTimeout(runSearch, 200);
+        input.addEventListener("input", () => {
 
-    });
+            clearTimeout(timer);
+            timer = setTimeout(runSearch, 200);
 
-    function escapeRegex(text) {
-        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    }
+        });
 
-    async function runSearch() {
-
-        const query = input.value.trim();
-
-        results.innerHTML = "";
-
-        if (query.length < 2)
-            return;
-
-        const search = await pagefind.search(query);
-
-        if (!search.results.length) {
-
-            results.innerHTML = `
-                <p class="search-empty">
-                    Nothing in The Lilamaya matched your search.
-                </p>
-            `;
-
-            return;
+        function escapeRegex(text) {
+            return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         }
 
-        const typeMap = {
-            "Essays": "Essay",
-            "Books": "Book",
-            "Fragments": "Fragment",
-            "Pages": "Page"
-        };
+        async function runSearch() {
 
-        const wholeWord = new RegExp(
-            `\\b${escapeRegex(query.toLowerCase())}\\b`,
-            "i"
-        );
+            const query = input.value.trim();
 
-        let matches = 0;
+            results.innerHTML = "";
 
-        for (const result of search.results) {
+            if (query.length < 2) return;
 
-            const data = await result.data();
+            const search = await pagefind.search(query);
 
-            const searchableText = [
-                data.meta.title || "",
-                data.meta.description || "",
-                data.excerpt || ""
-            ].join(" ").toLowerCase();
+            if (!search.results.length) {
 
-            // Ignore fuzzy matches like "moments" for "moon"
-            if (!wholeWord.test(searchableText)) {
-                continue;
+                results.innerHTML = `
+                    <p class="search-empty">
+                        Nothing in The Lilamaya matched your search.
+                    </p>
+                `;
+
+                return;
             }
 
-            matches++;
+            const typeMap = {
+                "Essays": "Essay",
+                "Books": "Book",
+                "Fragments": "Fragment",
+                "Pages": "Page"
+            };
 
-            const card = template.content.cloneNode(true);
+            const wholeWord = new RegExp(
+                `\\b${escapeRegex(query.toLowerCase())}\\b`,
+                "i"
+            );
 
-            const link = card.querySelector(".search-result__link");
+            let matches = 0;
 
-            link.href = data.url;
-            link.textContent = data.meta.title || data.url;
+            for (const result of search.results) {
 
-            const contentType =
-                typeMap[data.meta.type] ||
-                data.meta.type ||
-                "Page";
+                const data = await result.data();
 
-            card.querySelector(".search-result__type")
-                .textContent = contentType;
+                const searchableText = [
+                    data.meta.title || "",
+                    data.meta.description || "",
+                    data.excerpt || ""
+                ].join(" ").toLowerCase();
 
-            const meta = card.querySelector(".search-result__reading-time");
+                if (!wholeWord.test(searchableText)) {
+                    continue;
+                }
 
-            if (contentType === "Fragment") {
+                matches++;
 
-                if (data.meta.date) {
+                const card = template.content.cloneNode(true);
 
-                    meta.textContent = new Date(data.meta.date)
-                        .toLocaleDateString("en-GB", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric"
-                        });
+                const link = card.querySelector(".search-result__link");
+
+                link.href = data.url;
+                link.textContent = data.meta.title || data.url;
+
+                const contentType =
+                    typeMap[data.meta.type] ||
+                    data.meta.type ||
+                    "Page";
+
+                card.querySelector(".search-result__type")
+                    .textContent = contentType;
+
+                const meta = card.querySelector(".search-result__reading-time");
+
+                if (contentType === "Fragment") {
+
+                    if (data.meta.date) {
+
+                        meta.textContent = new Date(data.meta.date)
+                            .toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric"
+                            });
+
+                    } else {
+
+                        meta.textContent = "";
+
+                    }
 
                 } else {
 
-                    meta.textContent = "";
+                    meta.textContent = data.meta.reading_time
+                        ? `${data.meta.reading_time} min read`
+                        : "";
 
                 }
 
-            } else {
+                card.querySelector(".search-result__description")
+                    .textContent =
+                        data.meta.description ||
+                        data.excerpt.replace(/<[^>]+>/g, "");
 
-                meta.textContent = `${data.meta.reading_time} min read`;
+                card.querySelector(".search-result__excerpt")
+                    .innerHTML = `… ${data.excerpt.trim()} …`;
+
+                results.appendChild(card);
 
             }
 
-            card.querySelector(".search-result__description")
-                .textContent =
-                    data.meta.description ||
-                    data.excerpt.replace(/<[^>]+>/g, "");
+            if (matches === 0) {
 
-            card.querySelector(".search-result__excerpt")
-                .innerHTML = `… ${data.excerpt.trim()} …`;
+                results.innerHTML = `
+                    <p class="search-empty">
+                        Nothing in The Lilamaya matched your search.
+                    </p>
+                `;
 
-            results.appendChild(card);
-
-        }
-
-        if (matches === 0) {
-
-            results.innerHTML = `
-                <p class="search-empty">
-                    Nothing in The Lilamaya matched your search.
-                </p>
-            `;
+            }
 
         }
+
+    } catch (error) {
+
+        console.error("Lilamaya search failed:", error);
+
+        results.innerHTML = `
+            <p class="search-empty">
+                Search is temporarily unavailable. Please try again.
+            </p>
+        `;
 
     }
 

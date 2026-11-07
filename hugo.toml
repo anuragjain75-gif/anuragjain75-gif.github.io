@@ -8,9 +8,9 @@ fragmenttheme = "fragmentthemes"
 paintingtheme = "paintingthemes"
 
 [params]
-tagline = "Essays on the extraordinary hidden within ordinary life"
+tagline = "A Personal Atlas of Literature, Ideas and Existence"
 author = "Anurag Jain"
-description = "A quiet literary home of essays on memory, childhood, fatherhood, nature, books, gardens, silence, and the extraordinary hidden within ordinary life."
+description = "An evolving landscape of human thought and imagination, connected through the paths of literature, philosophy, art, history and personal discovery."
 [page]
   nextPrevSortOrder = "asc"
 
