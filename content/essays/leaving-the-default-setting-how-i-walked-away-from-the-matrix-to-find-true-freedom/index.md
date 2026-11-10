@@ -16,21 +16,18 @@ connections: []
 I wake up in the morning and toddle towards my parents’ bedroom when suddenly I see golden sunlight bursting through the window, bathing the room with an ethereal light. 
 
 
-![Annie Dillard s Wild Creek Reverie](images/annie-dillard-s-wild-creek-reverie-1794306057754.png)
 
 <br />
 
 I have spent almost my whole life in this town called Tatanagar, the Pittsburgh of India. Built from scratch in the early 20th century as a model “company town,” it was engineered to combine heavy steel production with spacious public parks and tree-lined avenues. Growing up here meant that in my consciousness the images of smokestacks, furnaces, and heavy industry mingled with the golden glow of sunlight in well-planned homes; the fragrance of globe-shaped orange-yellow flowers of the Kadam trees along the roadside; and the spectacular vision of the Dalma Mountains looming on the horizon.
 
 
-![Van Gogh Style Portrait by the Window](images/van-gogh-style-portrait-by-the-window-1794306078546.png)
 
 <br />
 
 This was the consciousness that accompanied me when I was bundled off to “Little Flower School” as a little flower myself. In an era before school vans, my younger brother and I skipped and hopped our way home, sometimes getting soaking wet in the monsoon rains. We would rip off our shoes and socks to sail paper boats down the gushing roadside gutters, splashing in cratered puddles and shouting with glee—entirely oblivious to the dressing-down our soiled clothes would earn us later.
 
 
-![Almond Blossoms](images/almond-blossoms-1794306093501.jpg)
 
 <br />
 
