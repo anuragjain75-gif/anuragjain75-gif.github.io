@@ -9,6 +9,9 @@
 
             <label for="new-essay-title">Title</label>
             <input type="text" id="new-essay-title" autocomplete="off">
+            <div id="new-essay-title-error"
+                 class="entry-connection-warning"
+                 role="alert" hidden></div>
 
             <label for="new-essay-introduction">Introduction</label>
             <textarea id="new-essay-introduction" rows="3"></textarea>
@@ -21,7 +24,10 @@
             </button>
 
             <label for="new-essay-image">Image</label>
-            <input type="file" id="new-essay-image" accept="image/*">
+            <input
+                type="file"
+                id="new-essay-image"
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
 
             <div class="new-document-actions">
                 <button type="button" id="begin-new-essay">Begin Writing</button>
@@ -31,7 +37,65 @@
             </div>
         </div>
 
+        <div id="new-entry-form" class="new-document-form" hidden>
+            <h2>Begin a New Entry</h2>
+
+            <label for="entry-type">Litverse Entrance</label>
+            <select id="entry-type">
+                <option value="people">People</option>
+                <option value="works">Works</option>
+                <option value="ideas">Ideas</option>
+                <option value="traditions">Traditions</option>
+                <option value="places">Places</option>
+                <option value="journeys">Journeys</option>
+            </select>
+
+            <label for="entry-title">Title</label>
+            <input type="text" id="entry-title" autocomplete="off">
+            <div id="entry-title-error"
+                 class="entry-connection-warning"
+                 role="alert" hidden></div>
+
+            <label for="entry-description">Description</label>
+            <textarea id="entry-description" rows="3"></textarea>
+
+            <label for="entry-stage">Development Stage</label>
+            <input type="text" id="entry-stage" value="seed">
+
+            <label for="entry-date">Date</label>
+            <input type="date" id="entry-date">
+
+            <div class="entry-connections">
+                <h3>Connections</h3>
+                <p>Connect this entry to other parts of the Lilamaya universe.</p>
+                <div id="entry-connection-list"></div>
+                <button type="button" id="add-entry-connection"
+                        class="secondary-action">+ Add connection</button>
+            </div>
+
+            <label for="entry-body">Opening Text</label>
+            <textarea id="entry-body" rows="10"
+                      placeholder="Begin writing your entry..."></textarea>
+
+            <div class="new-document-actions">
+                <button type="button" id="create-entry">Create Entry</button>
+                <button type="button" id="cancel-entry"
+                        class="secondary-action">Cancel</button>
+            </div>
+            <div id="create-entry-status" class="entry-connection-notice"
+                 role="status" aria-live="polite"></div>
+        </div>
+
         <div id="document-selector" class="document-selector"></div>
+
+        <section id="document-connections"
+                 class="entry-connections document-connections" hidden>
+            <h3>Connections</h3>
+            <p>Relationships belonging to this entry in the Lilamaya universe.</p>
+            <div id="document-connection-list"></div>
+            <button type="button" id="add-document-connection"
+                    class="secondary-action">+ Add connection</button>
+        </section>
 
         <div class="editor-actions">
             <button type="button" id="save-editor">Save</button>

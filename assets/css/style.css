@@ -4741,3 +4741,1285 @@ q {
         padding: 10px 3px 14px;
     }
 }
+
+/* ----------------------------------------------------------
+   Writing Desk — Litverse Connections
+----------------------------------------------------------- */
+
+.entry-connections {
+    margin: 12px 0 16px;
+}
+
+.entry-connections > h3 {
+    margin: 0 0 10px;
+    color: #3f3b36;
+}
+
+.entry-connections > p {
+    margin: 0 0 18px;
+    color: #62594d;
+    font-size: 0.95rem;
+}
+
+#entry-connection-list,
+#document-connection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Connections panel action */
+#add-document-connection {
+    margin-top: 10px;
+    padding: 8px 13px;
+    border: 1px solid #cdbda5;
+    border-radius: 4px;
+    background: #fbf5e9;
+    color: #62594d;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 160ms ease,
+                border-color 160ms ease,
+                color 160ms ease;
+}
+
+#add-document-connection:hover {
+    border-color: #8b8b68;
+    background: #f1ead9;
+    color: #3f3b36;
+}
+
+#add-document-connection:focus-visible {
+    outline: 2px solid #8b8b68;
+    outline-offset: 3px;
+}
+
+.entry-connection-row {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 0.9fr 2fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid #d8c9b2;
+    border-radius: 6px;
+    background: #fbf5e9;
+}
+
+.entry-connection-row select,
+.entry-connection-row input[type="text"] {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 9px 10px;
+    border: 1px solid #cdbda5;
+    border-radius: 3px;
+    background: #fff9eb;
+    color: #3f3b36;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.92rem;
+}
+
+.entry-connection-row select:focus,
+.entry-connection-row input:focus {
+    border-color: #6e7451;
+    outline: none;
+}
+
+.entry-connection-row .entry-connection-remove {
+    padding: 7px 10px;
+    border: 1px solid #cdbda5;
+    border-radius: 3px;
+    background: transparent;
+    color: #62594d;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.entry-connection-row .entry-connection-remove:hover {
+    border-color: #8f6658;
+    color: #8f6658;
+}
+
+@media (max-width: 850px) {
+    .entry-connection-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .entry-connection-target,
+    .entry-connection-note {
+        grid-column: 1 / -1;
+    }
+
+    .entry-connection-row .entry-connection-remove {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 480px) {
+    .entry-connection-row {
+        grid-template-columns: 1fr;
+        gap: 9px;
+        padding: 12px;
+    }
+
+    .entry-connection-target,
+    .entry-connection-note {
+        grid-column: auto;
+    }
+}
+
+
+/* Writing Desk relationship validation */
+
+.entry-connection-row.has-duplicate-target {
+    border-color: #a87969;
+}
+
+.entry-connection-warning,
+.entry-connection-notice {
+    grid-column: 1 / -1;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding: 2px 0;
+}
+
+.entry-connection-warning {
+    color: #925c4d;
+}
+
+.entry-connection-notice {
+    color: #6e7451;
+}
+
+.entry-connection-warning[hidden] {
+    display: none;
+}
+
+/* ----------------------------------------------------------
+   Writing Desk — Theme Management
+----------------------------------------------------------- */
+
+.manage-themes {
+    margin: 14px 0 22px;
+    border-top: 1px solid #d8cbb8;
+    border-bottom: 1px solid #d8cbb8;
+    color: #51493f;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.manage-themes > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 2px;
+    cursor: pointer;
+    font-size: 0.96rem;
+    font-weight: 600;
+    list-style: none;
+}
+
+.manage-themes > summary::-webkit-details-marker {
+    display: none;
+}
+
+.manage-themes > summary::after {
+    content: "+";
+    margin-left: auto;
+    color: #81745f;
+    font-size: 1.15rem;
+    font-weight: 400;
+}
+
+.manage-themes[open] > summary::after {
+    content: "−";
+}
+
+.manage-themes > summary span {
+    color: #897d6b;
+    font-size: 0.82rem;
+    font-weight: 400;
+}
+
+.manage-themes-content {
+    padding: 2px 0 14px;
+}
+
+.manage-themes-content > p {
+    margin: 0 0 12px;
+    color: #756b5e;
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.manage-themes-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.manage-theme-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 9px 2px;
+    border-top: 1px solid #e6ddcf;
+}
+
+.manage-theme-name {
+    color: #51493f;
+    font-size: 0.93rem;
+}
+
+.remove-theme-button {
+    padding: 4px 10px !important;
+    border: 1px solid #c7b7a5 !important;
+    border-radius: 2px !important;
+    background: transparent !important;
+    color: #795c50 !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 0.82rem !important;
+    cursor: pointer;
+}
+
+.remove-theme-button:hover {
+    border-color: #98766a !important;
+    background: #f3e9dd !important;
+}
+
+.remove-theme-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.remove-theme-confirmation {
+    flex: 1 1 100%;
+    margin: 5px 0 4px;
+    padding: 13px 15px;
+    border-left: 2px solid #a48a70;
+    background: #f5eee2;
+}
+
+.remove-theme-confirmation > p {
+    margin: 0 0 9px;
+    color: #51493f;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.remove-theme-confirmation ul {
+    margin: 8px 0 13px;
+    padding-left: 20px;
+    color: #6e6254;
+    font-size: 0.85rem;
+    line-height: 1.65;
+}
+
+.remove-theme-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 12px;
+}
+
+.remove-theme-confirm-button {
+    padding: 7px 13px !important;
+    border: 1px solid #98766a !important;
+    border-radius: 2px !important;
+    background: #8b695d !important;
+    color: #fff9eb !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 0.86rem !important;
+    cursor: pointer;
+}
+
+.remove-theme-confirm-button:hover {
+    background: #75564c !important;
+}
+
+.remove-theme-confirm-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.remove-theme-actions button:focus-visible,
+.remove-theme-button:focus-visible,
+.manage-themes > summary:focus-visible {
+    outline: 2px solid #8b8067;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .manage-theme-row {
+        padding: 10px 2px;
+    }
+
+    .remove-theme-confirmation {
+        padding: 11px;
+    }
+}
+
+/* ----------------------------------------------------------
+   Writing Desk — Theme Renaming
+----------------------------------------------------------- */
+
+.manage-theme-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.rename-theme-button {
+    padding: 4px 10px !important;
+    border: 1px solid #c7b7a5 !important;
+    border-radius: 2px !important;
+    background: transparent !important;
+    color: #5e705a !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 0.82rem !important;
+    cursor: pointer;
+}
+
+.rename-theme-button:hover {
+    border-color: #829078 !important;
+    background: #edf0e8 !important;
+}
+
+.rename-theme-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.rename-theme-editor {
+    flex: 1 1 100%;
+    margin: 5px 0 4px;
+    padding: 13px 15px;
+    border-left: 2px solid #829078;
+    background: #f0f0e8;
+}
+
+.rename-theme-input {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 420px;
+    padding: 8px 10px;
+    border: 1px solid #c7bda9;
+    border-radius: 2px;
+    background: #fffaf0;
+    color: #51493f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.94rem;
+}
+
+.rename-theme-message {
+    margin: 10px 0;
+    color: #51493f;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.rename-theme-editor ul {
+    margin: 8px 0 13px;
+    padding-left: 20px;
+    color: #6e6254;
+    font-size: 0.85rem;
+    line-height: 1.65;
+}
+
+.rename-theme-preview-button,
+.rename-theme-confirm-button {
+    padding: 7px 13px !important;
+    border: 1px solid #829078 !important;
+    border-radius: 2px !important;
+    background: #75836d !important;
+    color: #fff9eb !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 0.86rem !important;
+    cursor: pointer;
+}
+
+.rename-theme-preview-button:hover,
+.rename-theme-confirm-button:hover {
+    background: #626f5b !important;
+}
+
+.rename-theme-preview-button:disabled,
+.rename-theme-confirm-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.rename-theme-editor button:focus-visible,
+.rename-theme-button:focus-visible {
+    outline: 2px solid #8b8067;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .rename-theme-editor {
+        padding: 11px;
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — RICH TEXT EDITOR
+   ========================================================= */
+
+#codemirror-editor {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff9eb;
+    border: 1px solid rgba(60, 58, 54, 0.12);
+}
+
+/* Persistent formatting toolbar */
+
+.lilamaya-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 11px 15px;
+    background: #f8f2e5;
+    border-bottom: 1px solid rgba(60, 58, 54, 0.12);
+}
+
+.lilamaya-toolbar-button {
+    min-width: 34px;
+    height: 32px;
+    padding: 4px 9px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #3c3a36;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.lilamaya-toolbar-button:hover {
+    background: rgba(110, 116, 81, 0.10);
+    border-color: rgba(110, 116, 81, 0.22);
+}
+
+.lilamaya-toolbar-button:focus-visible,
+.lilamaya-toolbar-select:focus-visible {
+    outline: 2px solid rgba(110, 116, 81, 0.55);
+    outline-offset: 2px;
+}
+
+.lilamaya-toolbar-select {
+    height: 32px;
+    padding: 3px 28px 3px 9px;
+    border: 1px solid rgba(60, 58, 54, 0.16);
+    border-radius: 4px;
+    background: #fffdf7;
+    color: #3c3a36;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.lilamaya-toolbar-separator {
+    width: 1px;
+    height: 21px;
+    margin: 0 5px;
+    background: rgba(60, 58, 54, 0.17);
+}
+
+/* Milkdown writing surface */
+
+.lilamaya-editor-area {
+    min-height: 650px;
+    padding: 34px 42px;
+    background: #fff9eb;
+    color: #2f2d2a;
+    font-family: Lora, Georgia, "Times New Roman", serif;
+    font-size: 1.12rem;
+    line-height: 1.9;
+}
+
+.lilamaya-editor-area .ProseMirror {
+    max-width: 900px;
+    min-height: 580px;
+    margin: 0 auto;
+    outline: none;
+}
+
+.lilamaya-editor-area .ProseMirror p {
+    margin: 0 0 1.25em;
+}
+
+.lilamaya-editor-area .ProseMirror h1,
+.lilamaya-editor-area .ProseMirror h2,
+.lilamaya-editor-area .ProseMirror h3,
+.lilamaya-editor-area .ProseMirror h4 {
+    color: #2f2d2a;
+    font-family: Lora, Georgia, "Times New Roman", serif;
+    line-height: 1.35;
+}
+
+.lilamaya-editor-area .ProseMirror blockquote {
+    margin: 1.8em 0;
+    padding: 0.15em 0 0.15em 1.4em;
+    border-left: 3px solid #8b8c6b;
+    color: #625f55;
+}
+
+.lilamaya-editor-area .ProseMirror img {
+    max-width: 100%;
+    height: auto;
+}
+
+.lilamaya-editor-area .ProseMirror a {
+    color: #596b4b;
+}
+
+.lilamaya-editor-area .ProseMirror p.is-empty:first-child::before {
+    color: rgba(60, 58, 54, 0.4);
+    content: "Begin writing…";
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+
+@media (max-width: 700px) {
+    .lilamaya-editor-area {
+        padding: 25px 20px;
+        font-size: 1.05rem;
+    }
+
+    .lilamaya-toolbar {
+        gap: 3px;
+        padding: 9px;
+    }
+
+    .lilamaya-toolbar-button {
+        min-width: 30px;
+        padding: 4px 7px;
+    }
+}
+
+/* =========================================================
+   LILAMAYA WRITING DESK — SEGMENTED DOCUMENTS
+   ========================================================= */
+
+.lilamaya-segmented-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.lilamaya-editable-segment {
+    margin: 0;
+}
+
+.lilamaya-editor-area {
+    min-height: 180px;
+}
+
+.lilamaya-editor-area .ProseMirror {
+    min-height: 150px;
+}
+
+/* Protected literary elements */
+
+.lilamaya-protected-block {
+    margin: 30px 0;
+    padding: 22px 28px;
+    border: 1px solid rgba(60, 58, 54, 0.13);
+    border-radius: 5px;
+    background: rgba(248, 242, 229, 0.65);
+}
+
+.lilamaya-protected-label {
+    margin-bottom: 15px;
+    color: #777866;
+    font-family: Georgia, serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+}
+
+.lilamaya-protected-note {
+    color: #625f55;
+    font-family: Lora, Georgia, serif;
+    font-size: 0.98rem;
+    font-style: italic;
+    text-align: center;
+    padding: 12px 0;
+}
+
+.lilamaya-poetry-block {
+    border-left: 3px solid #8b8c6b;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-radius: 0;
+    background: transparent;
+    padding-left: 30px;
+}
+
+.lilamaya-poetry-content {
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    color: #514e47;
+    font-family: Lora, Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.9;
+}
+
+.lilamaya-invocation-block {
+    border: 0;
+    background: transparent;
+    padding: 35px 25px;
+    text-align: center;
+}
+
+.lilamaya-invocation-content {
+    color: #514e47;
+    font-family: Lora, Georgia, serif;
+    font-size: 1.12rem;
+    font-style: italic;
+    line-height: 1.9;
+    white-space: pre-wrap;
+}
+
+.lilamaya-invocation-separator {
+    margin-top: 20px;
+    color: #8b8c6b;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .lilamaya-protected-block {
+        padding: 18px;
+    }
+
+    .lilamaya-poetry-block {
+        padding-left: 20px;
+    }
+}
+
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — STICKY TOOLBAR
+   ========================================================= */
+
+.lilamaya-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    padding: 11px 15px;
+
+    background: rgba(248, 242, 229, 0.98);
+    border-bottom: 1px solid rgba(60, 58, 54, 0.16);
+
+    box-shadow: 0 3px 9px rgba(45, 40, 30, 0.055);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.lilamaya-toolbar-button {
+    font-size: 1rem;
+}
+
+.lilamaya-toolbar-button:active {
+    background: rgba(110, 116, 81, 0.17);
+    border-color: rgba(110, 116, 81, 0.30);
+}
+
+@media (max-width: 700px) {
+    .lilamaya-toolbar {
+        gap: 3px;
+        padding: 8px;
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — CORRECTED STICKY TOOLBAR
+   ========================================================= */
+
+#codemirror-editor .lilamaya-toolbar {
+    position: sticky;
+    position: -webkit-sticky;
+
+    top: 112px;
+
+    z-index: 1500;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    padding: 10px 15px;
+
+    background: #F8F2E5;
+
+    border-bottom: 1px solid rgba(60, 58, 54, 0.16);
+
+    box-shadow: 0 3px 9px rgba(45, 40, 30, 0.07);
+}
+
+#codemirror-editor .lilamaya-toolbar-button {
+    font-size: 1rem;
+}
+
+#codemirror-editor .lilamaya-toolbar-button:active {
+    background: rgba(110, 116, 81, 0.17);
+    border-color: rgba(110, 116, 81, 0.30);
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-toolbar {
+        top: 105px;
+        gap: 3px;
+        padding: 8px;
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — DOCUMENT TITLE
+   ========================================================= */
+
+#codemirror-editor .lilamaya-document-title-panel {
+    position: sticky;
+    position: -webkit-sticky;
+    top: 112px;
+    z-index: 1501;
+
+    padding: 15px 25px 11px;
+
+    background: rgba(255, 249, 235, 0.98);
+    border-bottom: 1px solid rgba(60, 58, 54, 0.10);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+#codemirror-editor .lilamaya-document-title {
+    margin: 0;
+    color: #3c3a36;
+    font-family: Lora, Georgia, "Times New Roman", serif;
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+}
+
+#codemirror-editor .lilamaya-document-title-meta {
+    margin-top: 4px;
+    color: #85836f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+}
+
+#codemirror-editor .lilamaya-toolbar {
+    top: 190px;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-document-title-panel {
+        top: 105px;
+        padding: 12px 16px 9px;
+    }
+
+    #codemirror-editor .lilamaya-document-title {
+        font-size: 1.15rem;
+    }
+
+    #codemirror-editor .lilamaya-toolbar {
+        top: 178px;
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — POETRY INDENTATION
+   ========================================================= */
+
+#codemirror-editor .lilamaya-poetry-block {
+    margin: 42px 0 42px 42px;
+    padding: 18px 35px;
+    max-width: calc(100% - 42px);
+    border-left: 3px solid #8b8c6b;
+}
+
+#codemirror-editor .lilamaya-poetry-content {
+    max-width: 720px;
+    padding-left: 0;
+}
+
+#codemirror-editor .lilamaya-shortcode-select {
+    min-width: 125px;
+    margin-left: 2px;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-poetry-block {
+        margin-left: 18px;
+        padding: 15px 20px;
+        max-width: calc(100% - 18px);
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — EDITABLE PROTECTED BLOCKS
+   ========================================================= */
+
+#codemirror-editor .lilamaya-protected-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+#codemirror-editor .lilamaya-protected-header .lilamaya-protected-label {
+    margin: 0;
+}
+
+#codemirror-editor .lilamaya-protected-remove {
+    appearance: none;
+    border: 1px solid rgba(110, 91, 69, 0.22);
+    border-radius: 4px;
+    padding: 5px 10px;
+    background: transparent;
+    color: #817665;
+    font-family: Georgia, serif;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+#codemirror-editor .lilamaya-protected-remove:hover {
+    background: rgba(139, 140, 107, 0.12);
+    color: #514e47;
+}
+
+#codemirror-editor .lilamaya-protected-textarea {
+    display: block;
+    width: 100%;
+    min-height: 110px;
+    box-sizing: border-box;
+    resize: vertical;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #514e47;
+    font-family: Lora, Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    padding: 0;
+    white-space: pre-wrap;
+}
+
+#codemirror-editor .lilamaya-poetry-textarea {
+    max-width: 720px;
+}
+
+#codemirror-editor .lilamaya-invocation-textarea {
+    text-align: center;
+    font-style: italic;
+    font-size: 1.12rem;
+}
+
+#codemirror-editor .lilamaya-protected-textarea:focus {
+    outline: none;
+}
+
+#codemirror-editor .lilamaya-poetry-block {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#codemirror-editor .lilamaya-invocation-block {
+    padding-top: 28px;
+    padding-bottom: 28px;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-protected-header {
+        gap: 8px;
+    }
+
+    #codemirror-editor .lilamaya-protected-textarea {
+        font-size: 1rem;
+    }
+}
+
+
+/* =========================================
+   LILAMAYA — POETRY LITERATA TYPOGRAPHY
+   Match the literary quotation typography
+   ========================================= */
+
+.essay-content blockquote.poetry pre,
+.page-content blockquote.poetry pre {
+    margin: 0;
+    font-family: "Literata", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-optical-sizing: auto;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+#codemirror-editor .lilamaya-poetry-content {
+    font-family: "Literata", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-optical-sizing: auto;
+}
+
+
+
+/* =========================================
+   LILAMAYA — POETRY TYPOGRAPHY CORRECTION
+   Writing Desk and published essays
+   ========================================= */
+
+#codemirror-editor textarea.lilamaya-poetry-textarea {
+    font-family: "Literata", Georgia, serif !important;
+    font-style: italic !important;
+    font-weight: 400;
+    font-optical-sizing: auto;
+}
+
+.essay-content blockquote.poetry pre,
+.page-content blockquote.poetry pre {
+    font-family: "Literata", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-optical-sizing: auto;
+}
+
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — DOCUMENT FIND
+   ========================================================= */
+
+#codemirror-editor .lilamaya-document-title-panel {
+    overflow: visible;
+}
+
+#codemirror-editor .lilamaya-document-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+#codemirror-editor .lilamaya-title-search-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    padding: 7px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    background: transparent;
+    color: #77785d;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+#codemirror-editor .lilamaya-title-search-toggle:hover,
+#codemirror-editor .lilamaya-title-search-toggle[aria-expanded="true"] {
+    border-color: rgba(112, 111, 79, 0.22);
+    background: rgba(139, 140, 107, 0.10);
+    color: #626746;
+}
+
+#codemirror-editor .lilamaya-title-search-toggle svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.65;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#codemirror-editor .lilamaya-title-search-toggle:focus-visible,
+#codemirror-editor .lilamaya-search-button:focus-visible,
+#codemirror-editor .lilamaya-search-input:focus-visible {
+    outline: 2px solid rgba(139, 140, 107, 0.65);
+    outline-offset: 2px;
+}
+
+#codemirror-editor .lilamaya-search-panel[hidden] {
+    display: none !important;
+}
+
+#codemirror-editor .lilamaya-search-panel {
+    position: absolute;
+    top: 8px;
+    right: 18px;
+    z-index: 1600;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    width: min(440px, calc(100vw - 48px));
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid rgba(91, 82, 65, 0.20);
+    border-radius: 7px;
+    background: #fbf6e9;
+    box-shadow: 0 8px 24px rgba(48, 42, 31, 0.13);
+}
+
+#codemirror-editor .lilamaya-search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 34px;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    border: 1px solid rgba(91, 82, 65, 0.19);
+    border-radius: 4px;
+    background: rgba(255, 252, 244, 0.92);
+    color: #403d36;
+    font-family: Lora, Georgia, serif;
+    font-size: 0.9rem;
+    box-shadow: none;
+}
+
+#codemirror-editor .lilamaya-search-input::placeholder {
+    color: #999382;
+    opacity: 1;
+}
+
+#codemirror-editor .lilamaya-search-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #77785d;
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+#codemirror-editor .lilamaya-search-button:hover {
+    border-color: rgba(112, 111, 79, 0.20);
+    background: rgba(139, 140, 107, 0.10);
+    color: #555b3d;
+}
+
+#codemirror-editor .lilamaya-search-counter {
+    flex: 0 0 auto;
+    min-width: 48px;
+    color: #77715f;
+    font-family: Georgia, serif;
+    font-size: 0.78rem;
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Clay for ordinary matches; olive for the current match. */
+#codemirror-editor .lilamaya-search-match {
+    border-radius: 2px;
+    background: rgba(177, 119, 83, 0.25);
+    box-shadow: 0 0 0 1px rgba(177, 119, 83, 0.10);
+}
+
+#codemirror-editor .lilamaya-search-match-active {
+    background: rgba(139, 140, 107, 0.42);
+    box-shadow: 0 0 0 1px rgba(101, 106, 70, 0.32);
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-search-panel {
+        right: 8px;
+        width: min(440px, calc(100vw - 32px));
+        gap: 5px;
+        padding: 8px;
+    }
+
+    #codemirror-editor .lilamaya-search-counter {
+        min-width: 42px;
+        font-size: 0.72rem;
+    }
+}
+
+
+/* Lilamaya Find and Replace controls */
+#codemirror-editor .lilamaya-search-top-row,
+#codemirror-editor .lilamaya-replace-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+}
+
+#codemirror-editor .lilamaya-search-top-row {
+    min-width: 0;
+}
+
+#codemirror-editor .lilamaya-replace-row[hidden] {
+    display: none !important;
+}
+
+#codemirror-editor .lilamaya-replace-row {
+    padding-top: 7px;
+    border-top: 1px solid rgba(91, 82, 65, 0.14);
+}
+
+#codemirror-editor .lilamaya-replace-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 32px;
+    box-sizing: border-box;
+    padding: 6px 9px;
+    border: 1px solid rgba(91, 82, 65, 0.19);
+    border-radius: 4px;
+    background: rgba(255, 252, 244, 0.92);
+    color: #403d36;
+    font-family: Lora, Georgia, serif;
+    font-size: 0.86rem;
+    box-shadow: none;
+}
+
+#codemirror-editor .lilamaya-replace-input::placeholder {
+    color: #999382;
+    opacity: 1;
+}
+
+#codemirror-editor .lilamaya-replace-action {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0 9px;
+    border-color: rgba(112, 111, 79, 0.20);
+    background: rgba(139, 140, 107, 0.08);
+    color: #626746;
+    font-family: Georgia, serif;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+#codemirror-editor .lilamaya-replace-action:hover {
+    border-color: rgba(112, 111, 79, 0.35);
+    background: rgba(139, 140, 107, 0.17);
+    color: #4e5738;
+}
+
+#codemirror-editor .lilamaya-replace-all {
+    background: rgba(177, 119, 83, 0.10);
+    color: #895f45;
+}
+
+#codemirror-editor .lilamaya-replace-all:hover {
+    background: rgba(177, 119, 83, 0.18);
+    color: #754b34;
+}
+
+#codemirror-editor .lilamaya-replace-toggle {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0 7px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-search-top-row,
+    #codemirror-editor .lilamaya-replace-row {
+        gap: 4px;
+    }
+
+    #codemirror-editor .lilamaya-replace-action {
+        padding: 0 6px;
+        font-size: 0.72rem;
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — TITLE / TOOLBAR STACKING FIX
+   ========================================================= */
+
+/* Let the document title scroll naturally out of view. */
+#codemirror-editor .lilamaya-document-title-panel {
+    position: relative;
+    top: auto;
+    z-index: auto;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* Keep the formatting toolbar sticky below the site header. */
+#codemirror-editor .lilamaya-toolbar {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 112px;
+    z-index: 1500;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-toolbar {
+        top: 105px;
+    }
+}
+
+
+/* =========================================================
+   LILAMAYA WRITING DESK — CONNECTED STICKY TITLE AND TOOLBAR
+   ========================================================= */
+
+#codemirror-editor .lilamaya-document-title-panel {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 112px;
+    z-index: 1501;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+#codemirror-editor .lilamaya-toolbar {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 220px;
+    z-index: 1500;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-document-title-panel {
+        top: 105px;
+    }
+
+    #codemirror-editor .lilamaya-toolbar {
+        top: 195px;
+    }
+}
