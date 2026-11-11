@@ -8,17 +8,22 @@ import {
 import {
   commandsCtx,
   editorViewCtx,
+  parserCtx,
+  schemaCtx,
   serializerCtx
 } from "@milkdown/kit/core";
 
-import {TextSelection} from "@milkdown/kit/prose/state";
+import {Plugin, TextSelection} from "@milkdown/kit/prose/state";
+import {$prose, $remark} from "@milkdown/kit/utils";
 
 import {
   toggleStrongCommand,
   toggleEmphasisCommand,
   wrapInHeadingCommand,
   turnIntoTextCommand,
-  wrapInBlockquoteCommand
+  wrapInBlockquoteCommand,
+  wrapInBulletListCommand,
+  wrapInOrderedListCommand
 } from "@milkdown/kit/preset/commonmark";
 
 import {
@@ -32,6 +37,12 @@ import {
   readHugoIntroduction,
   updateHugoIntroduction
 } from "./lilamaya-document.js";
+
+import {
+  applySourceReplacements,
+  planNodeReconciliation,
+  buildSeparatorAwareReplacements
+} from "./lilamaya-source-sync.js";
 
 
 function createElement(tag, className, text = "") {
@@ -94,6 +105,555 @@ function createShortcodeSegment(kind) {
 }
 
 
+function createTransactionDiagnosticExtension() {
+  return $prose(() => new Plugin({
+    state: {
+      init() {
+        return null;
+      },
+
+      apply(transaction, value, oldState, newState) {
+        if (!transaction.docChanged) {
+          return value;
+        }
+
+        const steps = transaction.steps.map((step, index) => ({
+          index,
+          type: step.constructor.name,
+          data: step.toJSON()
+        }));
+
+        console.groupCollapsed(
+          "[Lilamaya] Document transaction — " +
+          steps.length + " step(s)"
+        );
+
+        function inspectTopLevelNodes(doc) {
+          const nodes = [];
+
+          doc.forEach((node, offset) => {
+            nodes.push({
+              type: node.type.name,
+              from: offset,
+              to: offset + node.nodeSize,
+              nodeSize: node.nodeSize,
+              text: node.textContent,
+              structure: node.toJSON()
+            });
+          });
+
+          return nodes;
+        }
+
+        console.log("Transaction steps:", steps);
+
+        function firstBlockquote(doc) {
+          let result = null;
+
+          doc.forEach(node => {
+            if (!result && node.type.name === "blockquote") {
+              result = node.toJSON();
+            }
+          });
+
+          return result;
+        }
+
+        console.log(
+          "FIRST BLOCKQUOTE BEFORE:",
+          JSON.stringify(firstBlockquote(oldState.doc), null, 2)
+        );
+
+        console.log(
+          "FIRST BLOCKQUOTE AFTER:",
+          JSON.stringify(firstBlockquote(newState.doc), null, 2)
+        );
+
+        console.groupEnd();
+
+        return value;
+      }
+    }
+  }));
+}
+
+
+
+function createSourceMapDiagnostic(sourceMap) {
+  return $remark(
+    "lilamayaSourceMapDiagnostic",
+    () => () => (tree, file) => {
+      const blockTypes = new Set([
+        "heading",
+        "paragraph",
+        "blockquote",
+        "list",
+        "listItem",
+        "code",
+        "thematicBreak",
+        "html"
+      ]);
+
+      const blocks = [];
+      const inlineNodes = [];
+      let currentBlock = null;
+
+      function visit(node, depth = 0, inlineAncestors = []) {
+        if (!node || typeof node !== "object") return;
+
+        const start = node.position?.start?.offset ?? null;
+        const end = node.position?.end?.offset ?? null;
+
+        if (blockTypes.has(node.type)) {
+          const block = {
+            type: node.type,
+            depth,
+            start,
+            end,
+            source: (
+              start != null &&
+              end != null
+            )
+              ? String(file.value ?? "").slice(start, end).slice(0, 220)
+              : null
+          };
+
+          blocks.push(block);
+
+          const previousBlock = currentBlock;
+          currentBlock = block;
+
+          if (Array.isArray(node.children)) {
+            node.children.forEach(child =>
+              visit(child, depth + 1, [])
+            );
+          }
+
+          currentBlock = previousBlock;
+          return;
+        }
+
+        if (currentBlock && start != null && end != null) {
+          inlineNodes.push({
+            type: node.type,
+            parentBlock: currentBlock.type,
+            parentStart: currentBlock.start,
+            parentInline: inlineAncestors,
+            depth,
+            start,
+            end,
+            value: typeof node.value === "string"
+              ? node.value
+              : null,
+            source: String(file.value ?? "").slice(start, end).slice(0, 160)
+          });
+        }
+
+        const nextAncestors = (
+          node.type !== "text" &&
+          start != null &&
+          end != null
+        )
+          ? [
+              ...inlineAncestors,
+              { type: node.type, start, end }
+            ]
+          : inlineAncestors;
+
+        if (Array.isArray(node.children)) {
+          node.children.forEach(child =>
+            visit(child, depth + 1, nextAncestors)
+          );
+        }
+      }
+
+      visit(tree);
+
+      sourceMap.push({
+        sourceLength: String(file.value ?? "").length,
+        blocks,
+        inlineNodes
+      });
+    }
+  );
+}
+
+function captureOriginalSourceMap(sourceMaps, originalSource, originalDocument) {
+  if (
+    !Array.isArray(sourceMaps) ||
+    sourceMaps.length === 0 ||
+    typeof originalSource !== "string" ||
+    !originalDocument
+  ) {
+    console.error(
+      "Unable to capture original source map: initial parser data is missing."
+    );
+    return null;
+  }
+
+  // The first entry belongs to the initial Markdown parse.
+  const initialMap = sourceMaps[0];
+
+  if (
+    !initialMap ||
+    initialMap.sourceLength !== originalSource.length ||
+    !Array.isArray(initialMap.blocks)
+  ) {
+    console.error(
+      "Unable to capture original source map: initial map does not match the original source."
+    );
+    return null;
+  }
+
+  const topLevelBlocks = initialMap.blocks.filter(
+    block => block.depth === 1
+  );
+
+  if (topLevelBlocks.length !== originalDocument.childCount) {
+    console.error(
+      "Unable to capture original source map: AST and ProseMirror block counts differ.",
+      {
+        astBlocks: topLevelBlocks.length,
+        proseMirrorBlocks: originalDocument.childCount
+      }
+    );
+    return null;
+  }
+
+  let previousEnd = 0;
+
+  for (let index = 0; index < topLevelBlocks.length; index++) {
+    const block = topLevelBlocks[index];
+
+    if (
+      !block ||
+      !Number.isInteger(block.start) ||
+      !Number.isInteger(block.end) ||
+      block.start < previousEnd ||
+      block.end <= block.start ||
+      block.end > originalSource.length
+    ) {
+      console.error(
+        "Unable to capture original source map: invalid block offsets.",
+        { index, block }
+      );
+      return null;
+    }
+
+    const expectedExcerpt = originalSource
+      .slice(block.start, block.end)
+      .slice(0, 220);
+
+    if (
+      typeof block.source !== "string" ||
+      block.source !== expectedExcerpt
+    ) {
+      console.error(
+        "Unable to capture original source map: source excerpt validation failed.",
+        { index, block }
+      );
+      return null;
+    }
+
+    previousEnd = block.end;
+  }
+
+  const snapshot = JSON.parse(JSON.stringify(initialMap));
+
+  function freezeRecursively(value) {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+      return value;
+    }
+
+    Object.values(value).forEach(freezeRecursively);
+    return Object.freeze(value);
+  }
+
+  return freezeRecursively(snapshot);
+}
+
+
+function diagnoseProseMirrorInlineFormatting(record) {
+  let view = null;
+
+  record.crepe.editor.action(ctx => {
+    view = ctx.get(editorViewCtx);
+  });
+
+  if (!view) {
+    console.error("Unable to retrieve ProseMirror editor view.");
+    return;
+  }
+
+  const doc = view.state.doc;
+  const markedTextNodes = [];
+
+  function visit(node, position, parentBlock = null) {
+    if (node.isText) {
+      if (node.marks.length > 0) {
+        markedTextNodes.push({
+          position,
+          end: position + node.nodeSize,
+          text: node.text,
+          marks: node.marks.map(mark => mark.type.name),
+          parentBlock
+        });
+      }
+      return;
+    }
+
+    const currentBlock = [
+      "paragraph",
+      "heading",
+      "blockquote",
+      "bullet_list",
+      "ordered_list",
+      "list_item",
+      "code_block"
+    ].includes(node.type.name)
+      ? node.type.name
+      : parentBlock;
+
+    if (!node.isLeaf) {
+      node.forEach((child, offset) => {
+        const childPosition =
+          position + (node.type.name === "doc" ? 0 : 1) + offset;
+
+        visit(child, childPosition, currentBlock);
+      });
+    }
+  }
+
+  visit(doc, 0);
+
+  const selectedMap = record.originalSourceMap;
+
+  if (
+    !selectedMap ||
+    selectedMap.sourceLength !== record.originalSource.length
+  ) {
+    console.error("Original source-map baseline is unavailable.");
+    return;
+  }
+
+  const astTextNodes = (selectedMap.inlineNodes || [])
+    .filter(node =>
+      node.type === "text" &&
+      node.parentInline?.some(parent => parent.type === "emphasis")
+    );
+
+  const comparisons = astTextNodes.map(astNode => {
+    const candidates = markedTextNodes.filter(pmNode =>
+      pmNode.text === astNode.value &&
+      pmNode.parentBlock === astNode.parentBlock &&
+      pmNode.marks.includes("emphasis")
+    );
+
+    const match = candidates.length === 1
+      ? candidates[0]
+      : null;
+
+    return {
+      text: astNode.value,
+      parentBlock: astNode.parentBlock,
+      sourceStart: astNode.start,
+      sourceEnd: astNode.end,
+      proseMirrorStart: match?.position ?? null,
+      proseMirrorEnd: match?.end ?? null,
+      matchCount: candidates.length,
+      exactTextMatch: Boolean(match),
+      emphasisMark: Boolean(match)
+    };
+  });
+
+  console.group("LILAMAYA INLINE SOURCE CORRESPONDENCE");
+
+  console.log("Remark emphasis text nodes:", astTextNodes.length);
+  console.log("ProseMirror marked text nodes:", markedTextNodes.length);
+  console.log("Unique exact matches:",
+    comparisons.filter(item => item.exactTextMatch).length
+  );
+
+  console.log("AST-to-ProseMirror correspondence:");
+  console.table(comparisons);
+
+  console.log("Complete comparison data:", comparisons);
+  console.log("CURRENT PROSEMIRROR MARKED-TEXT NODES:");
+  console.table(markedTextNodes);
+
+  console.groupEnd();
+}
+
+function inspectProseMirrorStructure(doc) {
+  const blocks = [];
+
+  const blockTypes = new Set([
+    "heading",
+    "paragraph",
+    "blockquote",
+    "bullet_list",
+    "ordered_list",
+    "list_item",
+    "code_block",
+    "horizontal_rule"
+  ]);
+
+  function visit(node, position, depth = 0) {
+    if (blockTypes.has(node.type.name)) {
+      blocks.push({
+        type: node.type.name,
+        position,
+        nodeSize: node.nodeSize,
+        depth,
+        text: node.textContent.slice(0, 120)
+      });
+    }
+
+    if (!node.isLeaf) {
+      node.forEach((child, offset) => {
+        const childPosition =
+          position + (node.type.name === "doc" ? 0 : 1) + offset;
+
+        visit(child, childPosition, depth + 1);
+      });
+    }
+  }
+
+  visit(doc, 0);
+  return blocks;
+}
+
+
+function diagnoseSingleBlockSerialization(record) {
+  const results = [];
+  let doc = null;
+
+  record.crepe.editor.action(ctx => {
+    const schema = ctx.get(schemaCtx);
+    const serializer = ctx.get(serializerCtx);
+    doc = ctx.get(editorViewCtx).state.doc;
+
+    doc.forEach((block, offset, index) => {
+      try {
+        const wrapper = schema.nodes.doc.create(null, [block]);
+        results.push({
+          index,
+          offset,
+          type: block.type.name,
+          text: block.textContent.slice(0, 100),
+          markdown: serializer(wrapper)
+        });
+      } catch (error) {
+        results.push({
+          index,
+          offset,
+          type: block.type.name,
+          error: String(error)
+        });
+      }
+    });
+  });
+
+
+  const selectedMap = record.originalSourceMap;
+  const sourceMaps = record.crepe.lilamayaSourceMap || [];
+  const pmBlocks = [];
+
+  doc.forEach((block, offset, index) => {
+    pmBlocks.push({
+      index,
+      type: block.type.name,
+      text: block.textContent.slice(0, 100)
+    });
+  });
+
+  const astBlocks = (selectedMap?.blocks || []).filter(
+    block => block.depth === 1
+  );
+  const comparison = Array.from(
+    { length: Math.max(astBlocks.length, pmBlocks.length) },
+    (_, index) => {
+      const ast = astBlocks[index];
+      const pm = pmBlocks[index];
+
+      return {
+        index,
+        astType: ast?.type ?? "MISSING",
+        sourceStart: ast?.start ?? null,
+        sourceEnd: ast?.end ?? null,
+        originalMarkdown: ast?.source?.slice(0, 120) ?? null,
+        pmType: pm?.type ?? "MISSING",
+        pmText: pm?.text ?? null
+      };
+    }
+  );
+
+  console.group("LILAMAYA SOURCE TO EDITOR BLOCK COMPARISON");
+  console.log("Source map entries:", sourceMaps.length);
+  console.log("Source length:", selectedMap?.sourceLength);
+  console.log("Original top-level blocks:", astBlocks.length);
+  console.log("Editor top-level blocks:", pmBlocks.length);
+  console.log("Block counts match:", astBlocks.length === pmBlocks.length);
+  console.table(comparison);
+  console.log("Full comparison JSON:", JSON.stringify(comparison, null, 2));
+  console.groupEnd();
+
+  console.group("LILAMAYA INDIVIDUAL BLOCK SERIALIZATION");
+  console.log("Segment index:", record.segmentIndex);
+  console.table(results);
+  console.log(
+    "FULL BLOCK SERIALIZATION JSON:",
+    JSON.stringify(results, null, 2)
+  );
+  console.groupEnd();
+}
+
+function diagnoseCurrentBlockSerialization(record) {
+  let results = [];
+
+  record.crepe.editor.action(ctx => {
+    const schema = ctx.get(schemaCtx);
+    const serializer = ctx.get(serializerCtx);
+    const doc = ctx.get(editorViewCtx).state.doc;
+
+    doc.forEach((block, offset, index) => {
+      try {
+        const wrapper = schema.nodes.doc.create(null, [block]);
+        const markdown = serializer(wrapper);
+
+        results.push({
+          index,
+          offset,
+          type: block.type.name,
+          text: block.textContent,
+          markdown
+        });
+      } catch (error) {
+        results.push({
+          index,
+          offset,
+          type: block.type.name,
+          text: block.textContent,
+          error: String(error)
+        });
+      }
+    });
+  });
+
+  // Display every block, not just blocks matching an obsolete test filter.
+  const relevant = results;
+
+  console.group("LILAMAYA CURRENT BLOCK SERIALIZATION");
+
+  console.log("Total current blocks:", results.length);
+  console.log("Relevant blocks:", relevant.length);
+  console.table(relevant);
+  console.log("Complete relevant serialization:", relevant);
+
+  console.groupEnd();
+}
+
+
 function createEditorInstance(root, markdown) {
   const crepe = new Crepe({
     root,
@@ -118,6 +678,11 @@ function createEditorInstance(root, markdown) {
   const searchExtension = createLilamayaSearchExtension();
 
   crepe.editor.use(searchExtension.extension);
+  crepe.editor.use(createTransactionDiagnosticExtension());
+
+  const sourceMap = [];
+  crepe.editor.use(createSourceMapDiagnostic(sourceMap));
+  crepe.lilamayaSourceMap = sourceMap;
 
   crepe.lilamayaSearchKey = searchExtension.key;
 
@@ -312,6 +877,252 @@ export async function createLilamayaEditor(
 
     return view;
   }
+
+
+  function diagnoseChangedBlocks(record) {
+    const original = record.originalDoc;
+    const current = getEditorView(record).state.doc;
+
+    const originalBlocks = [];
+    const currentBlocks = [];
+
+    original.forEach((node, offset) => {
+      originalBlocks.push({node, offset});
+    });
+
+    current.forEach((node, offset) => {
+      currentBlocks.push({node, offset});
+    });
+
+    function inspectTextNodes(node) {
+      const result = [];
+
+      node.descendants(child => {
+        if (child.isText) {
+          result.push({
+            text: child.text,
+            textLength: child.text.length,
+            marks: child.marks.map(mark => ({
+              type: mark.type.name,
+              attrs: mark.attrs
+            }))
+          });
+        }
+      });
+
+      return result;
+    }
+
+    const comparison = Array.from(
+      {length: Math.max(originalBlocks.length, currentBlocks.length)},
+      (_, index) => {
+        const before = originalBlocks[index];
+        const after = currentBlocks[index];
+
+        return {
+          index,
+          originalType: before?.node.type.name ?? "MISSING",
+          currentType: after?.node.type.name ?? "MISSING",
+          unchanged: before && after
+            ? before.node.eq(after.node)
+            : false,
+          originalText: before?.node.textContent.slice(0, 100) ?? null,
+          currentText: after?.node.textContent.slice(0, 100) ?? null,
+          originalJSON: before?.node.toJSON() ?? null,
+          currentJSON: after?.node.toJSON() ?? null,
+          originalTextNodes: before
+            ? inspectTextNodes(before.node)
+            : null,
+          currentTextNodes: after
+            ? inspectTextNodes(after.node)
+            : null
+        };
+      }
+    );
+
+    const changed = comparison.filter(item => !item.unchanged);
+
+    console.group("LILAMAYA ORIGINAL-TO-CURRENT BLOCK COMPARISON");
+    console.log("Original block count:", originalBlocks.length);
+    console.log("Current block count:", currentBlocks.length);
+    console.log("Changed blocks:", changed.length);
+    console.table(comparison);
+    console.log("Changed block details:", changed);
+    console.groupEnd();
+  }
+
+  function diagnoseSourceReplacement(record) {
+    const originalSource = record.originalSource;
+    const originalDoc = record.originalDoc;
+    const currentDoc = getEditorView(record).state.doc;
+    console.group("LILAMAYA MULTIPLE-BLOCK SOURCE REPLACEMENT TEST");
+
+    const selectedMap = record.originalSourceMap;
+
+    if (!selectedMap) {
+      console.error("STOPPED: No source map matches the original segment.");
+      console.groupEnd();
+      return;
+    }
+
+    if (originalDoc.childCount !== currentDoc.childCount) {
+      console.error("STOPPED: Block counts differ. Structural edits are not supported by this test.");
+      console.groupEnd();
+      return;
+    }
+
+    const astBlocks = selectedMap.blocks.filter(
+      block => block.depth === 1
+    );
+
+    const originalBlocks = [];
+    const currentBlocks = [];
+
+    originalDoc.forEach(node => originalBlocks.push(node));
+    currentDoc.forEach(node => currentBlocks.push(node));
+
+    const changedIndices = [];
+
+    for (let index = 0; index < originalBlocks.length; index++) {
+      if (!originalBlocks[index].eq(currentBlocks[index])) {
+        changedIndices.push(index);
+      }
+    }
+
+    console.log("Original source length:", originalSource.length);
+    console.log("Original block count:", originalBlocks.length);
+    console.log("Current block count:", currentBlocks.length);
+    console.log("Changed block indices:", changedIndices);
+
+    if (changedIndices.length < 2) {
+      console.error("STOPPED: Please modify at least two existing blocks for this test.");
+      console.groupEnd();
+      return;
+    }
+
+    const replacements = [];
+
+    for (const index of changedIndices) {
+      const originalBlock = originalBlocks[index];
+      const currentBlock = currentBlocks[index];
+      const sourceBlock = astBlocks[index];
+
+      if (
+        !sourceBlock ||
+        originalBlock.type.name !== currentBlock.type.name
+      ) {
+        console.error("STOPPED: Block correspondence is uncertain at index", index);
+        console.groupEnd();
+        return;
+      }
+
+      const start = sourceBlock.start;
+      const end = sourceBlock.end;
+
+      if (
+        !Number.isInteger(start) ||
+        !Number.isInteger(end) ||
+        start < 0 ||
+        end <= start ||
+        end > originalSource.length
+      ) {
+        console.error("STOPPED: Invalid source offsets at index", index);
+        console.groupEnd();
+        return;
+      }
+
+      let serializedBlock = null;
+
+      record.crepe.editor.action(ctx => {
+        const schema = ctx.get(schemaCtx);
+        const serializer = ctx.get(serializerCtx);
+        const wrapper = schema.nodes.doc.create(null, [currentBlock]);
+
+        serializedBlock = serializer(wrapper);
+      });
+
+      if (typeof serializedBlock !== "string") {
+        console.error("STOPPED: Serialization failed at index", index);
+        console.groupEnd();
+        return;
+      }
+
+      replacements.push({
+        index,
+        start,
+        end,
+        original: originalSource.slice(start, end),
+        replacement: serializedBlock
+      });
+    }
+
+    const ordered = [...replacements].sort(
+      (a, b) => a.start - b.start
+    );
+
+    for (let index = 1; index < ordered.length; index++) {
+      if (ordered[index].start < ordered[index - 1].end) {
+        console.error("STOPPED: Original source ranges overlap.");
+        console.groupEnd();
+        return;
+      }
+    }
+
+    let proposedSource = originalSource;
+
+    const descending = [...replacements].sort(
+      (a, b) => b.start - a.start
+    );
+
+    for (const item of descending) {
+      proposedSource =
+        proposedSource.slice(0, item.start) +
+        item.replacement +
+        proposedSource.slice(item.end);
+    }
+
+    // Independently reconstruct the expected result from the
+    // untouched original regions and the proposed replacements.
+    let expectedSource = "";
+    let cursor = 0;
+
+    for (const item of ordered) {
+      expectedSource += originalSource.slice(cursor, item.start);
+      expectedSource += item.replacement;
+      cursor = item.end;
+    }
+
+    expectedSource += originalSource.slice(cursor);
+
+    console.log("Replacement count:", replacements.length);
+    console.log("Replacement details:", replacements);
+    console.log("Application order (descending offsets):",
+      descending.map(item => ({
+        index: item.index,
+        start: item.start,
+        end: item.end
+      }))
+    );
+
+    console.log("Original source ranges overlap:", false);
+    console.log(
+      "Untouched source regions preserved exactly:",
+      proposedSource === expectedSource
+    );
+    console.log("Original segment remains unchanged:",
+      record.segment.content === originalSource
+    );
+    console.log("Proposed source length:", proposedSource.length);
+    console.log("Original source length:", originalSource.length);
+    console.log("PROPOSED MARKDOWN (NOT SAVED):", proposedSource);
+    console.log(
+      "Production segment matches independently reconstructed source:",
+      record.segment.content === proposedSource
+    );
+
+    console.groupEnd();
+  }
+
 
   function refreshSearch(resetActive = false) {
     if (destroyed || rebuilding) return;
@@ -691,12 +1502,202 @@ export async function createLilamayaEditor(
 
   function synchronizeSegments() {
     for (const record of editors) {
-      if (record.dirty) {
-        record.segment.content = record.crepe.getMarkdown();
+      const originalSource = record.originalSource;
+      const originalDocument = record.originalDoc;
+      const currentDocument = getEditorView(record).state.doc;
+
+      if (
+        typeof originalSource !== "string" ||
+        !originalDocument
+      ) {
+        throw new Error(
+          "Cannot safely synchronize: the original Markdown baseline is missing."
+        );
       }
+
+      if (currentDocument.eq(originalDocument)) {
+        record.segment.content = originalSource;
+        continue;
+      }
+
+      if (/^\s*$/.test(originalSource)) {
+        let serializedDocument = null;
+
+        record.crepe.editor.action(ctx => {
+          const serializer = ctx.get(serializerCtx);
+          serializedDocument = serializer(currentDocument);
+        });
+
+        if (typeof serializedDocument !== "string") {
+          throw new Error(
+            "Cannot safely synchronize: complete document serialization failed."
+          );
+        }
+
+        record.segment.content = serializedDocument;
+        continue;
+      }
+
+      const originalBlocks = [];
+      const currentBlocks = [];
+
+      originalDocument.forEach(node => originalBlocks.push(node));
+      currentDocument.forEach(node => currentBlocks.push(node));
+
+      // Ignore Milkdown's additional empty trailing paragraph only
+      // when it is the sole additional final block.
+      if (currentBlocks.length === originalBlocks.length + 1) {
+        const lastBlock = currentBlocks[currentBlocks.length - 1];
+
+        if (
+          lastBlock.type.name === "paragraph" &&
+          lastBlock.content.size === 0
+        ) {
+          currentBlocks.pop();
+        }
+      }
+
+      const selectedMap = record.originalSourceMap;
+
+      if (
+        !selectedMap ||
+        selectedMap.sourceLength !== originalSource.length ||
+        !Array.isArray(selectedMap.blocks)
+      ) {
+        throw new Error(
+          "Cannot safely synchronize: the validated original source-map baseline is missing."
+        );
+      }
+
+      const sourceBlocks = selectedMap.blocks.filter(
+        block => block.depth === 1
+      );
+
+      if (sourceBlocks.length !== originalBlocks.length) {
+        throw new Error(
+          "Cannot safely synchronize: source-map and document block counts differ."
+        );
+      }
+
+      // Structural reconciliation is used only when block counts differ.
+      if (originalBlocks.length !== currentBlocks.length) {
+        const plan = planNodeReconciliation(originalBlocks, currentBlocks);
+
+        const serializedRegions = plan.regions.map(region => {
+          if (region.currentStart === region.currentEnd) {
+            return "";
+          }
+
+          let serialized = null;
+
+          record.crepe.editor.action(ctx => {
+            const schema = ctx.get(schemaCtx);
+            const serializer = ctx.get(serializerCtx);
+            const wrapper = schema.nodes.doc.create(
+              null,
+              currentBlocks.slice(region.currentStart, region.currentEnd)
+            );
+
+            serialized = serializer(wrapper);
+          });
+
+          if (typeof serialized !== "string") {
+            throw new Error(
+              "Cannot safely synchronize: structural region serialization failed."
+            );
+          }
+
+          return serialized;
+        });
+
+        const replacements = buildSeparatorAwareReplacements(
+          originalSource,
+          sourceBlocks,
+          plan,
+          serializedRegions
+        );
+
+        record.segment.content = applySourceReplacements(
+          originalSource,
+          replacements
+        );
+
+        continue;
+      }
+
+      // Preserve the established same-count, block-by-block editing path.
+      const replacements = [];
+
+      for (let index = 0; index < originalBlocks.length; index++) {
+        const originalBlock = originalBlocks[index];
+        const currentBlock = currentBlocks[index];
+
+        if (originalBlock.eq(currentBlock)) {
+          continue;
+        }
+
+        const sourceBlock = sourceBlocks[index];
+
+        if (
+          !sourceBlock ||
+          originalBlock.type.name !== currentBlock.type.name
+        ) {
+          throw new Error(
+            "Cannot safely synchronize: block correspondence is uncertain at index " +
+            index + "."
+          );
+        }
+
+        const start = sourceBlock.start;
+        const end = sourceBlock.end;
+
+        if (
+          !Number.isInteger(start) ||
+          !Number.isInteger(end) ||
+          start < 0 ||
+          end <= start ||
+          end > originalSource.length
+        ) {
+          throw new Error(
+            "Cannot safely synchronize: invalid original source offsets at block " +
+            index + "."
+          );
+        }
+
+        let serializedBlock = null;
+
+        record.crepe.editor.action(ctx => {
+          const schema = ctx.get(schemaCtx);
+          const serializer = ctx.get(serializerCtx);
+          const wrapper = schema.nodes.doc.create(
+            null,
+            [currentBlock]
+          );
+
+          serializedBlock = serializer(wrapper);
+        });
+
+        if (typeof serializedBlock !== "string") {
+          throw new Error(
+            "Cannot safely synchronize: block serialization failed at index " +
+            index + "."
+          );
+        }
+
+        replacements.push({
+          index,
+          start,
+          end,
+          replacement: serializedBlock
+        });
+      }
+
+      record.segment.content = applySourceReplacements(
+        originalSource,
+        replacements
+      );
     }
   }
-
 
   function splitActiveEditor(record, savedSelection = null) {
     let result = null;
@@ -998,6 +1999,35 @@ export async function createLilamayaEditor(
         };
 
         await record.crepe.create();
+        record.originalSource = segment.content;
+        record.originalDoc = getEditorView(record).state.doc;
+        record.originalSourceMap = captureOriginalSourceMap(
+          record.crepe.lilamayaSourceMap,
+          record.originalSource,
+          record.originalDoc
+        );
+        diagnoseSingleBlockSerialization(record);
+    console.group("LILAMAYA SOURCE FIDELITY DIAGNOSTIC");
+
+    console.log(
+      "REMARK AST SOURCE MAP:",
+      JSON.stringify(record.crepe.lilamayaSourceMap, null, 2)
+    );
+
+    console.log(
+      "PROSEMIRROR DOCUMENT:",
+      JSON.stringify(
+        inspectProseMirrorStructure(record.originalDoc),
+        null,
+        2
+      )
+    );
+
+    console.groupEnd();
+
+
+        // Keep the original ProseMirror document as a fidelity reference.
+        // If the editor returns to this exact state, preserve the original Markdown.
 
         resolveImagePreviewUrls(editorRoot, imageBaseUrl, imagePreviewUrls);
 
@@ -1316,6 +2346,9 @@ export async function createLilamayaEditor(
     wrapInBlockquoteCommand
   );
 
+  createButton("•", "Bulleted list", wrapInBulletListCommand);
+  createButton("1.", "Numbered list", wrapInOrderedListCommand);
+
   addSeparator();
 
 
@@ -1406,6 +2439,11 @@ export async function createLilamayaEditor(
 
 
   // Initial document rendering.
+  // An entirely empty document still needs one editable Markdown paragraph.
+  const hasNonEmptyMarkdown = segments.some(
+    segment => segment.type === "markdown" && segment.content.trim() !== ""
+  );
+  let mountedEmptyMarkdown = false;
 
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index];
@@ -1419,7 +2457,11 @@ export async function createLilamayaEditor(
     }
 
     if (segment.content.trim() === "") {
-      continue;
+      if (hasNonEmptyMarkdown || mountedEmptyMarkdown) {
+        continue;
+      }
+
+      mountedEmptyMarkdown = true;
     }
 
     const section = createElement(
@@ -1447,6 +2489,35 @@ export async function createLilamayaEditor(
     };
 
     await record.crepe.create();
+    record.originalSource = segment.content;
+    record.originalDoc = getEditorView(record).state.doc;
+    record.originalSourceMap = captureOriginalSourceMap(
+      record.crepe.lilamayaSourceMap,
+      record.originalSource,
+      record.originalDoc
+    );
+    diagnoseSingleBlockSerialization(record);
+    console.group("LILAMAYA SOURCE FIDELITY DIAGNOSTIC");
+
+    console.log(
+      "REMARK AST SOURCE MAP:",
+      JSON.stringify(record.crepe.lilamayaSourceMap, null, 2)
+    );
+
+    console.log(
+      "PROSEMIRROR DOCUMENT:",
+      JSON.stringify(
+        inspectProseMirrorStructure(record.originalDoc),
+        null,
+        2
+      )
+    );
+
+    console.groupEnd();
+
+
+        // Keep the original ProseMirror document as a fidelity reference.
+        // If the editor returns to this exact state, preserve the original Markdown.
 
     resolveImagePreviewUrls(editorRoot, imageBaseUrl, imagePreviewUrls);
 
@@ -1517,6 +2588,102 @@ export async function createLilamayaEditor(
 
     attachSearchPanel(container) {
       if (!destroyed && container) container.appendChild(searchPanel);
+    },
+
+    diagnoseChangedBlocks() {
+      for (const record of editors) {
+        diagnoseChangedBlocks(record);
+      }
+    },
+
+    diagnoseCurrentBlockSerialization() {
+      for (const record of editors) {
+        diagnoseCurrentBlockSerialization(record);
+      }
+    },
+
+    diagnoseSourceReplacement() {
+      for (const record of editors) {
+        diagnoseSourceReplacement(record);
+      }
+    },
+
+    diagnoseProseMirrorInlineFormatting() {
+      for (const record of editors) {
+        diagnoseProseMirrorInlineFormatting(record);
+      }
+    },
+
+    inspectInlineSourceMap() {
+      for (const record of editors) {
+        const maps = record.crepe.lilamayaSourceMap || [];
+
+        console.group("LILAMAYA FORMATTED INLINE NODES");
+
+        console.log("Segment:", record.segment.title || record.segment.type);
+        console.log("Source length:", record.segment.content.length);
+        console.log("Original source (exact):", JSON.stringify(record.originalSource));
+        console.log("Original source is whitespace-only:", /^\\s*$/.test(record.originalSource));
+
+        for (const map of maps) {
+          const formattedNodes = (map.inlineNodes || [])
+            .filter(node =>
+              node.type !== "text" ||
+              node.parentInline?.some(parent => parent.type === "emphasis")
+            );
+
+          console.log("Total inline nodes:", (map.inlineNodes || []).length);
+          console.log("Formatted nodes:", formattedNodes.length);
+          console.table(formattedNodes);
+        }
+
+        console.groupEnd();
+      }
+    },
+
+    diagnoseParserHistory() {
+      const testMarkdown =
+        "Lilamaya parser diagnostic paragraph.\\n\\nSecond paragraph.";
+
+      for (const record of editors) {
+        const maps = record.crepe.lilamayaSourceMap || [];
+        const originalMapBefore = JSON.stringify(
+          record.originalSourceMap
+        );
+        const countBefore = maps.length;
+
+        let parsedDocument = null;
+
+        record.crepe.editor.action(ctx => {
+          const parser = ctx.get(parserCtx);
+          parsedDocument = parser(testMarkdown);
+        });
+
+        const countAfter = maps.length;
+        const originalMapAfter = JSON.stringify(
+          record.originalSourceMap
+        );
+
+        console.group(
+          "LILAMAYA PARSER HISTORY DIAGNOSTIC"
+        );
+
+        console.log("Segment:", record.segment.title || record.segment.type);
+        console.log("Entries before:", countBefore);
+        console.log("Entries after:", countAfter);
+        console.log("New entry appended:", countAfter === countBefore + 1);
+        console.log("Parsed document:", parsedDocument);
+        console.log(
+          "Original baseline unchanged:",
+          originalMapBefore === originalMapAfter
+        );
+        console.log(
+          "Original baseline frozen:",
+          Object.isFrozen(record.originalSourceMap)
+        );
+
+        console.groupEnd();
+      }
     },
 
     get editor() {
