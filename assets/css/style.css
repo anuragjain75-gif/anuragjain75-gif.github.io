@@ -1,5 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@1,7..72,400&display=swap");
 
+@font-face {
+    font-family: "Mozilla Headline Variable";
+    font-style: normal;
+    font-weight: 200 700;
+    font-display: swap;
+    src: url("/fonts/mozilla-headline/mozilla-headline-latin-variable.woff2") format("woff2");
+}
+
 html {
     color-scheme: light;
 }
@@ -488,6 +496,7 @@ nav a:hover {
 .essay-content h2,
 .page-content h2 {
 
+    font-family: "Mozilla Headline Variable", sans-serif;
     margin-top: 3rem;
 
     margin-bottom: 1.6rem;
@@ -501,6 +510,7 @@ nav a:hover {
 .essay-content h3,
 .page-content h3 {
 
+    font-family: "Mozilla Headline Variable", sans-serif;
     margin: 2.5em 0 .8em;
 
     font-size: 1.5rem;
