@@ -934,29 +934,144 @@ test("rejects inconsistent separators instead of guessing", () => {
   );
 });
 
-test("rejects structural changes at document boundaries", () => {
+test("inserts a paragraph at the beginning", () => {
   const source = "First.\n\nSecond.";
-  const secondStart = source.indexOf("Second.");
 
-  assert.throws(
-    () => buildSeparatorAwareReplacements(
-      source,
-      [
-        { start: 0, end: 6 },
-        { start: secondStart, end: source.length }
+  const replacements = buildSeparatorAwareReplacements(
+    source,
+    [
+      { start: 0, end: 6 },
+      { start: 8, end: source.length }
+    ],
+    {
+      anchors: [
+        { originalIndex: 0, currentIndex: 1 },
+        { originalIndex: 1, currentIndex: 2 }
       ],
-      {
-        anchors: [{ originalIndex: 1, currentIndex: 2 }],
-        regions: [{
-          originalStart: 0, originalEnd: 0,
-          currentStart: 0, currentEnd: 1
-        }]
-      },
-      ["Inserted."]
-    ),
-    /beginning or end are not supported/
+      regions: [{
+        originalStart: 0, originalEnd: 0,
+        currentStart: 0, currentEnd: 1
+      }]
+    },
+    ["Inserted."]
+  );
+
+  assert.equal(
+    applySourceReplacements(source, replacements),
+    "Inserted.\n\nFirst.\n\nSecond."
   );
 });
+
+test("appends a paragraph at the end", () => {
+  const source = "First.\n\nSecond.";
+
+  const replacements = buildSeparatorAwareReplacements(
+    source,
+    [
+      { start: 0, end: 6 },
+      { start: 8, end: source.length }
+    ],
+    {
+      anchors: [
+        { originalIndex: 0, currentIndex: 0 },
+        { originalIndex: 1, currentIndex: 1 }
+      ],
+      regions: [{
+        originalStart: 2, originalEnd: 2,
+        currentStart: 2, currentEnd: 3
+      }]
+    },
+    ["Appended."]
+  );
+
+  assert.equal(
+    applySourceReplacements(source, replacements),
+    "First.\n\nSecond.\n\nAppended."
+  );
+});
+
+test("deletes the first paragraph", () => {
+  const source = "First.\n\nSecond.";
+
+  const replacements = buildSeparatorAwareReplacements(
+    source,
+    [
+      { start: 0, end: 6 },
+      { start: 8, end: source.length }
+    ],
+    {
+      anchors: [
+        { originalIndex: 1, currentIndex: 0 }
+      ],
+      regions: [{
+        originalStart: 0, originalEnd: 1,
+        currentStart: 0, currentEnd: 0
+      }]
+    },
+    [""]
+  );
+
+  assert.equal(
+    applySourceReplacements(source, replacements),
+    "Second."
+  );
+});
+
+test("deletes the last paragraph", () => {
+  const source = "First.\n\nSecond.";
+
+  const replacements = buildSeparatorAwareReplacements(
+    source,
+    [
+      { start: 0, end: 6 },
+      { start: 8, end: source.length }
+    ],
+    {
+      anchors: [
+        { originalIndex: 0, currentIndex: 0 }
+      ],
+      regions: [{
+        originalStart: 1, originalEnd: 2,
+        currentStart: 1, currentEnd: 1
+      }]
+    },
+    [""]
+  );
+
+  assert.equal(
+    applySourceReplacements(source, replacements),
+    "First."
+  );
+});
+
+test("appends a paragraph while preserving CRLF separators", () => {
+  const source = "First.\r\n\r\nSecond.";
+
+  const replacements = buildSeparatorAwareReplacements(
+    source,
+    [
+      { start: 0, end: 6 },
+      { start: 10, end: source.length }
+    ],
+    {
+      anchors: [
+        { originalIndex: 0, currentIndex: 0 },
+        { originalIndex: 1, currentIndex: 1 }
+      ],
+      regions: [{
+        originalStart: 2, originalEnd: 2,
+        currentStart: 2, currentEnd: 3
+      }]
+    },
+    ["Appended."]
+  );
+
+  assert.equal(
+    applySourceReplacements(source, replacements),
+    "First.\r\n\r\nSecond.\r\n\r\nAppended."
+  );
+});
+
 
 test("handles two independent structural changes in one manuscript", () => {
   const source = "A.\n\nB.\n\nC.\n\nD.\n\nE.";
@@ -1185,5 +1300,45 @@ test("runs real ProseMirror replacement through the complete sync pipeline", () 
       ["First.", "Revised.", "Third."]
     ),
     "First.\n\nRevised.\n\nThird."
+  );
+});
+
+test("runs real ProseMirror insertion at the beginning through the complete sync pipeline", () => {
+  assert.equal(
+    runRealNodeSyncFixture(
+      ["First.", "Second."],
+      ["Inserted.", "First.", "Second."]
+    ),
+    "Inserted.\n\nFirst.\n\nSecond."
+  );
+});
+
+test("runs real ProseMirror insertion at the end through the complete sync pipeline", () => {
+  assert.equal(
+    runRealNodeSyncFixture(
+      ["First.", "Second."],
+      ["First.", "Second.", "Appended."]
+    ),
+    "First.\n\nSecond.\n\nAppended."
+  );
+});
+
+test("runs real ProseMirror deletion at the beginning through the complete sync pipeline", () => {
+  assert.equal(
+    runRealNodeSyncFixture(
+      ["First.", "Second.", "Third."],
+      ["Second.", "Third."]
+    ),
+    "Second.\n\nThird."
+  );
+});
+
+test("runs real ProseMirror deletion at the end through the complete sync pipeline", () => {
+  assert.equal(
+    runRealNodeSyncFixture(
+      ["First.", "Second.", "Third."],
+      ["First.", "Second."]
+    ),
+    "First.\n\nSecond."
   );
 });

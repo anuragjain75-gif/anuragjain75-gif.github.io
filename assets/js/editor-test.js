@@ -989,17 +989,6 @@ async function loadDocumentList() {
 }
 
 async function saveDocument() {
-  const markdownText = richEditor.getMarkdown();
-
-  const savePayload = {
-    path: documentPath,
-    content: markdownText,
-    sha: documentSha,
-    connections: collectDocumentConnections()
-  };
-
-  console.log("Lilamaya Save:", savePayload);
-
   const saveStatus = document.querySelector("#save-status");
 
   if (updateDuplicateWarnings("#document-connection-list")) {
@@ -1010,6 +999,19 @@ async function saveDocument() {
   saveStatus.textContent = "Saving…";
 
   try {
+    // Markdown extraction can itself fail if synchronisation is unsafe.
+    // Keep it inside the try block so the error is shown in the editor.
+    const markdownText = richEditor.getMarkdown();
+
+    const savePayload = {
+      path: documentPath,
+      content: markdownText,
+      sha: documentSha,
+      connections: collectDocumentConnections()
+    };
+
+    console.log("Lilamaya Save:", savePayload);
+
     const response = await fetch(apiBase + "/api/save", {
       method: "POST",
       headers: {
@@ -1030,12 +1032,12 @@ async function saveDocument() {
     saveStatus.textContent = "Saved";
   } catch (error) {
     console.error("Lilamaya Save Error:", error);
-    saveStatus.textContent = "Save failed";
+    saveStatus.textContent = "Save failed: " + error.message;
   }
 
   setTimeout(() => {
     saveStatus.textContent = "";
-  }, 2000);
+  }, 4000);
 }
 
 async function beginNewEssay() {

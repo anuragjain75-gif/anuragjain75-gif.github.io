@@ -459,9 +459,134 @@ export function buildSeparatorAwareReplacements(
     );
 
     if (!previousAnchor || !nextAnchor) {
-      throw new Error(
-        "Structural changes at the beginning or end are not supported yet."
-      );
+      const originalCount = region.originalEnd - region.originalStart;
+      const currentCount = region.currentEnd - region.currentStart;
+
+      const clean = serialized.replace(/(?:\r?\n)+$/, "");
+
+      function boundarySeparator(leftIndex, rightIndex) {
+        if (
+          rightIndex !== leftIndex + 1 ||
+          leftIndex < 0 ||
+          rightIndex >= sourceBlocks.length
+        ) {
+          throw new Error(
+            "Cannot safely infer a document-boundary separator."
+          );
+        }
+
+        const value = originalSource.slice(
+          sourceBlocks[leftIndex].end,
+          sourceBlocks[rightIndex].start
+        );
+
+        if (!value || !/^\s+$/.test(value)) {
+          throw new Error(
+            "Cannot safely infer a document-boundary separator."
+          );
+        }
+
+        return value;
+      }
+
+      if (!previousAnchor && !nextAnchor) {
+        if (originalCount !== sourceBlocks.length || !sourceBlocks.length) {
+          throw new Error(
+            "Cannot safely reconcile a region without unchanged anchors."
+          );
+        }
+
+        replacements.push({
+          start: sourceBlocks[0].start,
+          end: sourceBlocks[sourceBlocks.length - 1].end,
+          replacement: currentCount === 0 ? "" : clean
+        });
+      } else if (!previousAnchor) {
+        if (originalCount === 0) {
+          if (nextAnchor.originalIndex !== 0 || !clean.trim()) {
+            throw new Error("Invalid insertion at the beginning of the document.");
+          }
+
+          const separator = boundarySeparator(0, 1);
+          const block = sourceBlocks[0];
+
+          replacements.push({
+            start: block.start,
+            end: block.end,
+            replacement:
+              clean + separator +
+              originalSource.slice(block.start, block.end)
+          });
+        } else {
+          const first = sourceBlocks[region.originalStart];
+          const last = sourceBlocks[region.originalEnd - 1];
+          const right = sourceBlocks[nextAnchor.originalIndex];
+          const suffix = originalSource.slice(last.end, right.start);
+
+          if (!suffix || !/^\s+$/.test(suffix)) {
+            throw new Error(
+              "Cannot safely reconcile the beginning region: invalid separator."
+            );
+          }
+
+          if (currentCount > 0 && !clean.trim()) {
+            throw new Error("A non-empty current region requires serialized content.");
+          }
+
+          replacements.push({
+            start: first.start,
+            end: right.start,
+            replacement: currentCount === 0 ? "" : clean + suffix
+          });
+        }
+      } else {
+        if (originalCount === 0) {
+          const lastIndex = sourceBlocks.length - 1;
+
+          if (
+            previousAnchor.originalIndex !== lastIndex ||
+            !clean.trim()
+          ) {
+            throw new Error("Invalid insertion at the end of the document.");
+          }
+
+          const separator = boundarySeparator(lastIndex - 1, lastIndex);
+          const block = sourceBlocks[lastIndex];
+
+          replacements.push({
+            start: block.start,
+            end: block.end,
+            replacement:
+              originalSource.slice(block.start, block.end) +
+              separator + clean
+          });
+        } else {
+          const left = sourceBlocks[previousAnchor.originalIndex];
+          const first = sourceBlocks[region.originalStart];
+          const last = sourceBlocks[region.originalEnd - 1];
+          const prefix = originalSource.slice(left.end, first.start);
+
+          if (!prefix || !/^\s+$/.test(prefix)) {
+            throw new Error(
+              "Cannot safely reconcile the ending region: invalid separator."
+            );
+          }
+
+          if (currentCount > 0 && !clean.trim()) {
+            throw new Error("A non-empty current region requires serialized content.");
+          }
+
+          replacements.push({
+            start: left.end,
+            end: last.end,
+            replacement: currentCount === 0 ? "" : prefix + clean
+          });
+        }
+      }
+
+      previousOriginalEnd = region.originalEnd;
+      previousCurrentEnd = region.currentEnd;
+      continue;
     }
 
     const leftBlock = sourceBlocks[previousAnchor.originalIndex];

@@ -1544,16 +1544,30 @@ export async function createLilamayaEditor(
       originalDocument.forEach(node => originalBlocks.push(node));
       currentDocument.forEach(node => currentBlocks.push(node));
 
-      // Ignore Milkdown's additional empty trailing paragraph only
-      // when it is the sole additional final block.
+      // Ignore one editor-generated empty paragraph only when
+      // removing it makes the complete document identical to
+      // the original document, block for block.
       if (currentBlocks.length === originalBlocks.length + 1) {
-        const lastBlock = currentBlocks[currentBlocks.length - 1];
+        const emptyParagraphIndexes = currentBlocks
+          .map((node, index) => ({ node, index }))
+          .filter(({ node }) =>
+            node.type.name === "paragraph" &&
+            node.content.size === 0
+          )
+          .map(({ index }) => index);
 
-        if (
-          lastBlock.type.name === "paragraph" &&
-          lastBlock.content.size === 0
-        ) {
-          currentBlocks.pop();
+        const matchingIndexes = emptyParagraphIndexes.filter(index => {
+          const candidate = currentBlocks.filter(
+            (_, currentIndex) => currentIndex !== index
+          );
+
+          return candidate.every((node, candidateIndex) =>
+            node.eq(originalBlocks[candidateIndex])
+          );
+        });
+
+        if (matchingIndexes.length === 1) {
+          currentBlocks.splice(matchingIndexes[0], 1);
         }
       }
 
@@ -1604,6 +1618,12 @@ export async function createLilamayaEditor(
           if (typeof serialized !== "string") {
             throw new Error(
               "Cannot safely synchronize: structural region serialization failed."
+            );
+          }
+
+          if (!serialized.trim()) {
+            throw new Error(
+              "Cannot safely synchronize: a structural insertion contains no serializable content."
             );
           }
 
@@ -1724,7 +1744,7 @@ export async function createLilamayaEditor(
       // following newlines and every other Markdown element.
       result = {
         left: leftMarkdown,
-        right: rightMarkdown.replace(/^\r?\n<br\s*\/?>(?=\r?\n)/i, "")
+        right: rightMarkdown.replace(/^(?:\r?\n)*<br\s*\/?>(?=\r?\n)/i, "")
       };
     });
 
