@@ -13,10 +13,13 @@ import {
   serializerCtx
 } from "@milkdown/kit/core";
 
+import {trailingConfig} from "@milkdown/kit/plugin/trailing";
+
 import {Plugin, TextSelection} from "@milkdown/kit/prose/state";
 import {$prose, $remark} from "@milkdown/kit/utils";
 
 import {
+  headingIdGenerator,
   toggleStrongCommand,
   toggleEmphasisCommand,
   wrapInHeadingCommand,
@@ -191,6 +194,7 @@ function createSourceMapDiagnostic(sourceMap) {
         "listItem",
         "code",
         "thematicBreak",
+        "table",
         "html"
       ]);
 
@@ -654,6 +658,30 @@ function diagnoseCurrentBlockSerialization(record) {
 }
 
 
+// Capture proof before editing: a pure Markdown parse has no source-backed ID,
+// and the live node differs only by this exact active plugin-generated value.
+function captureGeneratedHeadingProvenance(record) {
+  if (record.originalDoc.childCount !== 1 ||
+      record.originalDoc.firstChild.type.name !== "heading") return null;
+  let proof = null;
+  record.crepe.editor.action(ctx => {
+    const parsed = ctx.get(parserCtx)(record.originalSource);
+    if (!parsed || parsed.childCount !== 1 ||
+        parsed.firstChild.type.name !== "heading" || parsed.firstChild.attrs.id !== "") return;
+    const live = record.originalDoc.firstChild;
+    const generator = ctx.get(headingIdGenerator.key);
+    const generatedId = generator(live);
+    if (typeof generatedId !== "string" || !generatedId || live.attrs.id !== generatedId) return;
+    const restored = parsed.firstChild.type.create(
+      {...parsed.firstChild.attrs, id: generatedId}, parsed.firstChild.content, parsed.firstChild.marks
+    );
+    if (!restored.eq(live)) return;
+    proof = Object.freeze({source: record.originalSource, parsedDocument: parsed,
+      generatedId, generator});
+  });
+  return proof;
+}
+
 function createEditorInstance(root, markdown) {
   const crepe = new Crepe({
     root,
@@ -674,6 +702,24 @@ function createEditorInstance(root, markdown) {
       latex: false
     }
   });
+
+  // Track node identity rather than guessing from an empty paragraph's shape.
+  // The trailing plugin creates cursor scaffolding after terminal block nodes.
+  // Source-backed and user-created paragraphs never enter this WeakSet.
+  const generatedTrailingParagraphs = new WeakSet();
+  crepe.editor.config(ctx => {
+    ctx.update(trailingConfig.key, config => ({
+      ...config,
+      getNode(state) {
+        const node = config.getNode(state);
+        if (node?.type.name === "paragraph" && node.content.size === 0) {
+          generatedTrailingParagraphs.add(node);
+        }
+        return node;
+      }
+    }));
+  });
+  crepe.lilamayaGeneratedTrailingParagraphs = generatedTrailingParagraphs;
 
   const searchExtension = createLilamayaSearchExtension();
 
@@ -1500,6 +1546,189 @@ export async function createLilamayaEditor(
   }
 
 
+  function singleBlockAppend(record, originalBlocks, currentBlocks, plan, serializedRegions) {
+    const supported = {table: "table", blockquote: "blockquote",
+      bullet_list: "list", ordered_list: "list", heading: "heading"};
+    if (originalBlocks.length !== 1 || currentBlocks.length !== 2 ||
+        !supported[originalBlocks[0].type.name] ||
+        currentBlocks[1].type.name !== "paragraph") return null;
+
+    const fail = message => { throw new Error("Cannot safely append paragraph: " + message); };
+    if (!originalBlocks[0].eq(currentBlocks[0]) ||
+        plan.anchors.length !== 1 || plan.anchors[0].originalIndex !== 0 ||
+        plan.anchors[0].currentIndex !== 0 || plan.regions.length !== 1) {
+      fail("the original block is not an exact, unique unchanged anchor.");
+    }
+    const region = plan.regions[0];
+    if (region.originalStart !== 1 || region.originalEnd !== 1 ||
+        region.currentStart !== 1 || region.currentEnd !== 2 ||
+        serializedRegions.length !== 1) fail("the change is not a single append-only paragraph.");
+
+    const source = record.originalSource;
+    const map = captureOriginalSourceMap([record.originalSourceMap], source, record.originalDoc);
+    if (!map) fail("the original source map cannot be revalidated.");
+    const blocks = map.blocks.filter(block => block.depth === 1);
+    if (blocks.length !== 1 || blocks[0].type !== supported[originalBlocks[0].type.name]) {
+      fail("the source block does not match the document anchor.");
+    }
+    const block = blocks[0];
+    const prefix = source.slice(0, block.start), suffix = source.slice(block.end);
+    if (!/^[ \t\r\n]*$/.test(prefix) || !/^(?:\r\n|\n)*$/.test(suffix)) {
+      fail("source-owned boundary whitespace cannot be preserved unambiguously.");
+    }
+    const endings = source.match(/\r\n|\r|\n/g) || [];
+    const kinds = new Set(endings);
+    if (kinds.size !== 1 || kinds.has("\r")) fail("line endings are mixed or indeterminate.");
+    const eol = endings[0];
+    let added = serializedRegions[0];
+    if (typeof added !== "string" || !added.trim() || /\r(?!\n)/.test(added)) {
+      fail("the new paragraph has no unambiguous serialization.");
+    }
+    // Only newly serialized bytes are normalized. Original bytes are never rewritten.
+    added = added.replace(/\r?\n$/, "").replace(/\r\n|\n/g, eol);
+    const candidate = source.slice(0, block.end) + eol + eol + added + suffix;
+    const segmented = parseHugoDocument(candidate);
+    if (segmented.frontmatter !== "" || segmented.segments.length !== 1 ||
+        segmented.segments[0].type !== "markdown" || segmented.segments[0].content !== candidate) {
+      fail("the insertion would create or cross a protected shortcode boundary.");
+    }
+    let parsed, expected;
+    record.crepe.editor.action(ctx => {
+      parsed = ctx.get(parserCtx)(candidate);
+      expected = ctx.get(schemaCtx).nodes.doc.create(null, currentBlocks);
+      const proof = record.generatedHeadingProvenance;
+      if (parsed && !parsed.eq(expected) && proof &&
+          originalBlocks[0].type.name === "heading" &&
+          proof.source === source && parsed.childCount === 2 &&
+          parsed.firstChild.eq(proof.parsedDocument.firstChild) &&
+          ctx.get(headingIdGenerator.key) === proof.generator &&
+          proof.generator(originalBlocks[0]) === proof.generatedId &&
+          originalBlocks[0].attrs.id === proof.generatedId) {
+        // Revalidate provenance with today's parser; explicit parsed IDs or any
+        // other source-backed differences cannot enter this normalization path.
+        const baseline = ctx.get(parserCtx)(source);
+        if (baseline && baseline.eq(proof.parsedDocument)) {
+          const heading = parsed.firstChild;
+          const restored = heading.type.create(
+            {...heading.attrs, id: proof.generatedId}, heading.content, heading.marks
+          );
+          if (restored.eq(originalBlocks[0])) {
+            parsed = parsed.copy(parsed.content.replaceChild(0, restored));
+          }
+        }
+      }
+    });
+    if (!parsed || !parsed.eq(expected)) fail("reparsed Markdown differs from the intended document.");
+    return candidate;
+  }
+
+  // A single deliberate paragraph conversion has an exact source slot. Other
+  // blocks remain unchanged anchors; never broaden the general mismatch path.
+  function synchronizeParagraphConversion(record, originalBlocks, currentBlocks) {
+    const changedTypes = originalBlocks.map((node, index) =>
+      node.type !== currentBlocks[index].type ? index : -1
+    ).filter(index => index >= 0);
+    if (!changedTypes.length) return null;
+    const fail = message => { throw new Error("Cannot safely convert paragraph: " + message + " Your unsaved draft is retained."); };
+    if (changedTypes.length !== 1) fail("only one block conversion at a time is supported.");
+    const index = changedTypes[0];
+    const original = originalBlocks[index], current = currentBlocks[index];
+    const type = current.type.name;
+    if (original.type.name !== "paragraph" ||
+        !["heading", "blockquote", "bullet_list", "ordered_list"].includes(type)) {
+      fail("this block-type conversion is not supported.");
+    }
+    if (originalBlocks.some((node, i) => i !== index && !node.eq(currentBlocks[i]))) {
+      fail("another source-backed block changed; its correspondence is uncertain.");
+    }
+    const inner = type === "heading" ? current :
+      type === "blockquote" ? current.firstChild : current.firstChild?.firstChild;
+    if ((type === "blockquote" && current.childCount !== 1) ||
+        (["bullet_list", "ordered_list"].includes(type) &&
+          (current.childCount !== 1 || current.firstChild.type.name !== "list_item" ||
+           current.firstChild.childCount !== 1)) ||
+        !inner || (type !== "heading" && inner.type.name !== "paragraph")) {
+      fail("only a heading or a single wrapped paragraph is supported.");
+    }
+    const source = record.originalSource;
+    const map = captureOriginalSourceMap([record.originalSourceMap], source, record.originalDoc);
+    if (!map) fail("the original source map could not be revalidated.");
+    const block = map.blocks.filter(item => item.depth === 1)[index];
+    if (block?.type !== "paragraph") fail("the source slot is not a paragraph.");
+    // Invisible comments must not be lost when serializing an edited block.
+    if (/<!--|-->|\{\{[<%]/.test(source.slice(block.start, block.end))) {
+      fail("the selected source contains a comment or protected boundary.");
+    }
+    const endings = new Set(source.match(/\r\n|\r|\n/g) || []);
+    if (endings.size > 1 || endings.has("\r")) fail("source line endings are ambiguous.");
+    const eol = [...endings][0] || "\n";
+    let candidate;
+    record.crepe.editor.action(ctx => {
+      const parser = ctx.get(parserCtx), schema = ctx.get(schemaCtx);
+      const baseline = parser(source);
+      const freshMap = record.crepe.lilamayaSourceMap.at(-1);
+      if (!baseline || baseline.childCount !== originalBlocks.length ||
+          !baseline.child(index).eq(original) || !freshMap ||
+          freshMap.sourceLength !== map.sourceLength ||
+          JSON.stringify(freshMap.blocks) !== JSON.stringify(map.blocks)) {
+        fail("the parser and saved source map no longer prove the same paragraph slot.");
+      }
+      let serialized = ctx.get(serializerCtx)(schema.nodes.doc.create(null, [current]));
+      if (typeof serialized !== "string" || !serialized.trim() || /\r(?!\n)/.test(serialized)) {
+        fail("the converted block has no safe serialization.");
+      }
+      // Paragraph AST ranges exclude their final source-owned line ending.
+      // Strip one serializer terminator, normalize only new bytes, and retain
+      // every original byte outside this deliberately modified block.
+      serialized = serialized.replace(/\r?\n$/, "").replace(/\r\n|\n/g, eol);
+      const converted = parser(serialized);
+      if (!converted || converted.childCount !== 1) fail("the conversion reparses as multiple blocks.");
+      let reparsed = converted.firstChild;
+      if (!reparsed.eq(current) && type === "heading" &&
+          reparsed.type === current.type && reparsed.attrs.id === "" &&
+          typeof current.attrs.id === "string" && current.attrs.id &&
+          ctx.get(headingIdGenerator.key)(current) === current.attrs.id) {
+        // This paragraph had no source-backed heading ID. Only the exact active
+        // plugin-generated ID may differ; all content, marks and other attrs
+        // must still compare exactly. Arbitrary IDs cannot pass this proof.
+        reparsed = reparsed.type.create(
+          {...reparsed.attrs, id: current.attrs.id}, reparsed.content, reparsed.marks
+        );
+      }
+      if (!reparsed.eq(current) && ["bullet_list", "ordered_list"].includes(type) &&
+          reparsed.type === current.type && reparsed.childCount === 1 &&
+          current.attrs.spread === false && reparsed.firstChild.childCount === 1 &&
+          reparsed.firstChild.firstChild.type.name === "paragraph" &&
+          current.firstChild.type.defaultAttrs.spread === true &&
+          current.firstChild.attrs.spread === true && reparsed.firstChild.attrs.spread === false) {
+        // wrapIn creates this item's schema-default spread=true, but one sole
+        // paragraph has no inter-block blank line to encode. The original slot
+        // was a paragraph, not a source-backed list. Restore only that generated
+        // default for comparison; every other attribute and child must match.
+        const item = reparsed.firstChild.type.create(
+          {...reparsed.firstChild.attrs, spread: true}, reparsed.firstChild.content, reparsed.firstChild.marks
+        );
+        reparsed = reparsed.copy(reparsed.content.replaceChild(0, item));
+      }
+      if (!reparsed.eq(current)) fail("serialized content or attributes differ from the intended block.");
+      candidate = applySourceReplacements(source, [{index, start: block.start, end: block.end, replacement: serialized}]);
+      const segmented = parseHugoDocument(candidate);
+      if (segmented.frontmatter !== "" || segmented.segments.length !== 1 ||
+          segmented.segments[0].type !== "markdown" || segmented.segments[0].content !== candidate) {
+        fail("the conversion would create or cross a protected boundary.");
+      }
+      // Compare in the pure parser domain: unchanged source-backed headings keep
+      // their exact parsed attrs. No attributes on surrounding nodes are ignored.
+      const expectedNodes = []; baseline.forEach(node => expectedNodes.push(node));
+      expectedNodes[index] = converted.firstChild;
+      const expected = schema.nodes.doc.create(null, expectedNodes);
+      const parsed = parser(candidate);
+      if (!parsed || !parsed.eq(expected)) fail("surrounding source changes the reparsed document structure.");
+    });
+    return candidate;
+  }
+
+
   function synchronizeSegments() {
     for (const record of editors) {
       const originalSource = record.originalSource;
@@ -1544,31 +1773,16 @@ export async function createLilamayaEditor(
       originalDocument.forEach(node => originalBlocks.push(node));
       currentDocument.forEach(node => currentBlocks.push(node));
 
-      // Ignore one editor-generated empty paragraph only when
-      // removing it makes the complete document identical to
-      // the original document, block for block.
-      if (currentBlocks.length === originalBlocks.length + 1) {
-        const emptyParagraphIndexes = currentBlocks
-          .map((node, index) => ({ node, index }))
-          .filter(({ node }) =>
-            node.type.name === "paragraph" &&
-            node.content.size === 0
-          )
-          .map(({ index }) => index);
-
-        const matchingIndexes = emptyParagraphIndexes.filter(index => {
-          const candidate = currentBlocks.filter(
-            (_, currentIndex) => currentIndex !== index
-          );
-
-          return candidate.every((node, candidateIndex) =>
-            node.eq(originalBlocks[candidateIndex])
-          );
-        });
-
-        if (matchingIndexes.length === 1) {
-          currentBlocks.splice(matchingIndexes[0], 1);
-        }
+      // Omit only the exact, still-empty cursor node created by Milkdown.
+      // Never infer provenance from shape or strip source-backed paragraphs.
+      const trailing = currentBlocks.at(-1);
+      if (
+        trailing?.type.name === "paragraph" &&
+        trailing.content.size === 0 &&
+        record.crepe.lilamayaGeneratedTrailingParagraphs?.has(trailing) &&
+        !originalBlocks.includes(trailing)
+      ) {
+        currentBlocks.pop();
       }
 
       const selectedMap = record.originalSourceMap;
@@ -1630,6 +1844,14 @@ export async function createLilamayaEditor(
           return serialized;
         });
 
+        const appended = singleBlockAppend(
+          record, originalBlocks, currentBlocks, plan, serializedRegions
+        );
+        if (appended !== null) {
+          record.segment.content = appended;
+          continue;
+        }
+
         const replacements = buildSeparatorAwareReplacements(
           originalSource,
           sourceBlocks,
@@ -1642,6 +1864,12 @@ export async function createLilamayaEditor(
           replacements
         );
 
+        continue;
+      }
+
+      const converted = synchronizeParagraphConversion(record, originalBlocks, currentBlocks);
+      if (converted !== null) {
+        record.segment.content = converted;
         continue;
       }
 
@@ -1702,6 +1930,12 @@ export async function createLilamayaEditor(
             "Cannot safely synchronize: block serialization failed at index " +
             index + "."
           );
+        }
+
+        // These Remark block ranges exclude the final source line ending.
+        // Remove exactly one serializer terminator, never source whitespace.
+        if (sourceBlock.type === "paragraph" || sourceBlock.type === "table") {
+          serializedBlock = serializedBlock.replace(/\r?\n$/, "");
         }
 
         replacements.push({
@@ -2026,6 +2260,7 @@ export async function createLilamayaEditor(
           record.originalSource,
           record.originalDoc
         );
+        record.generatedHeadingProvenance = captureGeneratedHeadingProvenance(record);
         diagnoseSingleBlockSerialization(record);
     console.group("LILAMAYA SOURCE FIDELITY DIAGNOSTIC");
 
@@ -2171,10 +2406,16 @@ export async function createLilamayaEditor(
       const view = ctx.get(editorViewCtx);
       const selection = view.state.selection;
 
-      savedSelection = {
+      savedSelection = Object.freeze({
         from: selection.from,
-        to: selection.to
-      };
+        to: selection.to,
+        document: view.state.doc,
+        source: record.segment.content,
+        sourceMap: record.originalSourceMap,
+        parser: ctx.get(parserCtx),
+        segmentState: segments.map(segment => ({segment, content: segment.content})),
+        introduction: introductionValue
+      });
     });
 
     if (!savedSelection) {
@@ -2229,44 +2470,114 @@ export async function createLilamayaEditor(
       throw new Error("Active editor segment was not found.");
     }
 
-    synchronizeSegments();
-
-    const split = splitActiveEditor(record, savedSelection);
-
-    const replacement = [];
-
-    if (split.left) {
-      replacement.push({
-        type: "markdown",
-        content: split.left
-      });
+    const fail = message => { throw new Error("Cannot safely insert image: " + message + " Your draft was not changed."); };
+    if (!editors.includes(record) || imagePreviewUrls.has(imagePath)) {
+      fail("the editor or image path is no longer available.");
     }
-
-    replacement.push({
-      type: "markdown",
-      content: (split.left ? "\n\n" : "") + markdown + "\n\n"
+    if (savedSelection.from !== savedSelection.to || !Number.isInteger(savedSelection.from)) {
+      fail("select a collapsed cursor at an unchanged paragraph end.");
+    }
+    if (introductionValue !== savedSelection.introduction ||
+        savedSelection.segmentState.length !== segments.length ||
+        savedSelection.segmentState.some((item,index) => item.segment !== segments[index] || item.content !== segments[index].content)) {
+      fail("the document changed while image selection was open.");
+    }
+    // Rebuilding must never discard an unsynchronized edit in any segment.
+    function sourceDocument(item) {
+      const doc = getEditorView(item).state.doc;
+      const blocks = []; doc.forEach(node => blocks.push(node));
+      const last = blocks.at(-1);
+      if (last?.type.name === "paragraph" && last.content.size === 0 &&
+          item.crepe.lilamayaGeneratedTrailingParagraphs?.has(last)) {
+        const original = []; item.originalDoc.forEach(node => original.push(node));
+        if (!original.includes(last)) blocks.pop();
+      }
+      return doc.copy(doc.content.constructor.fromArray(blocks));
+    }
+    for (const item of editors) {
+      if (item.segment.content !== item.originalSource || !sourceDocument(item).eq(item.originalDoc)) {
+        fail("a Markdown segment no longer matches its trusted source baseline.");
+      }
+    }
+    const view = getEditorView(record);
+    if (!view.state.doc.eq(savedSelection.document) ||
+        view.state.selection.from !== savedSelection.from || view.state.selection.to !== savedSelection.to ||
+        record.segment.content !== savedSelection.source || record.originalSourceMap !== savedSelection.sourceMap) {
+      fail("the saved cursor or source map is stale.");
+    }
+    const source = record.originalSource;
+    const map = captureOriginalSourceMap([record.originalSourceMap], source, record.originalDoc);
+    if (!map) fail("the original source map could not be validated.");
+    const sourceBlocks = map.blocks.filter(block => block.depth === 1);
+    let blockIndex = -1;
+    record.originalDoc.forEach((node,pos,index) => {
+      if (node.type.name === "paragraph" && savedSelection.from === pos + node.nodeSize - 1) blockIndex = index;
     });
-
-    replacement.push({
-      type: "markdown",
-      content: split.right || ""
+    if (blockIndex < 0 || sourceBlocks[blockIndex]?.type !== "paragraph") {
+      fail("only proven top-level paragraph-end boundaries are supported.");
+    }
+    const offset = sourceBlocks[blockIndex].end;
+    const endings = new Set(source.match(/\r\n|\r|\n/g) || []);
+    if (endings.size !== 1 || endings.has("\r")) fail("the local line-ending style is ambiguous.");
+    const eol = [...endings][0];
+    const left = source.slice(0,offset), right = source.slice(offset);
+    const imageSource = eol + eol + markdown;
+    const candidateSource = left + imageSource + right;
+    const segmented = parseHugoDocument(candidateSource);
+    if (segmented.frontmatter !== "" || segmented.segments.length !== 1 ||
+        segmented.segments[0].type !== "markdown" || segmented.segments[0].content !== candidateSource) {
+      fail("the image would create or cross a protected shortcode boundary.");
+    }
+    // Compare exact parser documents, without serializing any source-backed node
+    // or ignoring attributes. Live generated heading IDs need no normalization:
+    // the unchanged source is parsed under the same parser on both sides.
+    record.crepe.editor.action(ctx => {
+      const parser = ctx.get(parserCtx);
+      if (parser !== savedSelection.parser) fail("the parser configuration changed.");
+      const before = parser(source), image = parser(markdown), after = parser(candidateSource);
+      if (!before || before.childCount !== record.originalDoc.childCount ||
+          !before.child(blockIndex).eq(record.originalDoc.child(blockIndex)) ||
+          !image || image.childCount !== 1 || image.firstChild.type.name !== "paragraph" ||
+          image.firstChild.childCount !== 1 || image.firstChild.firstChild.type.name !== "image" ||
+          image.firstChild.firstChild.attrs.src !== imagePath) {
+        fail("the insertion has no unambiguous parser correspondence.");
+      }
+      const nodes = []; before.forEach(node => nodes.push(node));
+      nodes.splice(blockIndex + 1,0,image.firstChild);
+      const expected = ctx.get(schemaCtx).nodes.doc.create(null,nodes);
+      if (!after || !after.eq(expected)) fail("the proposed Markdown changes the intended document structure.");
     });
-
-    segments.splice(segmentIndex, 1, ...replacement);
-
-    const rightIndex =
-      segmentIndex +
-      (split.left ? 1 : 0) +
-      2;
-
-    imagePreviewUrls.set(imagePath, previewUrl);
-
-
+    // All source/position/structure checks completed before any mutation.
+    const previousSegments = [...segments];
+    const replacement = [
+      {type:"markdown",content:left},
+      {type:"markdown",content:imageSource},
+      {type:"markdown",content:right}
+    ];
+    segments.splice(segmentIndex,1,...replacement);
+    imagePreviewUrls.set(imagePath,previewUrl);
     try {
-      await rebuildSegments(rightIndex);
+      await rebuildSegments(segmentIndex + 2);
     } catch (error) {
+      // Render failure is not permission to discard the original source.
+      segments.splice(0,segments.length,...previousSegments);
       imagePreviewUrls.delete(imagePath);
-      throw error;
+      try {
+        await rebuildSegments(segmentIndex);
+        const restored = editors.find(item => item.segment === record.segment);
+        if (restored) {
+          const restoredView = getEditorView(restored);
+          restoredView.dispatch(restoredView.state.tr.setSelection(
+            TextSelection.create(restoredView.state.doc,savedSelection.from,savedSelection.to)
+          ));
+        }
+      } catch (restoreError) {
+        const failure = new Error("Image rendering and editor restoration failed; preserve the retained source snapshot.");
+        failure.sourceSnapshot = previousSegments.map(segment => ({type:segment.type,content:segment.content}));
+        failure.cause = restoreError;
+        throw failure;
+      }
+      throw new Error("Image rendering failed. The original source was restored.",{cause:error});
     }
   }
 
@@ -2406,7 +2717,7 @@ export async function createLilamayaEditor(
   }
 
 
-  // Hugo shortcode dropdown.
+  // New shortcode insertion is temporarily disabled until source-safe slicing is supported.
 
   const shortcodeSelect = document.createElement("select");
 
@@ -2415,11 +2726,11 @@ export async function createLilamayaEditor(
 
   shortcodeSelect.setAttribute(
     "aria-label",
-    "Insert Hugo shortcode"
+    "New shortcode insertion temporarily unavailable"
   );
 
   const shortcodeOptions = [
-    ["", "Shortcodes"],
+    ["", "New shortcode insertion temporarily unavailable"],
     ["introduction", "Introduction"],
     ["poetry", "Poetry"],
     ["invocation", "Invocation"]
@@ -2432,26 +2743,9 @@ export async function createLilamayaEditor(
     shortcodeSelect.appendChild(option);
   }
 
-  shortcodeSelect.addEventListener("change", async () => {
-    const kind = shortcodeSelect.value;
-    if (!kind) return;
+  shortcodeSelect.disabled = true;
+  shortcodeSelect.title = "New shortcode insertion temporarily unavailable. Existing shortcodes are preserved.";
 
-    shortcodeSelect.disabled = true;
-
-    try {
-      await insertShortcode(kind);
-    } catch (error) {
-      console.error("Shortcode insertion failed:", error);
-
-      window.alert(
-        "The shortcode could not be inserted. " +
-        "No document has been saved."
-      );
-    } finally {
-      shortcodeSelect.value = "";
-      shortcodeSelect.disabled = false;
-    }
-  });
 
   toolbar.appendChild(shortcodeSelect);
 
@@ -2516,6 +2810,7 @@ export async function createLilamayaEditor(
       record.originalSource,
       record.originalDoc
     );
+    record.generatedHeadingProvenance = captureGeneratedHeadingProvenance(record);
     diagnoseSingleBlockSerialization(record);
     console.group("LILAMAYA SOURCE FIDELITY DIAGNOSTIC");
 
@@ -2559,6 +2854,24 @@ export async function createLilamayaEditor(
 
 
   return {
+
+    captureDraftSnapshot() {
+      if (destroyed) throw new Error("The editor is unavailable; keep the page open.");
+      return {
+        format: "lilamaya-editor-buffer-v1",
+        frontmatter: documentModel.frontmatter,
+        introduction: introductionValue,
+        imagePaths: [...imagePreviewUrls.keys()],
+        segments: segments.map(segment => {
+          const record = editors.find(item => item.segment === segment);
+          const textarea = protectedTextareas.get(segment);
+          return {type:segment.type, source:segment.content,
+            ...(record ? {originalSource:record.originalSource,
+              document:getEditorView(record).state.doc.toJSON()} : {}),
+            ...(textarea ? {protectedText:textarea.value} : {})};
+        })
+      };
+    },
 
     getMarkdown() {
       if (destroyed) {

@@ -1,14 +1,144 @@
 import {createLilamayaEditor} from "./lilamaya-rich-editor.js";
+import {createSaveSafety, createSaveSafetyPanel} from "./lilamaya-save-safety.mjs";
 
 const defaultDocumentPath = "content/essays/the-art-of-becoming-whole/index.md";
 let documentPath = defaultDocumentPath;
 let documentSha = null;
+let documentIsLocal = false;
 let richEditor = null;
 let savedContent = null;
 let savedConnections = "[]";
 let newEssayMode = false;
 let newEntryMode = false;
 let availableDocuments = [];
+let saveSafety = null;
+let pendingSave = null;
+let pendingEditor = null;
+let lastSaveHttpStatus = null;
+let acknowledgedDiskKnown = false;
+let documentLoading = false;
+let saveValidationError = null;
+
+function differsFromSubmitted(draft) {
+  if (!richEditor || draft.path !== documentPath) return true;
+  try {
+    return richEditor.getMarkdown() !== draft.markdown ||
+      JSON.stringify(collectDocumentConnections()) !== JSON.stringify(draft.connections);
+  } catch { return true; }
+}
+
+function hasUnsavedBufferChanges() {
+  if (!richEditor || savedContent === null) return false;
+  if (!acknowledgedDiskKnown) return true;
+  try {
+    return richEditor.getMarkdown() !== savedContent ||
+      JSON.stringify(collectDocumentConnections()) !== savedConnections;
+  } catch { return true; }
+}
+
+function renderSaveStatus(state = saveSafety?.state()) {
+  const status = document.querySelector("#save-status");
+  if (!status) return;
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  document.querySelector("#save-editor").disabled =
+    documentLoading || !richEditor || !state?.canRetry;
+  // A stale/uncertain outcome invalidates our old view of disk, even after the
+  // user explicitly acknowledges recovery review. Only load/save reestablishes it.
+  if (state?.issue && (state.issue.kind === "stale" || state.issue.publication !== "none")) {
+    acknowledgedDiskKnown = false;
+  }
+  let text = "";
+  if (documentLoading) text = "Opening…";
+  else if (state?.busy) text = pendingSave && differsFromSubmitted(pendingSave)
+    ? "Saving… — newer changes unsaved" : "Saving…";
+  else if (state?.issue) text = state.issue.kind === "stale" || lastSaveHttpStatus === 409
+    ? "Conflict — preserve your draft and review the warning."
+    : "Save failed — preserve your draft and review the warning.";
+  else if (saveValidationError) text = "Save failed — " + saveValidationError;
+  else if (richEditor && savedContent !== null) text = hasUnsavedBufferChanges() ? "Unsaved" : "Saved";
+  if (status.textContent !== text) status.textContent = text;
+}
+
+function initializeSaveStatusNotifications() {
+  const editor = document.querySelector("#codemirror-editor");
+  const connections = document.querySelector("#document-connection-list");
+  let queued = false;
+  const changed = () => {
+    saveValidationError = null;
+    // Invalidate a visible Saved label immediately; reconcile after Milkdown's
+    // DOM observer has processed the edit. No debounce timer, autosave or retry.
+    const status = document.querySelector("#save-status");
+    if (richEditor && !documentLoading && !saveSafety?.state().issue && status.textContent === "Saved") {
+      status.textContent = "Unsaved";
+    }
+    if (queued) return;
+    queued = true;
+    queueMicrotask(() => { queued = false; renderSaveStatus(); });
+  };
+  for (const root of [editor, connections]) {
+    root.addEventListener("input", changed);
+    root.addEventListener("change", changed);
+    new MutationObserver(changed).observe(root, {
+      subtree: true, childList: true, characterData: true, attributes: true
+    });
+  }
+}
+
+function currentBufferIdentity() {
+  if (!richEditor) return null;
+  const {segments, ...snapshot} = richEditor.captureDraftSnapshot();
+  // Derived serialized source may refresh without an edit; compare live nodes
+  // and protected fields instead when guarding a pending document load.
+  return JSON.stringify({...snapshot,
+    segments: segments.map(({source, originalSource, ...live}) => live),
+    connections: collectDocumentConnections()});
+}
+
+
+function captureUnsavedDraft() {
+  if (!richEditor) throw new Error("No manuscript is loaded.");
+  const snapshot = richEditor.captureDraftSnapshot();
+  let markdown=null, serializationError=null;
+  try { markdown=richEditor.getMarkdown(); } catch(error) { serializationError=error.message; }
+  return {path:documentPath, revision:documentSha, snapshot, markdown, serializationError,
+    connections:collectDocumentConnections()};
+}
+
+function initializeSaveSafety() {
+  if(saveSafety)return;
+  let panel;
+  const download=()=>saveSafety.exportDraft(async payload=>{
+    const url=URL.createObjectURL(new Blob([payload.text],{type:"application/json;charset=utf-8"}));
+    const a=document.createElement("a");a.href=url;a.download="lilamaya-unsaved-draft-"+(typeof crypto.randomUUID==="function"?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2))+".json";
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  });
+  const copy=()=>saveSafety.exportDraft(async payload=>{
+    if(!navigator.clipboard?.writeText)throw new Error("Clipboard is unavailable; use download.");
+    await navigator.clipboard.writeText(payload.text);
+  });
+  panel=createSaveSafetyPanel(document,document.querySelector(".editor-actions"),{
+    download,copy,resolve:flags=>saveSafety.acknowledgeResolution(flags)
+  });
+  saveSafety=createSaveSafety({readDraft:captureUnsavedDraft,isDirty:hasUnsavedChanges,
+    confirmResolution:()=>window.confirm("Confirm that you preserved the latest exported draft and reviewed all disk/recovery versions. Nothing will be reloaded or restored. Continue?"),
+    onSaved:(result,draft)=>{
+      if (draft.path !== documentPath || pendingEditor !== richEditor) {
+        throw new Error("The save acknowledgment belongs to a different editor.");
+      }
+      documentSha=result.sha;
+      savedContent=draft.markdown;
+      savedConnections=JSON.stringify(draft.connections);
+      acknowledgedDiskKnown=true;
+    },
+    render:state=>{
+      panel.render(state);
+      renderSaveStatus(state);
+    }});
+  window.addEventListener("beforeunload",event=>saveSafety.beforeUnload(event));
+  initializeSaveStatusNotifications();
+}
+
 
 function showLibraryScreen() {
   newEssayMode = false;
@@ -143,7 +273,7 @@ async function handleImageInsertion(insertImageAtCursor) {
       body: JSON.stringify({
         path: imagePath,
         content: base64Content,
-        local: documentSha === "LOCAL"
+        local: documentIsLocal
       })
     });
 
@@ -173,10 +303,22 @@ async function handleImageInsertion(insertImageAtCursor) {
 }
 
 async function loadDocument(path) {
+  if(saveSafety && !saveSafety.canNavigate()) throw new Error("Preserve your current draft and resolve its warning before opening another document.");
+  if (documentLoading) throw new Error("Another manuscript is still opening.");
+  const previousEditor = richEditor;
+  const previousBuffer = currentBufferIdentity();
+  documentLoading = true;
+  renderSaveStatus();
+  try {
   const data = await fetchDocument(path);
+  if (previousEditor !== richEditor || previousBuffer !== currentBufferIdentity() ||
+      (saveSafety && !saveSafety.canNavigate())) {
+    throw new Error("The current draft changed while opening another manuscript. It has been retained; choose the document again when ready.");
+  }
 
   documentPath = data.path;
   documentSha = data.sha;
+  documentIsLocal = data.local === true;
   localStorage.setItem("lilamaya-editor-document-path", documentPath);
 
   renderDocumentSelector(availableDocuments);
@@ -251,7 +393,12 @@ async function loadDocument(path) {
   renderDocumentConnections(data.connections || []);
   savedContent = data.content;
   savedConnections = JSON.stringify(collectDocumentConnections());
-  document.querySelector("#save-status").textContent = "";
+  acknowledgedDiskKnown = true;
+  saveValidationError = null;
+  } finally {
+    documentLoading = false;
+    renderSaveStatus();
+  }
 }
 
 function sectionForPath(path) {
@@ -989,56 +1136,35 @@ async function loadDocumentList() {
 }
 
 async function saveDocument() {
-  const saveStatus = document.querySelector("#save-status");
-
-  if (updateDuplicateWarnings("#document-connection-list")) {
-    saveStatus.textContent = "Resolve duplicate connections before saving.";
+  initializeSaveSafety();
+  if (documentLoading || !richEditor || !saveSafety.state().canRetry) {
+    renderSaveStatus();
     return;
   }
-
-  saveStatus.textContent = "Saving…";
-
-  try {
-    // Markdown extraction can itself fail if synchronisation is unsafe.
-    // Keep it inside the try block so the error is shown in the editor.
-    const markdownText = richEditor.getMarkdown();
-
-    const savePayload = {
-      path: documentPath,
-      content: markdownText,
-      sha: documentSha,
-      connections: collectDocumentConnections()
-    };
-
-    console.log("Lilamaya Save:", savePayload);
-
-    const response = await fetch(apiBase + "/api/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(savePayload)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || `Save failed: ${response.status}`);
-    }
-
-    documentSha = result.sha;
-    savedContent = markdownText;
-    savedConnections = JSON.stringify(savePayload.connections);
-    saveStatus.textContent = "Saved";
-  } catch (error) {
-    console.error("Lilamaya Save Error:", error);
-    saveStatus.textContent = "Save failed: " + error.message;
+  if(updateDuplicateWarnings("#document-connection-list")) {
+    saveValidationError = "Resolve duplicate connections before saving.";
+    renderSaveStatus();
+    return;
   }
-
-  setTimeout(() => {
-    saveStatus.textContent = "";
-  }, 4000);
+  saveValidationError = null;
+  lastSaveHttpStatus = null;
+  try {
+    await saveSafety.save(async draft=>{
+      pendingSave = draft;
+      pendingEditor = richEditor;
+      renderSaveStatus();
+      const response=await fetch(apiBase+"/api/save",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({path:draft.path,content:draft.markdown,sha:draft.revision,connections:draft.connections})});
+      lastSaveHttpStatus = response.status;
+      return {ok:response.ok,status:response.status,body:await response.json()};
+    });
+  } finally {
+    pendingSave = null;
+    pendingEditor = null;
+    renderSaveStatus();
+  }
 }
+
 
 async function beginNewEssay() {
   const newEssayForm = document.querySelector("#new-essay-form");
@@ -1145,7 +1271,8 @@ async function beginNewEssay() {
             /index\.md$/,
             `hero.${extension}`
           ),
-          content: base64
+          content: base64,
+          local: result.local === true
         })
       });
 
@@ -1440,18 +1567,13 @@ function collectDocumentConnections() {
 }
 
 function hasUnsavedChanges() {
-  if (!richEditor || savedContent === null) return false;
-
-  const contentChanged =
-    richEditor.getMarkdown() !== savedContent;
-
-  const connectionsChanged =
-    JSON.stringify(collectDocumentConnections()) !== savedConnections;
-
-  return contentChanged || connectionsChanged;
+  if(saveSafety && (saveSafety.state().issue || saveSafety.state().busy))return true;
+  return hasUnsavedBufferChanges();
 }
 
+
 function confirmDiscardUnsavedChanges() {
+  if(saveSafety && !saveSafety.canNavigate())return false;
   if (!hasUnsavedChanges()) return true;
 
   return window.confirm(
@@ -1528,8 +1650,7 @@ async function createNewEntry() {
     await loadDocument(result.path);
     showEditorScreen();
 
-    document.querySelector("#save-status").textContent =
-      result.local ? "Local test entry created — draft" : "Entry created — draft";
+    renderSaveStatus();
 
   } catch (error) {
     console.error("New Entry Error:", error);
@@ -1542,6 +1663,7 @@ async function createNewEntry() {
 }
 
 async function loadEditor() {
+  initializeSaveSafety();
   const newEssayForm = document.querySelector("#new-essay-form");
   const newEntryForm = document.querySelector("#new-entry-form");
 

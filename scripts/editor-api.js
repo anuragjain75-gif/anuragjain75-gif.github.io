@@ -8,7 +8,8 @@ const GITHUB_OWNER = "anuragjain75-gif";
 const GITHUB_REPO = "anuragjain75-gif.github.io";
 const GITHUB_BRANCH = "main";
 
-// Use Git's secure credential store when no environment token is supplied.
+// GitHub credentials are optional for local writing.
+// Remote operations check credentials individually.
 if (!process.env.GITHUB_TOKEN) {
   try {
     const credentials = execFileSync(
@@ -23,20 +24,191 @@ if (!process.env.GITHUB_TOKEN) {
 
     const match = credentials.match(/^password=(.+)$/m);
 
-    if (!match) {
-      throw new Error("No GitHub password/token was returned.");
+    if (match) {
+      process.env.GITHUB_TOKEN = match[1];
+      console.log("GitHub credential loaded from Git credential manager.");
+    } else {
+      console.warn("GitHub credentials unavailable. Local editing remains available.");
     }
-
-    process.env.GITHUB_TOKEN = match[1];
-    console.log("GitHub credential loaded from Git credential manager.");
   } catch (error) {
-    console.error("Could not load GitHub credentials:", error.message);
-    process.exit(1);
+    console.warn("GitHub credentials unavailable. Local editing remains available.");
   }
+}
+
+function requireGitHubCredentials() {
+  if (!process.env.GITHUB_TOKEN) {
+    const error = new Error(
+      "GitHub credentials are unavailable. Local editing remains available; configure Git credentials to use remote operations."
+    );
+    error.statusCode = 503;
+    throw error;
+  }
+}
+
+// Linux local storage: pin directories before using names relative to them.
+const crypto = require("crypto");
+const repositoryRoot = nodePath.resolve(__dirname, "..");
+function storageError(statusCode, message) { return Object.assign(new Error(message), {statusCode}); }
+function saveFailure(error, details) { error.saveFailure = details; return error; }
+function sameInode(a, b) { return a.dev === b.dev && a.ino === b.ino; }
+function directory(relative, create = false) {
+  if (fs.realpathSync(repositoryRoot) !== repositoryRoot) throw storageError(403, "Repository ancestors must not be symbolic links.");
+  const parts = relative ? relative.split("/") : [];
+  if (parts.some(p => !p || p === "." || p === ".." || /[\\\0]/.test(p))) throw storageError(403, "Unsafe directory path.");
+  let fd = fs.openSync(repositoryRoot, fs.constants.O_RDONLY | fs.constants.O_DIRECTORY | fs.constants.O_NOFOLLOW);
+  try {
+    for (const part of parts) {
+      const child = `/proc/self/fd/${fd}/${part}`;
+      if (create) { try { fs.mkdirSync(child, {mode: 0o700}); } catch (e) { if (e.code !== "EEXIST") throw e; } }
+      const next = fs.openSync(child, fs.constants.O_RDONLY | fs.constants.O_DIRECTORY | fs.constants.O_NOFOLLOW);
+      fs.closeSync(fd); fd = next;
+    }
+    return {fd, path: `/proc/self/fd/${fd}`, close() { fs.closeSync(fd); }};
+  } catch (e) {
+    fs.closeSync(fd);
+    if (["ELOOP", "ENOTDIR"].includes(e.code)) throw storageError(403, "Symbolic links and non-directory ancestors are not allowed.");
+    throw e;
+  }
+}
+function snapshot(file) {
+  let fd;
+  try {
+    fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+    const a = fs.fstatSync(fd);
+    if (!a.isFile()) throw storageError(403, "Only regular files are allowed.");
+    const bytes = fs.readFileSync(fd), b = fs.fstatSync(fd);
+    if (!sameInode(a,b) || a.size !== b.size || a.mtimeMs !== b.mtimeMs || a.ctimeMs !== b.ctimeMs) throw storageError(409, "Document changed during read.");
+    const sha = "LOCAL:" + crypto.createHash("sha256").update(bytes).update(`:${b.dev}:${b.ino}:${b.mtimeMs}`).digest("hex");
+    return {fd, bytes, stat: b, sha, close() { fs.closeSync(fd); }};
+  } catch (e) { if (fd !== undefined) fs.closeSync(fd); if (e.code === "ELOOP") throw storageError(403, "Symbolic links are not allowed."); throw e; }
+}
+function ownedUnlink(file, identity) {
+  try { if (!sameInode(fs.lstatSync(file),identity)) throw storageError(409, "Cleanup refused: file ownership changed."); fs.unlinkSync(file); }
+  catch (e) { if (e.code !== "ENOENT") throw e; }
+}
+function writeExclusive(file, data, mode = 0o600) {
+  let fd, identity;
+  try {
+    fd = fs.openSync(file, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW, mode);
+    identity = fs.fstatSync(fd); // Record ownership before writes can fail.
+    fs.writeFileSync(fd, data); fs.fchmodSync(fd,mode & 0o777); fs.fsyncSync(fd); return identity;
+  } catch (e) { if (identity) ownedUnlink(file,identity); if (e.code === "EEXIST") throw storageError(409,"Local file already exists."); throw e; }
+  finally { if (fd !== undefined) fs.closeSync(fd); }
+}
+function createLocalFile(relative,data) {
+  const dir = directory(nodePath.dirname(relative),true);
+  try {
+    const file = `${dir.path}/${nodePath.basename(relative)}`; writeExclusive(file,data);
+    const s = snapshot(file); try { fs.fsyncSync(dir.fd); return {path:relative,sha:s.sha,commit:null,local:true}; } finally { s.close(); }
+  } finally { dir.close(); }
+}
+function readLocalFile(relative) {
+  const dir = directory(nodePath.dirname(relative));
+  try {
+    const name = nodePath.basename(relative);
+    if (fs.existsSync(`${dir.path}/.${name}.save-lock`)) throw saveFailure(storageError(409,"A save or recovery is in progress; preserve your draft and follow the recovery procedure."),
+      {kind:"recovery-conflict",code:"RECOVERY_LOCK",publication:"unknown",recovery:{required:true,lockRetained:true}});
+    const s = snapshot(`${dir.path}/${name}`); try { return {content:s.bytes.toString("utf8"),sha:s.sha}; } finally { s.close(); }
+  } finally { dir.close(); }
+}
+function saveLocalFile(relative, content, expectedSha) {
+  if (!/^LOCAL:[a-f0-9]{64}$/.test(expectedSha)) throw saveFailure(storageError(409,"A current local revision is required. Preserve your draft before reviewing the disk version."),
+    {kind:"stale-conflict",code:"REVISION_REQUIRED",publication:"none",recovery:{required:false,lockRetained:false}});
+  const dir = directory(nodePath.dirname(relative));
+  const name=nodePath.basename(relative), file=`${dir.path}/${name}`, lock=`${dir.path}/.${name}.save-lock`;
+  let lockCreated=false, lockFD, backupDir, source, temp, tempIdentity, recovery, displaced=false;
+  let publishedDraft=false, backupId=null, failureDetails=null;
+  try {
+    try { fs.mkdirSync(lock,{mode:0o700}); lockCreated=true; } catch(e) { if(e.code==="EEXIST") throw storageError(409,"Another writer or recovery owns this document."); throw e; }
+    lockFD=fs.openSync(lock,fs.constants.O_RDONLY|fs.constants.O_DIRECTORY|fs.constants.O_NOFOLLOW);
+    source=snapshot(file);
+    if(source.sha!==expectedSha) throw storageError(409,"Document changed since it was opened.");
+    backupDir=directory(`backups/editor-autosave/${nodePath.dirname(relative)}`,true);
+    if(fs.fstatSync(backupDir.fd).dev!==fs.fstatSync(dir.fd).dev) throw storageError(503,"Safe saves require backups on the same filesystem.");
+    const stamp=new Date().toISOString().replace(/[:.]/g,"-");
+    backupId=`${name}.${stamp}-${process.pid}.bak`;
+    const backup=`${backupDir.path}/${backupId}`;
+    fs.copyFileSync(`/proc/self/fd/${source.fd}`,backup,fs.constants.COPYFILE_EXCL);
+    const backupIdentity=fs.lstatSync(backup), backupFD=fs.openSync(backup,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW);
+    try { fs.fsyncSync(backupFD); } finally { fs.closeSync(backupFD); }
+    temp=`${dir.path}/.${name}.${process.pid}.${Date.now()}.tmp`;
+    tempIdentity=writeExclusive(temp,content,source.stat.mode);
+    const current=snapshot(file); try { if(current.sha!==expectedSha) throw storageError(409,"Document changed during save preparation."); } finally { current.close(); }
+    // Keep the displaced inode so edits in the validation/replacement window
+    // are recoverable. Publication never overwrites an independently created path.
+    recovery=`/proc/self/fd/${lockFD}/original`;
+    fs.renameSync(file,recovery); displaced=true;
+    const moved=snapshot(recovery); let conflict;
+    try { conflict=moved.sha!==expectedSha; } finally { moved.close(); }
+    if(conflict) throw storageError(409,"Document changed before publication.");
+    try { fs.linkSync(temp,file); publishedDraft=true; } catch(e) { if(e.code==="EEXIST") throw storageError(409,"Another writer created the document during save."); throw e; }
+    const last=snapshot(recovery); try { conflict=last.sha!==expectedSha; } finally { last.close(); }
+    if(!sameInode(fs.lstatSync(backup),backupIdentity)) throw storageError(409,"Backup ownership changed; original retained for recovery.");
+    fs.renameSync(recovery,backup); displaced=false;
+    fs.fsyncSync(backupDir.fd); fs.fsyncSync(dir.fd);
+    const published=snapshot(file); let sha;
+    try { if(!sameInode(published.stat,tempIdentity)) throw storageError(409,"Published document changed; original retained in backup."); sha=published.sha; } finally { published.close(); }
+    if(conflict) throw storageError(409,"External edit detected in displaced original; preserved in newest backup.");
+    try {
+      const names=fs.readdirSync(backupDir.path).filter(n=>n.startsWith(`${name}.`)&&n.endsWith(".bak")).sort().reverse();
+      for(const old of names.slice(30)) { const p=`${backupDir.path}/${old}`, identity=fs.lstatSync(p); if(!identity.isFile()||identity.isSymbolicLink()) throw storageError(403,"Unsafe backup entry; retention stopped."); ownedUnlink(p,identity); }
+    } catch(e) { console.warn("Old backup cleanup warning:",e.message); }
+    return sha;
+  } catch(e) {
+    if(displaced) {
+      try { fs.linkSync(recovery,file); ownedUnlink(recovery,fs.lstatSync(recovery)); displaced=false; }
+      catch(restoreError) { console.error("Original retained in .save-lock/original:",relative,restoreError.message); e.message+=" Original retained in .save-lock/original; manual recovery required."; }
+    }
+    const recoveryRequired=publishedDraft||displaced||(!lockCreated && e.statusCode===409);
+    const kind=recoveryRequired?"recovery-conflict":e.statusCode===409?"stale-conflict":"failure";
+    const details=failureDetails={kind,code:recoveryRequired?"RECOVERY_REVIEW_REQUIRED":e.statusCode===409?"LOCAL_REVISION_CONFLICT":"LOCAL_SAVE_FAILED",
+      publication:publishedDraft?"occurred":"none",
+      recovery:{required:recoveryRequired,lockRetained:displaced||(!lockCreated&&e.statusCode===409),
+        ...(recoveryRequired&&backupId?{backupId}:{})}};
+    if(!lockCreated&&e.statusCode===409)details.publication="unknown";
+    // Error text is safe for browser display: never expose OS error paths.
+    e.message=recoveryRequired?"Save not confirmed. Preserve your browser draft; inspect the disk version and indicated recovery data before further writes."
+      :e.statusCode===409?"The document changed or another save could not safely proceed. This request did not publish your draft."
+      :"The save failed before draft publication. Your browser draft must be preserved before retrying.";
+    throw saveFailure(e,details);
+  } finally {
+    if(source) source.close();
+    if(tempIdentity) { try { ownedUnlink(temp,tempIdentity); } catch(e) { console.error("Temporary cleanup refused:",e.message); } }
+    if(lockFD!==undefined) fs.closeSync(lockFD);
+    let lockCleanupFailed=false;
+    if(lockCreated&&!displaced) {
+      try { fs.rmdirSync(lock); }
+      catch(e) {
+        lockCleanupFailed=true;
+        if(failureDetails){failureDetails.kind="recovery-conflict";failureDetails.recovery.required=true;failureDetails.recovery.lockRetained=true;}
+        console.warn("Save lock retained:",e.message);
+      }
+    }
+    if(backupDir) backupDir.close(); dir.close();
+    if(lockCleanupFailed&&!failureDetails)throw saveFailure(storageError(500,"Draft publication completed but a save lock remains. Preserve your draft and follow the recovery procedure."),
+      {kind:"recovery-conflict",code:"LOCK_CLEANUP_FAILED",publication:publishedDraft?"occurred":"unknown",recovery:{required:true,lockRetained:true,...(backupId?{backupId}:{})}});
+  }
+}
+function denyRemoteMutation() { throw storageError(403,"Remote mutations are disabled in local-first mode."); }
+function assertSafeHugoContent(relative="content") {
+  let dir; try { dir=directory(relative); } catch(e) { if(e.code==="ENOENT") return; throw e; }
+  try { for(const item of fs.readdirSync(dir.path,{withFileTypes:true})) { if(item.isSymbolicLink()) throw storageError(403,"Hugo content must not contain symbolic links."); if(item.isDirectory()) assertSafeHugoContent(`${relative}/${item.name}`); } }
+  finally { dir.close(); }
 }
 
 function updateConnectionsFrontmatter(content, connections) {
   const parsed = matter(content);
+  const signature=value=>JSON.stringify(value,(key,item)=>item&&typeof item==="object"&&!Array.isArray(item)
+    ?Object.fromEntries(Object.keys(item).sort().map(name=>[name,item[name]])):item);
+  if(Object.prototype.hasOwnProperty.call(parsed.data,"connections")&&signature(parsed.data.connections)===signature(connections)) return content;
+
+  // Do not add empty Connections metadata to older documents.
+  if (
+    connections.length === 0 &&
+    !Object.prototype.hasOwnProperty.call(parsed.data, "connections")
+  ) {
+    return content;
+  }
 
   if (!content.startsWith("---")) {
     throw new Error("Document has no YAML frontmatter");
@@ -49,6 +221,7 @@ function updateConnectionsFrontmatter(content, connections) {
   }
 
   const originalYaml = match[1];
+  const newline=match[0].includes("\r\n")?"\r\n":"\n";
   const serialized = matter.stringify("", {connections});
   const serializedMatch = serialized.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 
@@ -70,21 +243,19 @@ function updateConnectionsFrontmatter(content, connections) {
 
     while (
       end < lines.length &&
-      (lines[end] === "" || /^[ \t]/.test(lines[end]))
+      (lines[end] === "" || /^[ \t]/.test(lines[end]) || /^-(?:[ \t]|$)/.test(lines[end]))
     ) {
       end++;
     }
 
-    updatedLines = [
-      ...lines.slice(0, start),
-      connectionsYaml,
-      ...lines.slice(end)
-    ];
+    let blanks=0;
+    for(let i=end-1;i>start&&!lines[i].trim();i--) blanks++;
+    updatedLines = [...lines.slice(0,start),connectionsYaml,...Array(blanks).fill(""),...lines.slice(end)];
   }
 
   const updated = content.replace(
     match[0],
-    `---\n${updatedLines.join("\n")}\n---`
+    () => `---${newline}${updatedLines.join("\n").replace(/\r?\n/g,newline)}${newline}---`
   );
 
   const validated = matter(updated);
@@ -97,6 +268,7 @@ function updateConnectionsFrontmatter(content, connections) {
 }
 
 function listHugoPermalinks() {
+  assertSafeHugoContent();
   const repoRoot = nodePath.resolve(__dirname, "..");
 
   const output = execFileSync("hugo", ["list", "all"], {
@@ -279,6 +451,7 @@ function validateConnections(connections, currentPermalink = null) {
     throw new ValidationError("A document cannot have more than 50 connections");
   }
 
+  if(connections.length===0) return [];
   const validTargets = new Set(listHugoPermalinks().values());
   const seenTargets = new Set();
 
@@ -328,6 +501,7 @@ function validateConnections(connections, currentPermalink = null) {
 }
 
 async function getGitHubFile(path) {
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}` +
     `?ref=${GITHUB_BRANCH}`;
@@ -354,6 +528,8 @@ async function getGitHubFile(path) {
 }
 
 async function updateGitHubFile(path, content, sha) {
+  denyRemoteMutation();
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
@@ -387,6 +563,8 @@ async function updateGitHubFile(path, content, sha) {
 }
 
 async function createGitHubFile(path, content) {
+  denyRemoteMutation();
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
@@ -419,6 +597,8 @@ async function createGitHubFile(path, content) {
 }
 
 async function createGitHubBinaryFile(path, base64Content) {
+  denyRemoteMutation();
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
@@ -451,6 +631,8 @@ async function createGitHubBinaryFile(path, base64Content) {
 }
 
 async function deleteGitHubFile(path, sha) {
+  denyRemoteMutation();
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
@@ -482,54 +664,27 @@ async function deleteGitHubFile(path, sha) {
 }
 
 function listLocalDocuments() {
-  const contentRoot = nodePath.resolve(__dirname, "..", "content");
-  const documents = [];
-
-  function scanDirectory(directory) {
-    if (!fs.existsSync(directory)) return;
-
-    for (const item of fs.readdirSync(directory, {withFileTypes: true})) {
-      const fullPath = nodePath.join(directory, item.name);
-
-      if (item.isDirectory()) {
-        scanDirectory(fullPath);
-        continue;
+  const documents=[];
+  function scan(relative) {
+    let dir; try { dir=directory(relative); } catch(e) { if(e.code==="ENOENT") return; throw e; }
+    try {
+      for(const item of fs.readdirSync(dir.path,{withFileTypes:true})) {
+        const child=`${relative}/${item.name}`;
+        if(item.isSymbolicLink()) continue;
+        if(item.isDirectory()) { scan(child); continue; }
+        if(!item.isFile()||item.name==="_index.md"||!isAllowedPath(child)) continue;
+        const file=snapshot(`${dir.path}/${item.name}`);
+        try { const match=file.bytes.toString("utf8").match(/^title:\s*["']?(.+?)["']?\s*$/m); documents.push({path:child,title:match?match[1]:child}); }
+        finally { file.close(); }
       }
-
-      if (!item.isFile() || !item.name.endsWith(".md") ||
-          item.name === "_index.md") {
-        continue;
-      }
-
-      const relativePath = nodePath.relative(
-        nodePath.resolve(__dirname, ".."),
-        fullPath
-      ).split(nodePath.sep).join("/");
-
-      if (!isAllowedPath(relativePath)) continue;
-
-      const content = fs.readFileSync(fullPath, "utf8");
-      const match = content.match(/^title:\s*["']?(.+?)["']?\s*$/m);
-
-      documents.push({
-        path: relativePath,
-        title: match ? match[1] : relativePath
-      });
-    }
+    } finally { dir.close(); }
   }
-
-  for (const section of [
-    "essays", "fragments", "paintings",
-    "people", "works", "ideas",
-    "traditions", "places", "journeys"
-  ]) {
-    scanDirectory(nodePath.join(contentRoot, section));
-  }
-
+  for(const section of ["essays","fragments","paintings","people","works","ideas","traditions","places","journeys"]) scan(`content/${section}`);
   return documents;
 }
 
 async function listGitHubDocuments() {
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
 
@@ -574,6 +729,7 @@ async function listGitHubDocuments() {
 
 
 async function githubApiRequest(endpoint, options = {}) {
+  requireGitHubCredentials();
   const response = await fetch(
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}${endpoint}`,
     {
@@ -714,7 +870,7 @@ function replaceEssayThemeFrontmatter(content, oldTheme, newTheme) {
 
   const updatedContent = content.replace(
     frontmatterMatch[0],
-    updatedFrontmatter
+    () => updatedFrontmatter
   );
 
   const verified = matter(updatedContent);
@@ -732,6 +888,7 @@ function replaceEssayThemeFrontmatter(content, oldTheme, newTheme) {
 
 
 async function getGitHubBlobContent(sha) {
+  requireGitHubCredentials();
   const blob = await githubApiRequest(`/git/blobs/${sha}`);
 
   if (blob.encoding !== "base64" || typeof blob.content !== "string") {
@@ -743,6 +900,8 @@ async function getGitHubBlobContent(sha) {
 
 
 async function renameGitHubEssayTheme(oldTheme, newTheme) {
+  denyRemoteMutation();
+  requireGitHubCredentials();
   const themesPath = "static/editor-data/essay-themes.json";
 
   // Capture the current branch commit.
@@ -915,6 +1074,7 @@ async function renameGitHubEssayTheme(oldTheme, newTheme) {
 }
 
 async function getGitHubThemeUsage(theme) {
+  requireGitHubCredentials();
   const url =
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
 
@@ -989,7 +1149,7 @@ const server = http.createServer(async (req, res) => {
           typeof content !== "string" ||
           typeof sha !== "string"
         ) {
-          throw new Error("path, content, and sha are required");
+          throw storageError(400,"path, content, and sha are required");
         }
 
         if (!isAllowedPath(path)) {
@@ -998,7 +1158,7 @@ const server = http.createServer(async (req, res) => {
 
         // Update only the connections field in the Markdown frontmatter.
         if (Array.isArray(connections)) {
-          const currentPermalink = listHugoPermalinks().get(path);
+          const currentPermalink = connections.length?listHugoPermalinks().get(path):null;
           const cleanConnections = validateConnections(
             connections,
             currentPermalink
@@ -1007,27 +1167,13 @@ const server = http.createServer(async (req, res) => {
           content = updateConnectionsFrontmatter(content, cleanConnections);
         }
 
-        if (sha === "LOCAL") {
-          const localPath = nodePath.resolve(__dirname, "..", path);
-
-          if (!localPath.startsWith(nodePath.resolve(__dirname, "..") + nodePath.sep)) {
-            throw new Error("Invalid local path");
-          }
-
-          if (!fs.existsSync(localPath)) {
-            throw new Error("Local document no longer exists");
-          }
-
-          fs.writeFileSync(localPath, content, "utf8");
-
+        if (sha === "LOCAL" || sha.startsWith("LOCAL:")) {
+          const revision = saveLocalFile(path, content, sha);
           res.writeHead(200, {"Content-Type": "application/json"});
-          res.end(JSON.stringify({
-            ok: true,
-            path,
-            sha: "LOCAL"
-          }));
+          res.end(JSON.stringify({ok:true,path,sha:revision,local:true}));
           return;
         }
+        denyRemoteMutation();
 
         const currentFile = await getGitHubFile(path);
 
@@ -1061,7 +1207,10 @@ const server = http.createServer(async (req, res) => {
           (error instanceof ValidationError ? 400 : 500);
 
         res.writeHead(statusCode, {"Content-Type": "application/json"});
-        res.end(JSON.stringify({error: error.message}));
+        res.end(JSON.stringify({
+          error:error.saveFailure?error.message:"The save was rejected before publication. Preserve your draft and check the request or local document.",
+          save:error.saveFailure||{kind:statusCode===409?"stale-conflict":"failure",code:"SAVE_REJECTED",publication:"none",recovery:{required:false,lockRetained:false}}
+        }));
       }
 
     return;
@@ -1098,31 +1247,8 @@ const server = http.createServer(async (req, res) => {
 
       let uploaded;
 
-      if (local === true) {
-        const repositoryRoot = nodePath.resolve(__dirname, "..");
-        const localPath = nodePath.resolve(repositoryRoot, path);
-
-        if (!localPath.startsWith(repositoryRoot + nodePath.sep)) {
-          throw new ValidationError("Invalid local image path");
-        }
-
-        fs.mkdirSync(nodePath.dirname(localPath), {recursive: true});
-
-        const imageBuffer = Buffer.from(
-          content.replace(/[\r\n]/g, ""),
-          "base64"
-        );
-
-        fs.writeFileSync(localPath, imageBuffer, {flag: "wx"});
-
-        uploaded = {
-          path,
-          sha: "LOCAL",
-          commit: null
-        };
-      } else {
-        uploaded = await createGitHubBinaryFile(path, content);
-      }
+      if (local === false) denyRemoteMutation();
+      uploaded = createLocalFile(path, Buffer.from(content.replace(/[\r\n]/g, ""), "base64"));
 
       console.log("Essay image uploaded:", uploaded.path);
       if (uploaded.commit) {
@@ -1244,7 +1370,7 @@ draft: true
 
       frontMatter += "---\n\n";
 
-      const created = await createGitHubFile(markdownPath, frontMatter);
+      const created = createLocalFile(markdownPath,frontMatter);
 
       res.writeHead(201, {"Content-Type": "application/json"});
       res.end(JSON.stringify({
@@ -1252,6 +1378,7 @@ draft: true
         path: created.path,
         sha: created.sha,
         commit: created.commit,
+        local: true,
         slug
       }));
 
@@ -1413,42 +1540,9 @@ stage: ${JSON.stringify(stage)}
 
       const content = frontMatter + entryBody;
       const requestUrl = new URL(req.url, "http://localhost:1314");
-      const localMode = requestUrl.searchParams.get("local") === "1";
-
-      let created;
-
-      if (localMode) {
-        const localPath = nodePath.resolve(__dirname, "..", markdownPath);
-        const contentRoot = nodePath.resolve(__dirname, "..", "content");
-
-        if (!localPath.startsWith(contentRoot + nodePath.sep)) {
-          throw new ValidationError("Invalid local content path");
-        }
-
-        fs.mkdirSync(nodePath.dirname(localPath), {recursive: true});
-
-        try {
-          fs.writeFileSync(localPath, content, {
-            encoding: "utf8",
-            flag: "wx"
-          });
-        } catch (error) {
-          if (error.code === "EEXIST") {
-            error.statusCode = 409;
-          }
-          throw error;
-        }
-
-        created = {
-          path: markdownPath,
-          sha: "LOCAL",
-          commit: null
-        };
-
-        console.log("Local test entry created:", markdownPath);
-      } else {
-        created = await createGitHubFile(markdownPath, content);
-      }
+      if (requestUrl.searchParams.has("local") && requestUrl.searchParams.get("local") !== "1") denyRemoteMutation();
+      const localMode = true;
+      const created = createLocalFile(markdownPath,content);
 
       res.writeHead(201, {"Content-Type": "application/json"});
       res.end(JSON.stringify({
@@ -1530,6 +1624,10 @@ stage: ${JSON.stringify(stage)}
     req.method === "POST" &&
     req.url === "/api/essay-themes/rename"
   ) {
+    res.writeHead(409, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({error: "Theme renaming is temporarily unavailable in local-first mode."}));
+    return;
+
     try {
       const body = await readRequestBody(req, 64 * 1024);
       const data = JSON.parse(body);
@@ -1621,6 +1719,10 @@ stage: ${JSON.stringify(stage)}
     req.method === "POST" &&
     req.url === "/api/essay-themes/delete"
   ) {
+    res.writeHead(409, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({error: "Theme deletion is temporarily unavailable in local-first mode."}));
+    return;
+
     try {
       const body = await readRequestBody(req, 64 * 1024);
       const data = JSON.parse(body);
@@ -1705,18 +1807,19 @@ stage: ${JSON.stringify(stage)}
     (req.method === "GET" && req.url === "/api/essay-themes") ||
     (req.method === "POST" && req.url === "/api/essay-themes")
   ) {
-    const themesPath = "static/editor-data/essay-themes.json";
-
+    let themeDirectory;
     try {
+      themeDirectory=directory("static/editor-data");
+      const themesPath=`${themeDirectory.path}/essay-themes.json`;
       if (req.method === "GET") {
-        const file = await getGitHubFile(themesPath);
-        const themes = JSON.parse(file.content);
+        const themes = JSON.parse(readLocalFile("static/editor-data/essay-themes.json").content);
+
+        if (!Array.isArray(themes)) {
+          throw new Error("The local essay themes file is not a valid array");
+        }
 
         res.writeHead(200, {"Content-Type": "application/json"});
-        res.end(JSON.stringify({
-          ok: true,
-          themes
-        }));
+        res.end(JSON.stringify({ok: true, themes}));
         return;
       }
 
@@ -1740,11 +1843,10 @@ stage: ${JSON.stringify(stage)}
       }
 
       const cleanTheme = theme.trim();
-      const currentFile = await getGitHubFile(themesPath);
-      const themes = JSON.parse(currentFile.content);
+      const themes = JSON.parse(readLocalFile("static/editor-data/essay-themes.json").content);
 
       if (!Array.isArray(themes)) {
-        throw new Error("The existing essay themes file is not a valid array");
+        throw new Error("The local essay themes file is not a valid array");
       }
 
       if (themes.includes(cleanTheme)) {
@@ -1761,24 +1863,23 @@ stage: ${JSON.stringify(stage)}
       themes.push(cleanTheme);
       themes.sort((a, b) => a.localeCompare(b));
 
-      const updated = await updateGitHubFile(
-        themesPath,
-        JSON.stringify(themes, null, 2) + "\n",
-        currentFile.sha
-      );
+      const temporaryPath = themesPath + ".tmp";
 
-      console.log("Essay theme added:", cleanTheme);
+      const identity=writeExclusive(temporaryPath,JSON.stringify(themes,null,2)+"\n");
+      try { fs.renameSync(temporaryPath,themesPath); }
+      finally { ownedUnlink(temporaryPath,identity); }
+
+      console.log("Local essay theme added:", cleanTheme);
 
       res.writeHead(200, {"Content-Type": "application/json"});
       res.end(JSON.stringify({
         ok: true,
         theme: cleanTheme,
         themes,
-        sha: updated.sha
+        local: true
       }));
-
     } catch (error) {
-      console.error("Essay theme error:", error.message);
+      console.error("Local essay theme error:", error.message);
 
       const statusCode =
         error.statusCode ||
@@ -1788,51 +1889,24 @@ stage: ${JSON.stringify(stage)}
 
       res.writeHead(statusCode, {"Content-Type": "application/json"});
       res.end(JSON.stringify({error: error.message}));
-    }
+    } finally { if(themeDirectory) themeDirectory.close(); }
 
     return;
   }
 
   if (req.method === "GET" && req.url === "/api/documents") {
     try {
-      const githubDocuments = await listGitHubDocuments();
       const localDocuments = listLocalDocuments();
       const permalinkMap = listHugoPermalinks();
 
-      const documentMap = new Map(
-        githubDocuments.map(item => [item.path, item])
-      );
-
-      for (const item of localDocuments) {
-        documentMap.set(item.path, item);
-      }
-
-      const allDocuments = [...documentMap.values()];
-
-      const documents = allDocuments
-        .map(item => ({
-          ...item,
-          permalink: permalinkMap.get(item.path) || null
-        }));
-
-      const missingPermalinks = allDocuments.filter(item => !permalinkMap.has(item.path)).length;
-
-      if (missingPermalinks > 0) {
-        console.warn(
-          "Documents without Hugo permalinks:",
-          missingPermalinks,
-          allDocuments
-            .filter(item => !permalinkMap.has(item.path))
-            .map(item => item.path)
-        );
-      }
+      const documents = localDocuments.map(item => ({
+        ...item,
+        permalink: permalinkMap.get(item.path) || null
+      }));
 
       console.log(
-        "Documents listed:",
-        documents.length,
-        "(including",
-        localDocuments.length,
-        "local files)"
+        "Local documents listed:",
+        documents.length
       );
 
       res.writeHead(200, {"Content-Type": "application/json"});
@@ -1841,7 +1915,7 @@ stage: ${JSON.stringify(stage)}
         documents
       }));
     } catch (error) {
-      console.error("GitHub list error:", error.message);
+      console.error("Local document list error:", error.message);
 
       res.writeHead(500, {"Content-Type": "application/json"});
       res.end(JSON.stringify({error: error.message}));
@@ -1864,46 +1938,15 @@ stage: ${JSON.stringify(stage)}
     }
 
     try {
-      const localPath = nodePath.resolve(__dirname, "..", path);
-      const contentRoot = nodePath.resolve(__dirname, "..", "content");
-
-      if (
-        localPath.startsWith(contentRoot + nodePath.sep) &&
-        fs.existsSync(localPath)
-      ) {
-        const content = fs.readFileSync(localPath, "utf8");
-
-        res.writeHead(200, {"Content-Type": "application/json"});
-        res.end(JSON.stringify({
-          ok: true,
-          path,
-          sha: "LOCAL",
-          content,
-          connections: matter(content).data.connections || [],
-          local: true
-        }));
-        return;
-      }
-
-      const file = await getGitHubFile(path);
-
-      console.log("GitHub file read:", file.path);
-      console.log("SHA:", file.sha);
-      console.log("Content length:", file.content.length);
-
+      const file = readLocalFile(path);
       res.writeHead(200, {"Content-Type": "application/json"});
-      res.end(JSON.stringify({
-        ok: true,
-        path: file.path,
-        sha: file.sha,
-        content: file.content,
-        connections: matter(file.content).data.connections || []
-      }));
+      res.end(JSON.stringify({ok:true,path,sha:file.sha,content:file.content,
+        connections:matter(file.content).data.connections||[],local:true}));
     } catch (error) {
       console.error("GitHub error:", error.message);
 
-      res.writeHead(500, {"Content-Type": "application/json"});
-      res.end(JSON.stringify({error: error.message}));
+      res.writeHead(error.statusCode || (error.code === "ENOENT" ? 404 : 500), {"Content-Type": "application/json"});
+      res.end(JSON.stringify({error:error.saveFailure?error.message:"The local document could not be opened safely.",...(error.saveFailure?{save:error.saveFailure}:{})}));
     }
 
     return;
