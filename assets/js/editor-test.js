@@ -148,6 +148,7 @@ function showLibraryScreen() {
   document.querySelector("#new-entry-form").hidden = true;
   const documentSelector = document.querySelector("#document-selector");
   documentSelector.hidden = false;
+  renderDocumentSelector(availableDocuments);
 
   documentSelector.querySelectorAll(
     ".document-selector-select"
@@ -1211,6 +1212,21 @@ async function beginNewEssay() {
     return;
   }
 
+  const documentConnections = document.querySelector("#document-connections");
+
+  const previousScreen = {
+    selectorHidden: documentSelector.hidden,
+    actionsHidden: editorActions.hidden,
+    editorHidden: codeMirrorEditor.hidden,
+    connectionsHidden: documentConnections.hidden
+  };
+
+  // Hide the previously loaded document while the new one is prepared.
+  documentSelector.hidden = true;
+  editorActions.hidden = true;
+  codeMirrorEditor.hidden = true;
+  documentConnections.hidden = true;
+
   beginButton.disabled = true;
   beginButton.textContent = "Creating…";
 
@@ -1286,18 +1302,19 @@ async function beginNewEssay() {
       }
     }
 
-    newEssayMode = false;
-    newEssayForm.hidden = true;
-    documentSelector.hidden = false;
-    editorActions.hidden = false;
-    codeMirrorEditor.hidden = false;
-
     await loadDocumentList();
     await loadDocument(result.path);
     showEditorScreen();
 
   } catch (error) {
     console.error("New Essay error:", error);
+
+    // Restore the previous screen if creation or loading fails.
+    documentSelector.hidden = previousScreen.selectorHidden;
+    editorActions.hidden = previousScreen.actionsHidden;
+    codeMirrorEditor.hidden = previousScreen.editorHidden;
+    documentConnections.hidden = previousScreen.connectionsHidden;
+
     alert(error.message);
 
   } finally {

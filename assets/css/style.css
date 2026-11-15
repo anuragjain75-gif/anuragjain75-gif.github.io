@@ -5262,6 +5262,15 @@ q {
     outline: none;
 }
 
+/* List marker alignment */
+.lilamaya-editor-area .milkdown-list-item-block li .label-wrapper {
+    height: 42px !important;
+}
+
+.lilamaya-editor-area .milkdown-list-item-block li .label-wrapper .label {
+    text-align: center !important;
+}
+
 .lilamaya-editor-area .ProseMirror p {
     margin: 0 0 1.25em;
 }
@@ -5275,11 +5284,16 @@ q {
     line-height: 1.35;
 }
 
-.lilamaya-editor-area .ProseMirror blockquote {
+.lilamaya-editor-area .milkdown .ProseMirror blockquote {
     margin: 1.8em 0;
-    padding: 0.15em 0 0.15em 1.4em;
+    padding: 0.15em 0 0.15em 0.8em;
     border-left: 3px solid #8b8c6b;
     color: #625f55;
+}
+
+/* Use Lilamaya's own blockquote border; disable Crepe's duplicate line. */
+.lilamaya-editor-area .ProseMirror blockquote::before {
+    content: none !important;
 }
 
 .lilamaya-editor-area .ProseMirror img {
@@ -6020,7 +6034,7 @@ q {
 #codemirror-editor .lilamaya-toolbar {
     position: -webkit-sticky;
     position: sticky;
-    top: 220px;
+    top: 196px;
     z-index: 1500;
 }
 
@@ -6030,9 +6044,43 @@ q {
     }
 
     #codemirror-editor .lilamaya-toolbar {
-        top: 195px;
+        top: 189px;
     }
 }
+
+
+/* =========================================================
+   LILAMAYA — REFINED MILKDOWN WRITING SURFACE
+   ========================================================= */
+
+.lilamaya-editor-area .milkdown {
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.lilamaya-editor-area .milkdown .ProseMirror {
+    width: 100%;
+    max-width: none;
+    min-height: 580px;
+    margin: 0;
+    padding: 20px 0;
+    outline: none;
+    color: #2f2d2a;
+    font-family: Lora, Georgia, "Times New Roman", serif;
+    font-size: 1em;
+    line-height: 1.9;
+}
+
+.lilamaya-editor-area .milkdown .ProseMirror p {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+
+
 
 /* Segmented Writing Desk: prevent vertical spacing from accumulating
    across independently editable Markdown segments. */
