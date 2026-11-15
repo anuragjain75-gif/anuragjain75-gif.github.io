@@ -2394,12 +2394,90 @@ export async function createLilamayaEditor(
   }
 
 
+  // A zero-byte placeholder has no source-owned blocks or insertion offsets.
+  // Prove its canonical paragraph exactly; whitespace and hidden content are
+  // deliberately ineligible, even when they render as an empty paragraph.
+  function isZeroByteImagePlaceholder(record, source, document, parsed, map) {
+    const emptyMap = value => value?.sourceLength === 0 &&
+      Array.isArray(value.blocks) && value.blocks.length === 0 &&
+      Array.isArray(value.inlineNodes) && value.inlineNodes.length === 0;
+    if (source !== "" || record.originalSource !== "" ||
+        record.originalSourceMap !== null || !parsed || !emptyMap(map) ||
+        !emptyMap(record.crepe.lilamayaSourceMap?.[0])) return false;
+    const paragraph = parsed.type.schema.nodes.paragraph.create();
+    const canonical = parsed.type.create(null, [paragraph]);
+    return parsed.eq(canonical) && record.originalDoc.eq(canonical) &&
+      document.eq(canonical);
+  }
+
+
+  // This proof belongs only to one image operation. The opening-time anchors
+  // remain untouched for normal source reconciliation and undo fidelity.
+  function captureImageSourceBaseline(record) {
+    const fail = message => { throw new Error("Cannot safely insert image: " + message + " Your draft was not changed."); };
+    const zeroSource = record.segment.content === "" && record.originalSource === "";
+    if (!zeroSource && !captureOriginalSourceMap([record.originalSourceMap], record.originalSource, record.originalDoc)) {
+      fail("the opening source anchor could not be validated.");
+    }
+    const document = getEditorView(record).state.doc;
+    const nodes = []; document.forEach(node => nodes.push(node));
+    const last = nodes.at(-1);
+    if (last?.type.name === "paragraph" && last.content.size === 0 &&
+        record.crepe.lilamayaGeneratedTrailingParagraphs?.has(last)) {
+      const original = []; record.originalDoc.forEach(node => original.push(node));
+      if (!original.includes(last)) nodes.pop();
+    }
+    const sourceDocument = document.copy(document.content.constructor.fromArray(nodes));
+    let baseline;
+    record.crepe.editor.action(ctx => {
+      const parser = ctx.get(parserCtx), maps = record.crepe.lilamayaSourceMap;
+      const count = maps.length;
+      const parsed = parser(record.segment.content);
+      // The collector must have run exactly once for this very parse.
+      if (maps.length !== count + 1 || !parsed) fail("the current parse has no unique source map.");
+      const emptyPlaceholder = isZeroByteImagePlaceholder(
+        record, record.segment.content, document, parsed, maps[count]
+      );
+      if (emptyPlaceholder) {
+        const map = Object.freeze({sourceLength: 0,
+          blocks: Object.freeze([]), inlineNodes: Object.freeze([])});
+        baseline = Object.freeze({record, source: "", document, parsed, map,
+          parser, originalMap: record.originalSourceMap, emptyPlaceholder: true});
+        return;
+      }
+      const map = captureOriginalSourceMap([maps[count]], record.segment.content, parsed);
+      if (!map || parsed.childCount !== sourceDocument.childCount) fail("the current source map is invalid.");
+      const generated = [];
+      parsed.forEach((node, offset, index) => {
+        const live = sourceDocument.child(index);
+        if (!node.eq(live) && node.type.name === "heading" && live.type === node.type &&
+            node.attrs.id === "" && typeof live.attrs.id === "string" && live.attrs.id &&
+            ctx.get(headingIdGenerator.key)(live) === live.attrs.id) {
+          // Only a source-absent, exact active-plugin-generated ID is allowed.
+          // Every other attribute, child and mark must still compare exactly.
+          node = node.type.create({...node.attrs, id: live.attrs.id}, node.content, node.marks);
+        }
+        generated.push(node);
+      });
+      if (!parsed.copy(parsed.content.constructor.fromArray(generated)).eq(sourceDocument)) {
+        fail("the current Markdown and editor document do not correspond.");
+      }
+      baseline = Object.freeze({record, source: record.segment.content, document,
+        parsed, map, parser, originalMap: record.originalSourceMap});
+    });
+    return baseline;
+  }
+
+
   function createImageInsertionCallback() {
     if (!activeEditor || destroyed || rebuilding) {
       throw new Error("No active editor is available for image insertion.");
     }
 
+    synchronizeSegments();
+    const baselines = Object.freeze(editors.map(captureImageSourceBaseline));
     const record = activeEditor;
+    const baseline = baselines.find(item => item.record === record);
     let savedSelection = null;
 
     record.crepe.editor.action(ctx => {
@@ -2411,7 +2489,9 @@ export async function createLilamayaEditor(
         to: selection.to,
         document: view.state.doc,
         source: record.segment.content,
-        sourceMap: record.originalSourceMap,
+        sourceMap: baseline.map,
+        baseline,
+        baselines,
         parser: ctx.get(parserCtx),
         segmentState: segments.map(segment => ({segment, content: segment.content})),
         introduction: introductionValue
@@ -2482,35 +2562,43 @@ export async function createLilamayaEditor(
         savedSelection.segmentState.some((item,index) => item.segment !== segments[index] || item.content !== segments[index].content)) {
       fail("the document changed while image selection was open.");
     }
-    // Rebuilding must never discard an unsynchronized edit in any segment.
-    function sourceDocument(item) {
-      const doc = getEditorView(item).state.doc;
-      const blocks = []; doc.forEach(node => blocks.push(node));
-      const last = blocks.at(-1);
-      if (last?.type.name === "paragraph" && last.content.size === 0 &&
-          item.crepe.lilamayaGeneratedTrailingParagraphs?.has(last)) {
-        const original = []; item.originalDoc.forEach(node => original.push(node));
-        if (!original.includes(last)) blocks.pop();
+    // Rebuilding must never discard an edit made while the picker was open.
+    if (savedSelection.baselines.length !== editors.length) fail("the editor set changed.");
+    for (const baseline of savedSelection.baselines) {
+      const item = baseline.record;
+      if (!editors.includes(item) || item.segment.content !== baseline.source ||
+          item.originalSourceMap !== baseline.originalMap ||
+          !getEditorView(item).state.doc.eq(baseline.document)) {
+        fail("a Markdown segment changed while image selection was open.");
       }
-      return doc.copy(doc.content.constructor.fromArray(blocks));
-    }
-    for (const item of editors) {
-      if (item.segment.content !== item.originalSource || !sourceDocument(item).eq(item.originalDoc)) {
-        fail("a Markdown segment no longer matches its trusted source baseline.");
+      item.crepe.editor.action(ctx => {
+        if (ctx.get(parserCtx) !== baseline.parser) fail("the parser configuration changed.");
+      });
+      if (baseline.emptyPlaceholder) {
+        if (!isZeroByteImagePlaceholder(item, baseline.source,
+            getEditorView(item).state.doc, baseline.parsed, baseline.map)) {
+          fail("the zero-byte placeholder proof is stale.");
+        }
+      } else if (!captureOriginalSourceMap([baseline.map], baseline.source, baseline.parsed)) {
+        fail("the operation source map could not be revalidated.");
       }
     }
     const view = getEditorView(record);
     if (!view.state.doc.eq(savedSelection.document) ||
         view.state.selection.from !== savedSelection.from || view.state.selection.to !== savedSelection.to ||
-        record.segment.content !== savedSelection.source || record.originalSourceMap !== savedSelection.sourceMap) {
+        record.segment.content !== savedSelection.source || savedSelection.baseline.map !== savedSelection.sourceMap) {
       fail("the saved cursor or source map is stale.");
     }
-    const source = record.originalSource;
-    const map = captureOriginalSourceMap([record.originalSourceMap], source, record.originalDoc);
-    if (!map) fail("the original source map could not be validated.");
+    if (savedSelection.baseline.emptyPlaceholder) {
+      fail("a zero-byte placeholder has no mapped insertion boundary.");
+    }
+    const source = savedSelection.baseline.source;
+    const parsedDocument = savedSelection.baseline.parsed;
+    const map = captureOriginalSourceMap([savedSelection.sourceMap], source, parsedDocument);
+    if (!map) fail("the operation source map could not be validated.");
     const sourceBlocks = map.blocks.filter(block => block.depth === 1);
     let blockIndex = -1;
-    record.originalDoc.forEach((node,pos,index) => {
+    parsedDocument.forEach((node,pos,index) => {
       if (node.type.name === "paragraph" && savedSelection.from === pos + node.nodeSize - 1) blockIndex = index;
     });
     if (blockIndex < 0 || sourceBlocks[blockIndex]?.type !== "paragraph") {
@@ -2518,6 +2606,12 @@ export async function createLilamayaEditor(
     }
     const offset = sourceBlocks[blockIndex].end;
     const endings = new Set(source.match(/\r\n|\r|\n/g) || []);
+    if (endings.size === 0) {
+      // An earlier image insertion can leave this paragraph in its own segment.
+      // Only an existing adjacent blank-line boundary can establish its EOL.
+      const boundary = segments[segmentIndex + 1]?.content.match(/^(\r\n|\n)\1/);
+      if (boundary) endings.add(boundary[1]);
+    }
     if (endings.size !== 1 || endings.has("\r")) fail("the local line-ending style is ambiguous.");
     const eol = [...endings][0];
     const left = source.slice(0,offset), right = source.slice(offset);
@@ -2535,8 +2629,7 @@ export async function createLilamayaEditor(
       const parser = ctx.get(parserCtx);
       if (parser !== savedSelection.parser) fail("the parser configuration changed.");
       const before = parser(source), image = parser(markdown), after = parser(candidateSource);
-      if (!before || before.childCount !== record.originalDoc.childCount ||
-          !before.child(blockIndex).eq(record.originalDoc.child(blockIndex)) ||
+      if (!before || !before.eq(parsedDocument) ||
           !image || image.childCount !== 1 || image.firstChild.type.name !== "paragraph" ||
           image.firstChild.childCount !== 1 || image.firstChild.firstChild.type.name !== "image" ||
           image.firstChild.firstChild.attrs.src !== imagePath) {
