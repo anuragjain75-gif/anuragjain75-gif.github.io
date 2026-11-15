@@ -1,0 +1,14 @@
+@import '../dependencies/prosemirror-view.css' layer(lilamaya-prosemirror-dependency);
+
+/* Preserve the Writing Desk's established text flow and font shaping. The
+   upstream structural/cursor rules remain active; only new text-flow defaults
+   fall back to the existing unlayered site/theme/UA cascade. */
+@layer lilamaya-prosemirror-dependency {
+  .milkdown .ProseMirror {
+    overflow-wrap: revert-layer;
+    white-space: break-spaces;
+    -webkit-font-variant-ligatures: revert-layer;
+    font-variant-ligatures: revert-layer;
+    font-feature-settings: revert-layer;
+  }
+}
