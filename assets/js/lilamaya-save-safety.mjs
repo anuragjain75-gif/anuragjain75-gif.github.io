@@ -67,6 +67,10 @@ export function createSaveSafetyPanel(document, actions, {download, copy, resolv
   panel.setAttribute("aria-label", "Unsaved manuscript protection");
   const message = document.createElement("p"); message.setAttribute("role","alert");
   message.setAttribute("aria-live","assertive"); message.setAttribute("aria-atomic","true");
+  const disclosure = document.createElement("details");
+  const summary = document.createElement("summary"); summary.textContent="Draft Safety";
+  disclosure.append(summary);
+  let previousIssue = null;
   const explanation = document.createElement("p");
   const feedback = document.createElement("p"); feedback.setAttribute("role","status");
   const exported = document.createElement("input"); exported.type="checkbox";
@@ -78,7 +82,7 @@ export function createSaveSafetyPanel(document, actions, {download, copy, resolv
     const e=document.createElement("button");e.type="button";e.textContent=text;
     e.addEventListener("click",async()=>{try{await action();}catch{feedback.textContent="Draft preservation did not complete. Keep this page open and try the download option.";}});return e;
   };
-  panel.append(message,explanation,
+  disclosure.append(explanation,
     button("Download complete draft snapshot",download),button("Copy complete draft snapshot",copy),
     ...labels,button("Acknowledge preservation and review",()=>{
       if(resolve({draftPreserved:exported.checked,diskReviewed:reviewed.checked})) {
@@ -86,11 +90,14 @@ export function createSaveSafetyPanel(document, actions, {download, copy, resolv
         feedback.textContent="Acknowledged. No disk changes or reload were performed. Your browser draft may still be unsaved.";
       } else feedback.textContent="First preserve the latest draft and complete both confirmations. Acknowledgment does not reload or restore anything.";
     }),feedback);
+  panel.append(message,disclosure);
   actions.insertAdjacentElement("afterend",panel);
   return {render(state){
     panel.hidden=false;
     message.hidden=!state.issue;
-    if(!state.issue){explanation.textContent="You can preserve a complete draft snapshot before reloading or leaving this manuscript.";return;}
+    if(state.issue && state.issue !== previousIssue) disclosure.open=true;
+    previousIssue=state.issue;
+    if(!state.issue){explanation.hidden=false;explanation.textContent="You can preserve a complete draft snapshot before reloading or leaving this manuscript.";return;}
     const i=state.issue;
     message.textContent=(i.kind==="stale"?"Save conflict: ":i.kind==="recovery"?"Recovery review required: ":"Save not completed: ")+i.message;
     explanation.textContent=i.publication==="none"
@@ -98,5 +105,8 @@ export function createSaveSafetyPanel(document, actions, {download, copy, resolv
       :"The document path may already have changed. Preserve your browser draft and inspect disk and recovery versions before retrying. Do not delete recovery locks.";
     if(i.recovery?.backupId) explanation.textContent+=" Backup reference: "+String(i.recovery.backupId).replace(/[^A-Za-z0-9._-]/g,"");
     if(i.recovery?.lockRetained) explanation.textContent+=" A manuscript recovery lock is retained; manual review is required.";
+    // Keep the complete warning visible even if its recovery controls are collapsed.
+    message.textContent+=" "+explanation.textContent;
+    explanation.hidden=true;
   }};
 }

@@ -111,7 +111,7 @@ function readLocalFile(relative) {
     const s = snapshot(`${dir.path}/${name}`); try { return {content:s.bytes.toString("utf8"),sha:s.sha}; } finally { s.close(); }
   } finally { dir.close(); }
 }
-function saveLocalFile(relative, content, expectedSha) {
+function saveLocalFile(relative, content, expectedSha, validateDependency = () => {}) {
   if (!/^LOCAL:[a-f0-9]{64}$/.test(expectedSha)) throw saveFailure(storageError(409,"A current local revision is required. Preserve your draft before reviewing the disk version."),
     {kind:"stale-conflict",code:"REVISION_REQUIRED",publication:"none",recovery:{required:false,lockRetained:false}});
   const dir = directory(nodePath.dirname(relative));
@@ -122,6 +122,7 @@ function saveLocalFile(relative, content, expectedSha) {
     try { fs.mkdirSync(lock,{mode:0o700}); lockCreated=true; } catch(e) { if(e.code==="EEXIST") throw storageError(409,"Another writer or recovery owns this document."); throw e; }
     lockFD=fs.openSync(lock,fs.constants.O_RDONLY|fs.constants.O_DIRECTORY|fs.constants.O_NOFOLLOW);
     source=snapshot(file);
+    validateDependency();
     if(source.sha!==expectedSha) throw storageError(409,"Document changed since it was opened.");
     backupDir=directory(`backups/editor-autosave/${nodePath.dirname(relative)}`,true);
     if(fs.fstatSync(backupDir.fd).dev!==fs.fstatSync(dir.fd).dev) throw storageError(503,"Safe saves require backups on the same filesystem.");
@@ -141,6 +142,7 @@ function saveLocalFile(relative, content, expectedSha) {
     const moved=snapshot(recovery); let conflict;
     try { conflict=moved.sha!==expectedSha; } finally { moved.close(); }
     if(conflict) throw storageError(409,"Document changed before publication.");
+    validateDependency();
     try { fs.linkSync(temp,file); publishedDraft=true; } catch(e) { if(e.code==="EEXIST") throw storageError(409,"Another writer created the document during save."); throw e; }
     const last=snapshot(recovery); try { conflict=last.sha!==expectedSha; } finally { last.close(); }
     if(!sameInode(fs.lstatSync(backup),backupIdentity)) throw storageError(409,"Backup ownership changed; original retained for recovery.");
@@ -149,6 +151,18 @@ function saveLocalFile(relative, content, expectedSha) {
     const published=snapshot(file); let sha;
     try { if(!sameInode(published.stat,tempIdentity)) throw storageError(409,"Published document changed; original retained in backup."); sha=published.sha; } finally { published.close(); }
     if(conflict) throw storageError(409,"External edit detected in displaced original; preserved in newest backup.");
+    try { validateDependency(); }
+    catch(assetError) {
+      // An asset changed in the publication window. Restore only our own
+      // unchanged published inode; never overwrite an intervening writer.
+      const check=snapshot(file);
+      try { if(check.sha!==sha||!sameInode(check.stat,tempIdentity))throw assetError; }
+      finally { check.close(); }
+      ownedUnlink(file,tempIdentity);
+      try { fs.linkSync(backup,file); publishedDraft=false; fs.fsyncSync(dir.fd); }
+      catch(restoreError) { throw assetError; } // Existing recovery reporting preserves the backup.
+      throw assetError;
+    }
     try {
       const names=fs.readdirSync(backupDir.path).filter(n=>n.startsWith(`${name}.`)&&n.endsWith(".bak")).sort().reverse();
       for(const old of names.slice(30)) { const p=`${backupDir.path}/${old}`, identity=fs.lstatSync(p); if(!identity.isFile()||identity.isSymbolicLink()) throw storageError(403,"Unsafe backup entry; retention stopped."); ownedUnlink(p,identity); }
@@ -663,7 +677,168 @@ async function deleteGitHubFile(path, sha) {
   };
 }
 
-function listLocalDocuments() {
+// Two independent local taxonomies reuse the same source-safe engine.
+const LOCAL_THEME_PROFILES = Object.freeze({
+  essays: Object.freeze({section:"essays",catalogPath:"static/editor-data/essay-themes.json",assignmentKey:"themes"}),
+  fragments: Object.freeze({section:"fragments",catalogKey:"fragmentThemes",assignmentKey:"fragmentthemes"}),
+  paintings: Object.freeze({section:"paintings",catalogKey:"paintingThemes",assignmentKey:"paintingthemes"})
+});
+const fragmentThemeTools = require('./lilamaya-fragment-themes.cjs');
+const localThemeCatalogPath = 'data/lilamaya.yaml';
+function readThemeSource(relative) {
+  const dir=directory(nodePath.dirname(relative));
+  try {
+    const name=nodePath.basename(relative);
+    if(fs.existsSync(`${dir.path}/.${name}.save-lock`))throw storageError(409,'A save or recovery owns a theme source; retry only after reviewing it.');
+    const file=snapshot(`${dir.path}/${name}`);
+    try {const content=file.bytes.toString('utf8');if(!Buffer.from(content,'utf8').equals(file.bytes))throw storageError(400,'Theme sources must be valid UTF-8');return {content,sha:file.sha};}finally{file.close();}
+  }finally{dir.close();}
+}
+function readLocalThemeCatalog(profile) {
+  const file=readThemeSource(profile.catalogPath||localThemeCatalogPath);
+  const values=profile.catalogPath?JSON.parse(file.content):fragmentThemeTools.listInfo(file.content,profile.catalogKey,false).values;
+  if(!Array.isArray(values)||values.some(v=>typeof v!=='string'||fragmentThemeTools.validName(v)!==v))throw storageError(400,'Invalid theme catalog');
+  const keys=values.map(fragmentThemeTools.keyOf);
+  if(new Set(keys).size!==keys.length)throw storageError(409,'Local theme definitions contain case-insensitive duplicates; review the catalog.');
+  return {...file,values};
+}
+function rewriteThemeCatalog(profile,content,transform,add=[]) {
+ if(!profile.catalogPath)return fragmentThemeTools.rewriteList(content,profile.catalogKey,transform,false,add);
+ const values=JSON.parse(content),next=values.map(transform).filter(v=>v!==null);for(const value of add)if(!next.includes(value))next.push(value);
+ if(new Set(next.map(v=>v.toLowerCase())).size!==next.length)throw storageError(409,'Duplicate theme catalog values');
+ return JSON.stringify(next)===JSON.stringify(values)?content:JSON.stringify(next,null,2)+'\n';
+}
+function localThemeUsage(profile, theme, newTheme = null) {
+  fragmentThemeTools.validName(theme);assertSafeHugoContent('content/'+profile.section);
+  const index=localThemeIndex(profile),resolved=resolveLocalTheme(profile, theme,index);
+  if(!index.themes.includes(resolved))throw storageError(404,'Theme not found');
+  const documents=listLocalDocuments([profile.section]).sort((a,b)=>a.path.localeCompare(b.path));
+  const files=documents.map(document=>{const file=readThemeSource(document.path),values=matter(file.content).data[profile.assignmentKey]||[];if(!Array.isArray(values))throw storageError(400,'Invalid theme assignments');return {...document,...file,values};});
+  const catalog=readLocalThemeCatalog(profile);
+  const revision=crypto.createHash('sha256').update(JSON.stringify({section:profile.section,theme:resolved,newTheme,catalog:catalog.sha,documents:files.map(f=>[f.path,f.sha])})).digest('hex');
+  return {theme:resolved,index,catalog,files,revision,items:files.filter(f=>f.values.some(v=>v.toLowerCase()===resolved.toLowerCase())).map(f=>({path:f.path,title:f.title,sha:f.sha}))};
+}
+function withLocalThemeLock(action) {
+  // Preserve the existing catalog-file lock name for old/new writer compatibility.
+  const dir=directory('data');const lock=`${dir.path}/.fragment-theme-operation-lock`;let owned=false,identity;
+  try{try{fs.mkdirSync(lock,{mode:0o700});identity=fs.lstatSync(lock);owned=true;}catch(e){if(e.code==='EEXIST')throw storageError(409,'Another local theme operation is in progress');throw e;}return action();}
+  finally{try{if(owned){if(!sameInode(fs.lstatSync(lock),identity))throw storageError(409,"Local theme lock ownership changed; stop and review recovery data");fs.rmdirSync(lock);}}finally{dir.close();}}
+}
+function themeLabel(profile,value) { return profile.section==="essays"?value:fragmentThemeLabel(value); }
+function addLocalTheme(profile, value) {
+  const name=themeLabel(profile,fragmentThemeTools.validName(value));
+  return withLocalThemeLock(()=>{
+    const index=localThemeIndex(profile),theme=resolveLocalTheme(profile, name,index),catalog=readLocalThemeCatalog(profile);
+    if(!catalog.values.some(v=>v.toLowerCase()===theme.toLowerCase())){
+      const updated=rewriteThemeCatalog(profile,catalog.content,v=>v,[themeLabel(profile,theme)]);
+      saveLocalFile(profile.catalogPath||localThemeCatalogPath,updated,catalog.sha);
+    }
+    return {theme,index:localThemeIndex(profile)};
+  });
+}
+function mutateLocalTheme(profile, data,remove=false) {
+  if(!data||typeof data!=='object'||Array.isArray(data)||data.confirm!==true)throw new ValidationError('Explicit theme confirmation is required');
+  const old=fragmentThemeTools.validName(remove?data.theme:data.oldTheme),newName=remove?null:themeLabel(profile,fragmentThemeTools.validName(data.newTheme));
+  return withLocalThemeLock(()=>{
+    const usage=localThemeUsage(profile, old,newName);
+    if(typeof data.revision!=='string'||data.revision!==usage.revision)throw storageError(409,'Theme usage changed; review it again before confirming');
+    if(remove&&usage.items.length)throw storageError(409,'Assigned themes cannot be removed; existing assignments are protected');
+    if(!remove&&newName===usage.theme)throw new ValidationError('The new name is identical to the current name');
+    if(!remove&&newName.toLowerCase()!==usage.theme.toLowerCase()&&usage.index.groups.has(newName.toLowerCase()))throw storageError(409,'A theme with that name already exists');
+    // The UI must explicitly warn/confirm an assigned term-name/URL change.
+    if(!remove&&usage.items.length&&newName.toLowerCase()!==usage.theme.toLowerCase()&&data.approveUrlChange!==true)throw storageError(409,'Renaming an assigned theme may change its public URL; explicit URL-change approval is required');
+    const changes=[];
+    for(const file of usage.files){
+      if(!file.values.some(v=>v.toLowerCase()===usage.theme.toLowerCase()))continue;
+      const content=fragmentThemeTools.rewriteList(file.content,profile.assignmentKey,v=>v.toLowerCase()===usage.theme.toLowerCase()?newName:v,true);
+      if(content!==file.content)changes.push({...file,updated:content});
+    }
+    const catalog=usage.catalog;let matched=false;
+    let updatedCatalog=rewriteThemeCatalog(profile,catalog.content,v=>{if(v.toLowerCase()!==usage.theme.toLowerCase())return v;matched=true;return remove?null:newName;});
+    if(!remove&&!matched)updatedCatalog=rewriteThemeCatalog(profile,updatedCatalog,v=>v,[newName]);
+    const completed=[],attempted=[];
+    try{
+      for(const file of changes){attempted.push(file.path);if(readThemeSource(file.path).sha!==file.sha)throw storageError(409,'Document changed since review');saveLocalFile(file.path,file.updated,file.sha);completed.push(file.path);}
+      // Refuse a concurrent new/changed document that was outside this review.
+      const names=listLocalDocuments([profile.section]).map(f=>f.path).sort();if(JSON.stringify(names)!==JSON.stringify(usage.files.map(f=>f.path).sort()))throw storageError(409,'Document inventory changed during rename');
+      for(const file of usage.files){const current=readThemeSource(file.path);if(completed.includes(file.path)){if(current.content!==changes.find(x=>x.path===file.path).updated)throw storageError(409,'Renamed document changed concurrently');}else if(current.sha!==file.sha)throw storageError(409,'Another document changed during rename');}
+      if(updatedCatalog!==catalog.content)saveLocalFile(profile.catalogPath||localThemeCatalogPath,updatedCatalog,catalog.sha);
+    }catch(error){error.completedThemePaths=completed;error.attemptedThemePaths=attempted;if(profile.section==="fragments"){error.completedFragmentPaths=completed;error.attemptedFragmentPaths=attempted;}if(attempted.length)error.message+=' Theme operation not confirmed. Stop and review attempted files: '+attempted.join(', ')+'. Confirmed updates: '+(completed.join(', ')||'none')+'. Preserve local save backups before retrying.';throw error;}
+    return {ok:true,local:true,themes:localThemeIndex(profile).themes,theme:newName||usage.theme,label:newName?themeLabel(profile,newName):themeLabel(profile,usage.theme),affectedCount:completed.length,[profile.section]:usage.items,commit:null};
+  });
+}
+
+// Labels are presentation only; existing stored local-theme spellings remain identities.
+function fragmentThemeLabel(value) {
+  const [first, ...rest] = Array.from(value);
+  return first ? first.toUpperCase() + rest.join("") : value;
+}
+function localThemeIndex(profile) {
+  const groups = new Map();
+  for (const document of listLocalDocuments([profile.section])) {
+    const values = matter(readLocalFile(document.path).content).data[profile.assignmentKey] ?? [];
+    if (!Array.isArray(values) || values.some(value => typeof value !== "string" || !value.trim() || value.trim().length > 100)) {
+      throw new ValidationError("Local themes must be a list of nonempty names of at most 100 characters");
+    }
+    for (const value of values) {
+      const name = value.trim(), key = name.toLowerCase();
+      if (!groups.has(key)) groups.set(key, new Set());
+      groups.get(key).add(name);
+    }
+  }
+  // Reuse the existing independent definitions, retaining stored assignment spellings.
+  for (const name of readLocalThemeCatalog(profile).values) {
+    const key=name.toLowerCase(); if (!groups.has(key)) groups.set(key,new Set([name]));
+  }
+  const themes = [], conflicts = [];
+  for (const variants of groups.values()) {
+    if (variants.size > 1) conflicts.push({label:fragmentThemeLabel([...variants][0]), variants:[...variants].sort()});
+    else themes.push([...variants][0]);
+  }
+  themes.sort((a,b) => a.localeCompare(b));
+  return {groups, themes, conflicts, themeOptions:themes.map(value => ({value,label:themeLabel(profile,value)}))};
+}
+function resolveLocalTheme(profile, name, index) {
+  const variants = index.groups.get(name.toLowerCase());
+  if (variants?.size > 1) throw storageError(409, "Theme has conflicting stored case variants; review them before selecting it.");
+  return variants?.size ? [...variants][0] : themeLabel(profile,name);
+}
+
+// Existing Fragment contracts remain wrappers around the shared typed engine.
+function fragmentThemeIndex() { return localThemeIndex(LOCAL_THEME_PROFILES.fragments); }
+function resolveFragmentTheme(name,index) { return resolveLocalTheme(LOCAL_THEME_PROFILES.fragments,name,index); }
+function addFragmentTheme(value) { return addLocalTheme(LOCAL_THEME_PROFILES.fragments,value); }
+function fragmentThemeUsage(theme,newTheme=null) { const usage=localThemeUsage(LOCAL_THEME_PROFILES.fragments,theme,newTheme); return {...usage,fragments:usage.items}; }
+function mutateFragmentTheme(data,remove=false) { return mutateLocalTheme(LOCAL_THEME_PROFILES.fragments,data,remove); }
+
+
+// Read-only metadata projection from the same loaded source/revision.
+function readDocumentMetadata(content, documentPath) {
+  const type=documentPath.split('/')[1], themeKey={essays:'themes',fragments:'fragmentthemes',paintings:'paintingthemes'}[type];
+  if(!themeKey){
+    if(!['people','works','ideas','traditions','places','journeys'].includes(type))return null;
+    const data=matter(content).data;return {type,fields:{title:typeof data.title==='string'?data.title:'Untitled'}};
+  }
+  const data=matter(content).data,fields={};
+  const keys=['title','date','description','draft',themeKey,...(type!=='fragments'?['hero']:[]),...(type==='paintings'?['artist','year']:[])];
+  for(const key of keys)if(Object.prototype.hasOwnProperty.call(data,key))fields[key]=data[key];
+  if(Object.prototype.hasOwnProperty.call(fields,'date')) {
+    const header=content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    const raw=header?.[1].match(/^date:[ \t]*("[^"\r\n]*"|'[^'\r\n]*'|[^#\r\n]*)/m)?.[1].trim();
+    if(raw) {
+      try {fields.date=raw.startsWith('"')?JSON.parse(raw):raw.startsWith("'")?raw.slice(1,-1):raw;}
+      catch {fields.date=raw;}
+    }
+  }
+  const result={type,fields};
+  if(type!=='fragments'&&typeof fields.hero==='string'){
+    try{result.heroAsset=heroAssetSnapshot(documentPath,fields.hero);}
+    catch(error){result.heroError='The explicit hero resource is missing or invalid. Replace, remove or restore it before saving.';}
+  }
+  return result;
+}
+
+function listLocalDocuments(sections = ["essays","fragments","paintings","people","works","ideas","traditions","places","journeys"]) {
   const documents=[];
   function scan(relative) {
     let dir; try { dir=directory(relative); } catch(e) { if(e.code==="ENOENT") return; throw e; }
@@ -679,7 +854,7 @@ function listLocalDocuments() {
       }
     } finally { dir.close(); }
   }
-  for(const section of ["essays","fragments","paintings","people","works","ideas","traditions","places","journeys"]) scan(`content/${section}`);
+  for(const section of sections) scan(`content/${section}`);
   return documents;
 }
 
@@ -1128,6 +1303,125 @@ async function getGitHubThemeUsage(theme) {
   return essays;
 }
 
+const metadataPatch = require('./lilamaya-metadata-patch.cjs');
+const metadataURL = require('./lilamaya-metadata-url.cjs');
+function metadataSourceSnapshot() {
+  const files=new Map(),revisions=new Map();
+  const read=(relative)=>{
+    const parent=nodePath.dirname(relative),dir=directory(parent==='.'?'':parent);
+    try{const file=snapshot(`${dir.path}/${nodePath.basename(relative)}`);try{const bytes=file.bytes;if(!Buffer.from(bytes.toString('utf8'),'utf8').equals(bytes))throw storageError(400,'URL source is not valid UTF-8');files.set(relative,bytes);revisions.set(relative,file.sha);}finally{file.close();}}finally{dir.close();}
+  };
+  const walk=(relative)=>{const dir=directory(relative);try{for(const item of fs.readdirSync(dir.path,{withFileTypes:true})){if(item.isSymbolicLink())throw storageError(403,'Symbolic links are not supported in URL validation');const child=relative+'/'+item.name;if(item.isDirectory())walk(child);else if(item.isFile()&&item.name.endsWith('.md'))read(child);else if(item.isFile()&&/\.(html|org|rst|adoc)$/i.test(item.name))throw storageError(422,'Additional content formats require separate URL verification');}}finally{dir.close();}};
+  if(fs.existsSync(nodePath.join(repositoryRoot,'config')))throw storageError(422,'Additional Hugo configuration requires separate verification');
+  read('hugo.toml');walk('content');
+  for(const name of ['introduction','poetry','invocation'])read('layouts/shortcodes/'+name+'.html');
+  return {files,revisions,identity:JSON.stringify([...revisions].sort((a,b)=>a[0].localeCompare(b[0])))};
+}
+// Reuse pinned-directory reads and signature validation; never follow arbitrary resource URLs.
+function heroAssetSnapshot(documentPath, reference, expected) {
+  metadataPatch.validHero(reference);
+  if(typeof reference!=='string'||!/^content\/(essays|paintings)\/[a-z0-9-]+\/index\.md$/.test(documentPath))throw storageError(400,'Hero images require an Essay or Painting bundle');
+  const path=nodePath.posix.dirname(documentPath)+'/'+reference;
+  const dir=directory(nodePath.posix.dirname(path));
+  try{const asset=snapshot(dir.path+'/'+nodePath.posix.basename(path));try{
+    validateImageContent(path,asset.bytes.toString('base64'));
+    if(expected&& (expected.path!==path||expected.sha!==asset.sha))throw storageError(409,'The reviewed hero image changed. Preserve the draft and review the image again.');
+    return {path,sha:asset.sha};
+  }finally{asset.close();}}finally{dir.close();}
+}
+function validateHeroDependency(path,content,intent){
+  if(!/^content\/(essays|paintings)\//.test(path))return;
+  if(!content.startsWith('---'))return;
+  const data=metadataPatch.parse(content).data;
+  if(!Object.hasOwn(data,'hero'))return;
+  metadataPatch.validHero(data.hero);
+  if(data.hero!==false){
+    if(!intent?.heroAsset||typeof intent.heroAsset.sha!=='string')throw storageError(400,'A reviewed hero asset revision is required');
+    heroAssetSnapshot(path,data.hero,intent.heroAsset);
+  }
+}
+function validateMetadataSave(path,content,revision,intent) {
+  const type=path.split('/')[1];if(!Object.hasOwn(metadataPatch.FIELDS,type))return content;
+  try{
+    const current=readLocalFile(path);if(current.sha!==revision)throw storageError(409,'Document changed since it was opened. Preserve your draft.');
+    const changes=intent?.changes||{};
+    if(intent&&(!intent.changes||Array.isArray(intent.changes)||typeof intent.changes!=='object'))throw storageError(400,'Invalid metadata intent');
+    if(Object.keys(changes).length){
+      if(typeof intent.baseFrontmatter!=='string')throw storageError(400,'Original metadata source is required');
+      const proposed=metadataPatch.frontmatter(content),base=metadataPatch.parse(intent.baseFrontmatter),disk=metadataPatch.parse(current.content);
+      const ignore=new Set([...Object.keys(changes),'introduction','connections']);
+      const other=data=>Object.fromEntries(Object.entries(data).filter(([k])=>!ignore.has(k)));
+      if(metadataPatch.stable(other(base.data))!==metadataPatch.stable(other(disk.data)))throw storageError(409,'Unrelated metadata changed; preserve your complete draft');
+      const patched=metadataPatch.patchMetadata(intent.baseFrontmatter+proposed.body,type,changes);
+      if(patched!==content)throw storageError(400,'Submitted source does not match the reviewed metadata edits');
+      const theme=metadataPatch.THEMES[type];
+      if(theme&&Object.hasOwn(changes,theme)){
+        const existing=disk.data[theme]||[];
+        const known=type==='essays'?(()=>{const dir=directory('static/editor-data');try{const f=snapshot(dir.path+'/essay-themes.json');try{return JSON.parse(f.bytes.toString('utf8'));}finally{f.close();}}finally{dir.close();}})():localThemeIndex(LOCAL_THEME_PROFILES[type]).themes;
+        if(changes[theme].some(value=>!known.includes(value)&&!existing.includes(value)))throw storageError(422,'A selected theme is unavailable in this content type; review the assignments');
+      }
+    }
+    if(['essays','paintings'].includes(type)&&(current.content.startsWith('---')||content.startsWith('---'))&&!Object.hasOwn(changes,'hero')&&metadataPatch.stable(metadataPatch.parse(current.content).data.hero)!==metadataPatch.stable(metadataPatch.parse(content).data.hero))throw storageError(400,'Hero changes require an explicit reviewed metadata intent');
+    validateHeroDependency(path,content,intent);
+    if(current.content===content)return content;
+    let before,after;try{before=metadataPatch.frontmatter(current.content);after=metadataPatch.frontmatter(content);}catch(error){if(!Object.keys(changes).length&&!current.content.startsWith('---')&&!content.startsWith('---'))return content;throw error;}
+    if(before.source!==after.source&&metadataPatch.stable(metadataPatch.urlFields(current.content))!==metadataPatch.stable(metadataPatch.urlFields(content))){
+      const context=metadataSourceSnapshot();if(context.revisions.get(path)!==revision)throw storageError(409,'Document changed during URL validation');
+      metadataURL.assertStableURL(context.files,path,content,intent?.expectedPermalink);
+      if(metadataSourceSnapshot().identity!==context.identity)throw storageError(409,'Hugo content or configuration changed during URL validation; preserve your draft');
+    }
+    return content;
+  }catch(error){error.statusCode=error.statusCode||400;error.saveFailure={kind:error.statusCode===409?'stale-conflict':'failure',code:'METADATA_REJECTED',publication:'none',recovery:{required:false,lockRetained:false}};throw error;}
+}
+
+// Derived cards never determine manuscript Save success. Jobs are serialized
+// per document, and every worker receives only a minimal noncredential environment.
+const socialJobs=new Map();
+function socialCardJob(path,revision,check=false){
+  if(!/^content\/(essays|paintings)\/[a-z0-9-]+\/index\.md$/.test(path))return Promise.resolve(null);
+  const perform=()=>new Promise(resolve=>{
+    let current;
+    try{current=readLocalFile(path);if(current.sha!==revision)throw Error('stale');}
+    catch{resolve({status:'failed',message:'The saved manuscript changed; review it before retrying the social card.',revision});return;}
+    const sourceHash=crypto.createHash('sha256').update(current.content).digest('hex');
+    const args=[nodePath.join(repositoryRoot,'scripts/social_cards.py'),'--document',path,'--source-sha',sourceHash,...(check?['--check']:[])];
+    require('child_process').execFile(nodePath.join(repositoryRoot,'.venv/bin/python3'),args,{cwd:repositoryRoot,env:{PATH:'/usr/bin:/bin',LANG:'C.UTF-8',PYTHONDONTWRITEBYTECODE:'1',HOME:nodePath.join(repositoryRoot,'backups/editor-derived')},timeout:30000,maxBuffer:1024*1024},(error,stdout)=>{
+      let result;try{result=JSON.parse(stdout);if(!['updated','current','stale','failed'].includes(result.status)||result.sourceHash!==sourceHash)throw Error('invalid');}
+      catch{result={status:'failed',message:'The manuscript is saved, but the social-card update did not complete. Retry Social Card is available.'};}
+      resolve({...result,revision});
+    });
+  });
+  const failed=()=>({status:'failed',message:'The manuscript is saved, but the social-card update failed. Retry Social Card is available.',revision});
+  if(check)return perform().catch(failed);
+  const existing=socialJobs.get(path);
+  if(existing?.revision===revision)return existing.promise;
+  const promise=(existing?existing.promise.catch(()=>{}):Promise.resolve()).then(perform).catch(failed);
+  const job={revision,promise};socialJobs.set(path,job);promise.finally(()=>{if(socialJobs.get(path)===job)socialJobs.delete(path);});return promise;
+}
+
+// One shared, local-only recovery service. Preparation never changes content.
+const deletion = require('./editor-delete.js').createDeleteService({directory,snapshot,writeExclusive,
+  busy:path=>socialJobs.has(path),
+  incoming:path=>{
+    const items=[];let complete=true;
+    try{
+      const permalink=listHugoPermalinks().get(path);
+      if(!permalink)return {items,complete:false};
+      for(const item of listLocalDocuments()){
+        if(item.path===path)continue;
+        try{const data=matter(readLocalFile(item.path).content).data;
+          if(Array.isArray(data.connections)&&data.connections.some(link=>link?.target===permalink))items.push({path:item.path,title:item.title});
+        }catch{complete=false;}
+      }
+    }catch{complete=false;}
+    return {items,complete,limitation:'Only stored connections are checked. Body links, external references and shared assets are not exhaustively checked or changed.'};
+  }
+});
+function authorizeDeletion(req){
+  if(!['127.0.0.1:1314','localhost:1314'].includes(req.headers.host)||req.headers.origin!=='http://localhost:1313'||
+    !/^application\/json(?:;|$)/i.test(req.headers['content-type']||''))throw storageError(403,'Deletion requires a JSON request from the local Writing Desk.');
+}
+
 const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:1313");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -1139,10 +1433,39 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if(req.method==='POST'&&['/api/delete-entry/prepare','/api/delete-entry/confirm'].includes(req.url)){
+    try{
+      authorizeDeletion(req);
+      const request=JSON.parse(await readRequestBody(req,16384));
+      let result;
+      if(req.url.endsWith('/prepare')){
+        require('./editor-delete.js').entryPath(request.path);
+        const loaded=readLocalFile(request.path);
+        result={ok:true,review:deletion.prepare(request.path,request.sha,matter(loaded.content).data.title)};
+      }else result=deletion.execute(request);
+      res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(result));
+    }catch(error){
+      res.writeHead(error.statusCode||409,{'Content-Type':'application/json','Cache-Control':'no-store'});
+      res.end(JSON.stringify({ok:false,error:error.deleteOutcome==='uncertain'?'Recovery outcome is uncertain. Export your draft and inspect the recovery record before further writes.':error.message,
+        outcome:error.deleteOutcome||'unchanged',...(error.recoveryId?{recoveryId:error.recoveryId}:{})}));
+    }
+    return;
+  }
+
+  if(req.method==='POST'&&req.url==='/api/social-card/retry'){
+    try{
+      const {path,sha}=JSON.parse(await readRequestBody(req,8192));
+      if(typeof path!=='string'||!/^content\/(essays|paintings)\/[a-z0-9-]+\/index\.md$/.test(path)||typeof sha!=='string')throw storageError(400,'An Essay or Painting and its current local revision are required');
+      const current=readLocalFile(path);if(current.sha!==sha)throw storageError(409,'The saved manuscript changed; preserve the current draft before reviewing disk');
+      res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({ok:true,socialCard:await socialCardJob(path,sha)}));
+    }catch(error){res.writeHead(error.statusCode||400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Social-card retry was rejected. The manuscript was not changed.'}));}
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/api/save") {
     try {
       const body = await readRequestBody(req, 5 * 1024 * 1024);
-      let {path, content, sha, connections} = JSON.parse(body);
+      let {path, content, sha, connections, metadata} = JSON.parse(body);
 
         if (
           typeof path !== "string" ||
@@ -1156,6 +1479,8 @@ const server = http.createServer(async (req, res) => {
           throw new Error("Path is not allowed");
         }
 
+        if(sha==='LOCAL'||sha.startsWith('LOCAL:'))content=validateMetadataSave(path,content,sha,metadata);
+
         // Update only the connections field in the Markdown frontmatter.
         if (Array.isArray(connections)) {
           const currentPermalink = connections.length?listHugoPermalinks().get(path):null;
@@ -1168,9 +1493,10 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (sha === "LOCAL" || sha.startsWith("LOCAL:")) {
-          const revision = saveLocalFile(path, content, sha);
+          const revision = saveLocalFile(path, content, sha, () => validateHeroDependency(path,content,metadata));
           res.writeHead(200, {"Content-Type": "application/json"});
-          res.end(JSON.stringify({ok:true,path,sha:revision,local:true}));
+          const socialCard=await socialCardJob(path,revision);
+          res.end(JSON.stringify({ok:true,path,sha:revision,local:true,...(socialCard?{socialCard}:{})}));
           return;
         }
         denyRemoteMutation();
@@ -1226,12 +1552,13 @@ const server = http.createServer(async (req, res) => {
       }
 
       const allowedHeroPath =
-        /^content\/essays\/[a-z0-9-]+\/hero\.(jpg|jpeg|png|webp)$/i;
+        /^content\/(essays|fragments|paintings)\/[a-z0-9-]+\/hero\.(jpg|jpeg|png|webp)$/i;
 
       const allowedInlinePath =
-        /^content\/essays\/[a-z0-9-]+\/images\/[a-z0-9][a-z0-9_-]{0,79}\.(jpg|jpeg|png|webp)$/i;
+        /^content\/(essays|fragments|paintings)\/[a-z0-9-]+\/images\/[a-z0-9][a-z0-9_-]{0,79}\.(jpg|jpeg|png|webp)$/i;
 
-      if (!allowedHeroPath.test(path) && !allowedInlinePath.test(path)) {
+      const allowedStandalonePath = /^static\/images\/fragments\/([a-z0-9-]+)\/[a-z0-9][a-z0-9_-]{0,79}\.(jpg|jpeg|png|webp)$/i;
+      if (!allowedHeroPath.test(path) && !allowedInlinePath.test(path) && !allowedStandalonePath.test(path)) {
         throw new ValidationError("Image path is not allowed");
       }
 
@@ -1243,12 +1570,24 @@ const server = http.createServer(async (req, res) => {
         throw new ValidationError("Invalid image data");
       }
 
-      validateImageContent(path, content);
-
-      let uploaded;
-
-      if (local === false) denyRemoteMutation();
-      uploaded = createLocalFile(path, Buffer.from(content.replace(/[\r\n]/g, ""), "base64"));
+      // Require the owning document, and retain the pinned-directory/symlink checks.
+      const standalone = path.match(allowedStandalonePath);
+      const owner = standalone ? `content/fragments/${standalone[1]}.md`
+        : path.replace(/\/(?:images\/)?[^/]+$/, "/index.md");
+      const ownerDir = directory(nodePath.dirname(owner));
+      const ownerLock=`${ownerDir.path}/.${nodePath.basename(owner)}.save-lock`;
+      let uploadLock,uploaded;
+      try {
+        try{fs.mkdirSync(ownerLock,{mode:0o700});uploadLock=fs.lstatSync(ownerLock);}
+        catch(error){if(error.code==='EEXIST')throw storageError(409,'Another save, deletion or recovery owns this document.');throw error;}
+        const current=snapshot(`${ownerDir.path}/${nodePath.basename(owner)}`);current.close();
+        validateImageContent(path,content);
+        if(local===false)denyRemoteMutation();
+        uploaded=createLocalFile(path,Buffer.from(content.replace(/[\r\n]/g,""),"base64"));
+      } finally {
+        try{if(uploadLock&&sameInode(fs.lstatSync(ownerLock),uploadLock))fs.rmdirSync(ownerLock);}
+        finally{ownerDir.close();}
+      }
 
       console.log("Essay image uploaded:", uploaded.path);
       if (uploaded.commit) {
@@ -1279,10 +1618,14 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === "POST" && req.url === "/api/new-essay") {
+  if (req.method === "POST" && ["/api/new-essay", "/api/new-fragment", "/api/new-painting"].includes(req.url)) {
+    const section = {"/api/new-essay": "essays", "/api/new-fragment": "fragments", "/api/new-painting": "paintings"}[req.url];
     try {
       const body = await readRequestBody(req, 1024 * 1024);
-      const {title, introduction, themes, date} = JSON.parse(body);
+      const {title, introduction, themes, date, artist, year} = JSON.parse(body);
+      if (section === "paintings" && (typeof artist !== "string" || !artist.trim() || artist.trim().length > 200 || typeof year !== "string" || !/^\d{4}$/.test(year))) {
+        throw new ValidationError("A painting requires an artist and a four-digit year");
+      }
 
       if (
         typeof title !== "string" ||
@@ -1294,7 +1637,7 @@ const server = http.createServer(async (req, res) => {
 
       const cleanTitle = title.trim();
       const cleanIntroduction =
-        typeof introduction === "string" ? introduction.trim() : "";
+        section !== "fragments" && typeof introduction === "string" ? introduction.trim() : "";
 
       if (cleanIntroduction.length > 2000) {
         throw new ValidationError("Introduction must not exceed 2000 characters");
@@ -1317,6 +1660,13 @@ const server = http.createServer(async (req, res) => {
         throw new ValidationError("An essay cannot have more than 50 themes");
       }
 
+      if (section === "fragments" || section === "paintings") {
+        const profile=LOCAL_THEME_PROFILES[section],index=localThemeIndex(profile),seen=new Set();
+        const normalized = cleanThemes.map(name => resolveLocalTheme(profile,name,index))
+          .filter(name => { const key=name.toLowerCase(); if(seen.has(key)) return false; seen.add(key); return true; });
+        cleanThemes.splice(0, cleanThemes.length, ...normalized);
+      }
+
       const slug = cleanTitle
         .normalize("NFKD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -1328,7 +1678,7 @@ const server = http.createServer(async (req, res) => {
         throw new ValidationError("Could not create a valid slug from the title");
       }
 
-      const markdownPath = `content/essays/${slug}/index.md`;
+      const markdownPath = `content/${section}/${slug}/index.md`;
 
       const essayDate =
         typeof date === "string" && date.trim()
@@ -1362,13 +1712,20 @@ draft: true
 `;
 
       if (cleanThemes.length) {
-        frontMatter += "themes:\n";
+        frontMatter += `${{essays: "themes", fragments: "fragmentthemes", paintings: "paintingthemes"}[section]}:\n`;
         for (const theme of cleanThemes) {
           frontMatter += `  - ${JSON.stringify(theme)}\n`;
         }
       }
 
+      if (section === "paintings") {
+        frontMatter += `artist: ${JSON.stringify(artist.trim())}\nyear: ${JSON.stringify(year)}\n`;
+      }
       frontMatter += "---\n\n";
+
+      if (cleanIntroduction) {
+        frontMatter += "{{< introduction >}}\n\n";
+      }
 
       const created = createLocalFile(markdownPath,frontMatter);
 
@@ -1572,6 +1929,22 @@ stage: ${JSON.stringify(stage)}
   }
 
 
+  if ((req.method==='GET'&&new URL(req.url,'http://localhost:1314').pathname==='/api/essay-theme-usage')||(['GET','POST'].includes(req.method)&&['/api/essay-themes','/api/essay-themes/rename','/api/essay-themes/delete'].includes(req.url))) {
+    try {
+      const profile=LOCAL_THEME_PROFILES.essays;
+      let result;
+      if(req.method==='GET'&&req.url.startsWith('/api/essay-theme-usage')){
+        const url=new URL(req.url,'http://localhost:1314'),next=url.searchParams.get('newTheme'),usage=localThemeUsage(profile,url.searchParams.get('theme'),next===null?null:themeLabel(profile,fragmentThemeTools.validName(next)));result={ok:true,theme:usage.theme,count:usage.items.length,essays:usage.items,revision:usage.revision};
+      }else if(req.method==='POST'&&req.url!=='/api/essay-themes')result=mutateLocalTheme(profile,JSON.parse(await readRequestBody(req,64*1024)),req.url.endsWith('/delete'));
+      else{
+        let index=localThemeIndex(profile),theme;
+        if(req.method==='POST'){const added=addLocalTheme(profile,JSON.parse(await readRequestBody(req,64*1024)).theme);index=added.index;theme=added.theme;}
+        result={ok:true,themes:index.themes,themeOptions:index.themeOptions,conflicts:index.conflicts,...(theme===undefined?{}:{theme,label:themeLabel(profile,theme),local:true,pending:false})};
+      }
+      res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(result));
+    }catch(error){res.writeHead(error.statusCode||400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:error.message,...(error.completedThemePaths?{completedThemePaths:error.completedThemePaths}:{}),...(error.attemptedThemePaths?{attemptedThemePaths:error.attemptedThemePaths}:{}),...(error.saveFailure?{save:error.saveFailure}:{})}));}
+    return;
+  }
   if (
     req.method === "GET" &&
     new URL(req.url, "http://localhost:1314").pathname === "/api/essay-theme-usage"
@@ -1803,6 +2176,71 @@ stage: ${JSON.stringify(stage)}
     return;
   }
 
+  if (req.method === "GET" && new URL(req.url,"http://localhost:1314").pathname === "/api/painting-theme-usage") {
+    try {
+      const url=new URL(req.url,"http://localhost:1314"),next=url.searchParams.get("newTheme");
+      const usage=localThemeUsage(LOCAL_THEME_PROFILES.paintings,url.searchParams.get("theme"),next===null?null:fragmentThemeLabel(fragmentThemeTools.validName(next)));
+      res.writeHead(200,{"Content-Type":"application/json"});res.end(JSON.stringify({ok:true,theme:usage.theme,count:usage.items.length,paintings:usage.items,revision:usage.revision}));
+    } catch(error) {res.writeHead(error.statusCode||400,{"Content-Type":"application/json"});res.end(JSON.stringify({error:error.message}));}
+    return;
+  }
+  if (req.method === "POST" && ["/api/painting-themes/rename","/api/painting-themes/delete"].includes(req.url)) {
+    try {
+      const data=JSON.parse(await readRequestBody(req,64*1024)),result=mutateLocalTheme(LOCAL_THEME_PROFILES.paintings,data,req.url.endsWith("/delete"));
+      res.writeHead(200,{"Content-Type":"application/json"});res.end(JSON.stringify(result));
+    } catch(error) {res.writeHead(error.statusCode||400,{"Content-Type":"application/json"});res.end(JSON.stringify({error:error.message,...(error.completedThemePaths?{completedPaintingPaths:error.completedThemePaths}:{}),...(error.attemptedThemePaths?{attemptedPaintingPaths:error.attemptedThemePaths}:{}),...(error.saveFailure?{save:error.saveFailure}:{})}));}
+    return;
+  }
+  if (["GET","POST"].includes(req.method) && req.url === "/api/painting-themes") {
+    try {
+      let index=localThemeIndex(LOCAL_THEME_PROFILES.paintings),theme;
+      if(req.method==="POST") {const data=JSON.parse(await readRequestBody(req,64*1024));if(!data||typeof data!=="object"||Array.isArray(data))throw new ValidationError("Invalid Painting theme request");const added=addLocalTheme(LOCAL_THEME_PROFILES.paintings,data.theme);index=added.index;theme=added.theme;}
+      res.writeHead(200,{"Content-Type":"application/json"});res.end(JSON.stringify({ok:true,themes:index.themes,themeOptions:index.themeOptions,conflicts:index.conflicts,...(theme===undefined?{}:{theme,label:fragmentThemeLabel(theme),local:true,pending:false})}));
+    }catch(error){res.writeHead(error.statusCode||400,{"Content-Type":"application/json"});res.end(JSON.stringify({error:error.message,...(error.saveFailure?{save:error.saveFailure}:{})}));}
+    return;
+  }
+
+  if (req.method === "GET" && new URL(req.url,"http://localhost:1314").pathname === "/api/fragment-theme-usage") {
+    try {
+      const url=new URL(req.url,"http://localhost:1314"),next=url.searchParams.get("newTheme");
+      const usage=fragmentThemeUsage(url.searchParams.get("theme"),next===null?null:fragmentThemeLabel(fragmentThemeTools.validName(next)));
+      res.writeHead(200,{"Content-Type":"application/json"});res.end(JSON.stringify({ok:true,theme:usage.theme,count:usage.fragments.length,fragments:usage.fragments,revision:usage.revision}));
+    } catch(error) {res.writeHead(error.statusCode||400,{"Content-Type":"application/json"});res.end(JSON.stringify({error:error.message}));}
+    return;
+  }
+  if (req.method === "POST" && ["/api/fragment-themes/rename","/api/fragment-themes/delete"].includes(req.url)) {
+    try {
+      const data=JSON.parse(await readRequestBody(req,64*1024));const result=mutateFragmentTheme(data,req.url.endsWith("/delete"));
+      res.writeHead(200,{"Content-Type":"application/json"});res.end(JSON.stringify(result));
+    } catch(error) {res.writeHead(error.statusCode||400,{"Content-Type":"application/json"});res.end(JSON.stringify({error:error.message,...(error.completedFragmentPaths?{completedFragmentPaths:error.completedFragmentPaths}: {}),...(error.attemptedFragmentPaths?{attemptedFragmentPaths:error.attemptedFragmentPaths}: {}),...(error.saveFailure?{save:error.saveFailure}: {})}));}
+    return;
+  }
+
+  if (["GET", "POST"].includes(req.method) && req.url === "/api/fragment-themes") {
+    try {
+      // Hugo's existing Fragment taxonomy is authored in fragment frontmatter.
+      // Do not read or mutate the separate Essay theme registry.
+      let index = fragmentThemeIndex();
+      let theme;
+      if (req.method === "POST") {
+        const data = JSON.parse(await readRequestBody(req, 64 * 1024));
+        if (!data || typeof data !== "object" || Array.isArray(data) || typeof data.theme !== "string" || !data.theme.trim() || data.theme.trim().length > 100) {
+          throw new ValidationError("A valid Fragment theme is required (maximum 100 characters)");
+        }
+        const added=addFragmentTheme(data.theme); theme=added.theme; index=added.index;
+      }
+      res.writeHead(200, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({ok: true, themes:index.themes, themeOptions:index.themeOptions, conflicts:index.conflicts,
+        ...(theme === undefined ? {} : {theme, label:fragmentThemeLabel(theme), pending:false, local:true})}));
+      // Definitions persist only in existing data/lilamaya.yaml.fragmentThemes.
+      // Adding a definition does not rewrite any manuscript or Essay collection.
+    } catch (error) {
+      res.writeHead(error.statusCode || (error instanceof ValidationError || error instanceof SyntaxError ? 400 : 500), {"Content-Type": "application/json"});
+      res.end(JSON.stringify({error: error.message, ...(error.saveFailure ? {save:error.saveFailure} : {})}));
+    }
+    return;
+  }
+
   if (
     (req.method === "GET" && req.url === "/api/essay-themes") ||
     (req.method === "POST" && req.url === "/api/essay-themes")
@@ -1941,7 +2379,7 @@ stage: ${JSON.stringify(stage)}
       const file = readLocalFile(path);
       res.writeHead(200, {"Content-Type": "application/json"});
       res.end(JSON.stringify({ok:true,path,sha:file.sha,content:file.content,
-        connections:matter(file.content).data.connections||[],local:true}));
+        connections:matter(file.content).data.connections||[],metadata:readDocumentMetadata(file.content,path),socialCard:await socialCardJob(path,file.sha,true),local:true}));
     } catch (error) {
       console.error("GitHub error:", error.message);
 

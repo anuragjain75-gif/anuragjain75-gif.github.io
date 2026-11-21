@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import vm from 'node:vm';
+import {metadataRows,localMetadataURL} from '../../assets/js/lilamaya-metadata-panel.js';
+const require=createRequire(import.meta.url),matter=require('gray-matter');
+const api=readFileSync(new URL('../../scripts/editor-api.js',import.meta.url),'utf8');
+const projection=api.slice(api.indexOf('function readDocumentMetadata('),api.indexOf('\nfunction listLocalDocuments('));
+const read=vm.runInNewContext('('+projection.trim()+')',{matter});
+for(const type of ['essays','fragments','paintings'])for(const newline of ['\n','\r\n'])test('Scoped projection preserves source '+type+JSON.stringify(newline),()=>{
+ const text=['---','title: "Śāntiḥ"','date: 2026-07-12T09:00:00+05:30','draft: false','themes: [Essay]','fragmentthemes: [Fragment]','paintingthemes: [Painting]','artist: Artist','year: "1890"','introduction: Keep protected','custom: untouched','---','{{< poetry >}}','Body  ','{{< /poetry >}}'].join(newline),copy=text;
+ const meta=read(text,'content/'+type+'/synthetic/index.md');assert.equal(text,copy);assert.equal(meta.type,type);assert.equal(meta.fields.date,'2026-07-12T09:00:00+05:30');assert.equal(meta.fields.draft,false);assert.equal('introduction' in meta.fields,false);assert.equal('custom' in meta.fields,false);
+ const key={essays:'themes',fragments:'fragmentthemes',paintings:'paintingthemes'}[type];for(const other of ['themes','fragmentthemes','paintingthemes'])assert.equal(other in meta.fields,other===key);assert.equal('artist' in meta.fields,type==='paintings');assert.equal('description' in meta.fields,false);assert.ok(metadataRows(meta).some(([k])=>k==='Date'));
+});
+for(const value of ['2026-07-12','"2026-07-12"',"'2026-07-12'",'2026-07-12T09:00:00+05:30'])test('Date representation '+value,()=>assert.equal(read('---\ntitle: T\ndate: '+value+'\n---\n','content/essays/t/index.md').fields.date,value.replace(/^["']|["']$/g,'')));
+test('Optional description retained only when present',()=>assert.equal(read('---\ndescription: A description\n---\n','content/fragments/x.md').fields.description,'A description'));
+test('No fields invented for empty frontmatter',()=>assert.equal(Object.keys(read('---\n---\n','content/paintings/x/index.md').fields).length,0));
+test('Litverse projection supports title without invented fields',()=>{const m=read('---\ntitle: X\nintroduction: hidden\n---\n','content/people/x/index.md');assert.equal(m.type,'people');assert.equal(m.readOnly,undefined);assert.deepEqual(Object.keys(m.fields),['title']);assert.equal(m.fields.title,'X')});
+for(const path of ['/essays/x/','/fragments/2026/07/12/x/','/paintings/x/'])test('Local permalink '+path,()=>assert.equal(localMetadataURL(path,'http://localhost:1313').origin,'http://localhost:1313'));
+for(const path of ['https://evil.test/x','//evil.test/x','javascript:alert(1)','/x?bad','/x#bad','/x\\bad',null,''])test('Unsafe metadata URL rejected '+path,()=>assert.equal(localMetadataURL(path,'http://localhost:1313'),null));
+test('Unknown panel type cannot leak excluded values',()=>assert.deepEqual(metadataRows({type:'people',fields:{introduction:'hidden'}}),[]));

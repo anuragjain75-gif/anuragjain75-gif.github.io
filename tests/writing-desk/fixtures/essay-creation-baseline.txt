@@ -1,0 +1,122 @@
+  if (req.method === "POST" && req.url === "/api/new-essay") {
+    try {
+      const body = await readRequestBody(req, 1024 * 1024);
+      const {title, introduction, themes, date} = JSON.parse(body);
+
+      if (
+        typeof title !== "string" ||
+        !title.trim() ||
+        title.trim().length > 200
+      ) {
+        throw new ValidationError("A valid title is required (maximum 200 characters)");
+      }
+
+      const cleanTitle = title.trim();
+      const cleanIntroduction =
+        typeof introduction === "string" ? introduction.trim() : "";
+
+      if (cleanIntroduction.length > 2000) {
+        throw new ValidationError("Introduction must not exceed 2000 characters");
+      }
+
+      if (themes !== undefined && !Array.isArray(themes)) {
+        throw new ValidationError("Themes must be an array");
+      }
+
+      const cleanThemes = (themes || [])
+        .map(theme => {
+          if (typeof theme !== "string" || theme.trim().length > 100) {
+            throw new ValidationError("Each theme must be text of at most 100 characters");
+          }
+          return theme.trim();
+        })
+        .filter(Boolean);
+
+      if (cleanThemes.length > 50) {
+        throw new ValidationError("An essay cannot have more than 50 themes");
+      }
+
+      const slug = cleanTitle
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      if (!slug) {
+        throw new ValidationError("Could not create a valid slug from the title");
+      }
+
+      const markdownPath = `content/essays/${slug}/index.md`;
+
+      const essayDate =
+        typeof date === "string" && date.trim()
+          ? date.trim()
+          : new Date().toISOString().slice(0, 10);
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(essayDate)) {
+        throw new ValidationError("Date must use YYYY-MM-DD format");
+      }
+
+      const parsedDate = new Date(`${essayDate}T00:00:00Z`);
+
+      if (
+        Number.isNaN(parsedDate.getTime()) ||
+        parsedDate.toISOString().slice(0, 10) !== essayDate
+      ) {
+        throw new ValidationError("Date is not a valid calendar date");
+      }
+
+      let frontMatter = `---
+title: ${JSON.stringify(cleanTitle)}
+`;
+
+      if (cleanIntroduction) {
+        frontMatter += `introduction: ${JSON.stringify(cleanIntroduction)}
+`;
+      }
+
+      frontMatter += `date: ${JSON.stringify(essayDate)}
+draft: true
+`;
+
+      if (cleanThemes.length) {
+        frontMatter += "themes:\n";
+        for (const theme of cleanThemes) {
+          frontMatter += `  - ${JSON.stringify(theme)}\n`;
+        }
+      }
+
+      frontMatter += "---\n\n";
+
+      if (cleanIntroduction) {
+        frontMatter += "{{< introduction >}}\n\n";
+      }
+
+      const created = createLocalFile(markdownPath,frontMatter);
+
+      res.writeHead(201, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({
+        ok: true,
+        path: created.path,
+        sha: created.sha,
+        commit: created.commit,
+        local: true,
+        slug
+      }));
+
+    } catch (error) {
+      console.error("New essay error:", error.message);
+
+      res.writeHead(
+        error.statusCode || (error instanceof ValidationError ? 400 : 500),
+        {"Content-Type": "application/json"}
+      );
+      res.end(JSON.stringify({error: error.message}));
+    }
+
+    return;
+  }
+
+  if (
+    req.method === "POST"

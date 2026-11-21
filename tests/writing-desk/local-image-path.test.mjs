@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
+const s=fs.readFileSync('assets/js/lilamaya-rich-editor.js','utf8'),start=s.indexOf('function validatedLocalImagePath('),end=s.indexOf('function resolveImagePreviewUrls(',start);assert.ok(start>=0&&end>start);const path=vm.runInNewContext(s.slice(start,end)+'\nvalidatedLocalImagePath');
+for(const name of ['image.png','hero-123.webp','A.B_123.JPG','synthetic-1794939249219.png'])test('Bundle image remains supported '+name,()=>assert.equal(path('![alt](images/'+name+')'),'images/'+name));
+const prefix='/images/fragments/synthetic-fragment/';
+for(const name of ['test.png','A.B_123.JPG'])test('Explicit standalone prefix '+name,()=>assert.equal(path('![alt]('+prefix+name+')',prefix),prefix+name));
+for(const p of ['images/../x.png','images/%2e%2e.png','images/..','images/.','images/a/b.png','images/a.png?x','images/a.png#x','images/a b.png','images/a\\b.png','https://example.invalid/a.png','//example.invalid/a.png','/images/fragments/other/test.png','/images/fragments/synthetic-fragment/../test.png'])test('Reject unsafe or wrong-owner path '+p,()=>{assert.equal(path('![alt]('+p+')',prefix),null);assert.equal(path('![alt]('+p+')'),null)});
+for(const p of ['../images/','https://example.invalid/','/images/other/','/images/fragments/../','/images/fragments/%2e%2e/',[],null,42,''])test('Reject unsafe prefix '+JSON.stringify(p),()=>assert.equal(path('![x](images/test.png)',p),null));
+test('Standalone paths rejected without explicit per-document prefix',()=>assert.equal(path('![x]('+prefix+'test.png)'),null));
+for(const value of ['![x](images/test.png)\n','prefix ![x](images/test.png)','![x](images/test.png) extra','![x](images/test.png)\r\n'])test('Reject extra Markdown '+JSON.stringify(value),()=>assert.equal(path(value),null));

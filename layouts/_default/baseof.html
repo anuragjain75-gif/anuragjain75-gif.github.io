@@ -10,7 +10,7 @@
 
 <body>
 
-    {{ if hugo.IsServer }}
+    {{ if or hugo.IsServer (eq .Layout "editor-test") }}
         {{ partial "author-bar.html" . }}
     {{ end }}
 

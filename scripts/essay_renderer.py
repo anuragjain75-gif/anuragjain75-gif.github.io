@@ -103,45 +103,46 @@ def render(
         HEIGHT * IMAGE_HEIGHT_RATIO
     )
 
-    hero = Image.open(image).convert("RGB")
+    if image is not None:
+        hero = Image.open(image).convert("RGB")
 
-    source_ratio = hero.width / hero.height
-    target_ratio = WIDTH / hero_height
+        source_ratio = hero.width / hero.height
+        target_ratio = WIDTH / hero_height
 
-    if source_ratio > target_ratio:
+        if source_ratio > target_ratio:
 
-        new_height = hero_height
+            new_height = hero_height
 
-        new_width = int(
-            hero.width * hero_height / hero.height
+            new_width = int(
+                hero.width * hero_height / hero.height
+            )
+
+        else:
+
+            new_width = WIDTH
+
+            new_height = int(
+                hero.height * WIDTH / hero.width
+            )
+
+        hero = hero.resize(
+            (new_width, new_height),
+            Image.Resampling.LANCZOS
         )
 
-    else:
+        left = (new_width - WIDTH) // 2
+        top = (new_height - hero_height) // 2
 
-        new_width = WIDTH
-
-        new_height = int(
-            hero.height * WIDTH / hero.width
+        hero = hero.crop(
+            (
+                left,
+                top,
+                left + WIDTH,
+                top + hero_height
+            )
         )
 
-    hero = hero.resize(
-        (new_width, new_height),
-        Image.Resampling.LANCZOS
-    )
-
-    left = (new_width - WIDTH) // 2
-    top = (new_height - hero_height) // 2
-
-    hero = hero.crop(
-        (
-            left,
-            top,
-            left + WIDTH,
-            top + hero_height
-        )
-    )
-
-    canvas.paste(hero, (0, 0))
+        canvas.paste(hero, (0, 0))
 
     # --------------------------------------------------
     # Title
@@ -165,6 +166,9 @@ def render(
         + (TITLE_BOX_HEIGHT - total_height) / 2
         - 10
     )
+
+    if image is None:
+        y = (HEIGHT - total_height) / 2 - 35
 
     for line in lines:
 

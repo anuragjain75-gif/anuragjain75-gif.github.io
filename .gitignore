@@ -30,3 +30,7 @@ npm-debug.log*
 # VS Code workspace (optional)
 # Uncomment the next line if you don't want to track it.
 # *.code-workspace
+
+# Local derived-card rebuild signals; cards themselves remain publication assets.
+/data/lilamaya_social_cards/
+/backups/editor-derived/social-cards/

@@ -44,14 +44,14 @@
     {{ if and (eq .Section "essays") (eq .Kind "page") }}
         {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir)}}
         {{ $image := printf "/images/social/essays/%s.png" $slug}}
-        <meta property="og:image" content="{{ absURL $image }}">
+        <meta property="og:image" content="{{ partial "social-card-url.html" $image }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
         {{ $image := printf "/images/social/fragments/%s.png" .File.ContentBaseName }}
         <meta property="og:image" content="{{ absURL $image }}">
     {{ else if and (eq .Section "paintings") (eq .Kind "page") }}
         {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir)}}
         {{ $image := printf "/images/social/paintings/%s.png" $slug}}
-        <meta property="og:image" content="{{ absURL $image }}">
+        <meta property="og:image" content="{{ partial "social-card-url.html" $image }}">
     {{ else if $og := .Resources.GetMatch "hero-og.*" }}
         <meta property="og:image" content="{{ $og.Permalink }}">
     {{ else }}
@@ -82,14 +82,14 @@
     {{ if and (eq .Section "essays") (eq .Kind "page") }}
         {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir)}}
         {{ $image := printf "/images/social/essays/%s.png" $slug}}
-        <meta name="twitter:image" content="{{ absURL $image }}">
+        <meta name="twitter:image" content="{{ partial "social-card-url.html" $image }}">
     {{ else if and (eq .Section "fragments") (eq .Kind "page") }}
         {{ $image := printf "/images/social/fragments/%s.png" .File.ContentBaseName }}
         <meta name="twitter:image" content="{{ absURL $image }}">
     {{ else if and (eq .Section "paintings") (eq .Kind "page") }}
         {{ $slug := path.Base (strings.TrimSuffix "/" .File.Dir)}}
         {{ $image := printf "/images/social/paintings/%s.png" $slug}}
-        <meta name="twitter:image" content="{{ absURL $image }}">
+        <meta name="twitter:image" content="{{ partial "social-card-url.html" $image }}">
     {{ else if $og := .Resources.GetMatch "hero-og.*" }}
         <meta name="twitter:image" content="{{ $og.Permalink }}">
     {{ else }}

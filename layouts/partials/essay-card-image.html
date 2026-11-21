@@ -1,4 +1,4 @@
-{{ $hero := .Resources.GetMatch "hero.*" }}
+{{ $hero := (partial "hero-resource.html" .).resource }}
 
 {{ with $hero }}
 

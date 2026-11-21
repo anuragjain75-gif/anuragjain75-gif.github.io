@@ -1,0 +1,18 @@
+{{- $url := absURL . -}}
+{{- $version := "" -}}
+{{- $parts := split . "/" -}}
+{{- /* Read Data unconditionally so first-card creation registers a rebuild dependency. */ -}}
+{{- with site.Data.lilamaya_social_cards -}}
+  {{- with index . (index $parts 3) -}}
+    {{- with index . (strings.TrimSuffix ".png" (index $parts 4)) -}}
+      {{- if gt (len (findRE `^[a-f0-9]{64}$` .cardHash)) 0 -}}{{- $version = .cardHash -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- /* Clean builds and existing cards need no receipt or local rebuild signal. */ -}}
+{{- if eq $version "" -}}
+  {{- $file := printf "static%s" . -}}
+  {{- if fileExists $file -}}{{- $version = sha256 (readFile $file) -}}{{- end -}}
+{{- end -}}
+{{- if ne $version "" -}}{{- $url = printf "%s?v=%s" $url $version -}}{{- end -}}
+{{- return $url -}}

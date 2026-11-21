@@ -2,7 +2,7 @@
 
     <a href="{{ .RelPermalink }}" class="painting-card__image-link">
 
-        {{ with .Resources.GetMatch "hero.*" }}
+        {{ with (partial "hero-resource.html" .).resource }}
 
         <figure class="painting-card__image">
             <img
