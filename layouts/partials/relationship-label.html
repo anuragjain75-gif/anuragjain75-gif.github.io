@@ -1,0 +1,33 @@
+{{- $relation := .relation -}}
+{{- $direction := .direction | default "outgoing" -}}
+{{- $label := $relation | humanize | title -}}
+
+{{- if eq $direction "incoming" -}}
+
+    {{- if eq $relation "authored" -}}
+        {{- $label = "Authored by" -}}
+    {{- else if eq $relation "authored-by" -}}
+        {{- $label = "Authored" -}}
+    {{- else if eq $relation "explores" -}}
+        {{- $label = "Explored through" -}}
+    {{- else if eq $relation "influenced" -}}
+        {{- $label = "Influenced by" -}}
+    {{- else if eq $relation "influenced-by" -}}
+        {{- $label = "Influenced" -}}
+    {{- else if eq $relation "disagrees-with" -}}
+        {{- $label = "Disagreed with by" -}}
+    {{- else if eq $relation "belongs-to" -}}
+        {{- $label = "Part of this journey" -}}
+    {{- else if eq $relation "related-to" -}}
+        {{- $label = "Related to" -}}
+    {{- end -}}
+
+{{- else -}}
+
+    {{- if eq $relation "belongs-to" -}}
+        {{- $label = "Part of this journey" -}}
+    {{- end -}}
+
+{{- end -}}
+
+{{- return $label -}}

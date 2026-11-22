@@ -1,0 +1,55 @@
+{{ with .Params.connections }}
+
+<section class="entity-connections essay-connections">
+
+    <h2>Connections</h2>
+
+    <div class="entity-connection-group">
+
+        <h3>Connected from this entry</h3>
+
+        <ul class="entity-connection-list">
+
+            {{ range $.Params.connections }}
+
+                {{ $connection := . }}
+
+                {{ with site.GetPage $connection.target }}
+
+                    {{ $label := partial "relationship-label.html" (dict "relation" $connection.relation "direction" "outgoing") }}
+
+                    <li class="entity-connection">
+
+                        <a href="{{ .RelPermalink }}">
+                            {{ .Title }}
+                        </a>
+
+                        <span class="entity-connection__relation">
+                            {{ $label }}
+                        </span>
+
+                        {{ with $connection.note }}
+                            <p class="entity-connection__note">
+                                {{ . }}
+                            </p>
+                        {{ end }}
+
+                        {{ with $connection.basis }}
+                            <span class="entity-connection__basis">
+                                {{ . | humanize }} relationship
+                            </span>
+                        {{ end }}
+
+                    </li>
+
+                {{ end }}
+
+            {{ end }}
+
+        </ul>
+
+    </div>
+
+</section>
+
+{{ end }}

@@ -44,7 +44,7 @@
 
     </section>
 
-    {{ with .Resources.GetMatch "hero.*" }}
+    {{ with (partial "hero-resource.html" .).resource }}
     <figure class="essay-hero">
         <img src="{{ .RelPermalink }}" alt="{{ $.Title }}">
     </figure>
@@ -57,6 +57,8 @@
             {{ .Content }}
 
         </article>
+
+        {{ partial "essay-connections.html" . }}
 
         {{ partial "share.html" . }}
 

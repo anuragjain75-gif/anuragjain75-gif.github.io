@@ -1,0 +1,12 @@
+{{- $resource := false -}}
+{{- if isset .Params "hero" -}}
+  {{- if ne .Params.hero false -}}
+    {{- if and (eq (printf "%T" .Params.hero) "string") (gt (len (findRE `^images/[a-z0-9][a-z0-9_-]{0,79}\.(jpg|jpeg|png|webp)$` .Params.hero)) 0) -}}
+      {{- $resource = .Resources.Get .Params.hero -}}
+    {{- end -}}
+    {{- if not $resource -}}{{- warnf "Invalid or missing explicit hero resource on %s" .File.Path -}}{{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- $resource = .Resources.GetMatch "hero.*" -}}
+{{- end -}}
+{{- return (dict "resource" $resource) -}}

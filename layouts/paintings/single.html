@@ -54,7 +54,7 @@
 
     </section>
 
-    {{ with .Resources.GetMatch "hero.*" }}
+    {{ with (partial "hero-resource.html" .).resource }}
 
     <figure class="painting-hero">
         <img

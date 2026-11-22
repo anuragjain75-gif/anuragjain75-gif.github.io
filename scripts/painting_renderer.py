@@ -209,48 +209,50 @@ def render(
     # Painting
     # --------------------------------------------------------
 
-    painting = (
-        Image.open(image)
-        .convert("RGB")
-    )
-
-    # Generous adaptive image area.
-    #
-    # The artwork is NEVER cropped or distorted.
-    # Its natural aspect ratio determines its final size.
-    #
-    # These are maximum bounds rather than fixed dimensions,
-    # so landscape, square and portrait paintings are all
-    # handled automatically.
-
-    painting_area_width = 1080
-    painting_area_height = 455
-
-    painting = fit_painting(
-        painting,
-        painting_area_width,
-        painting_area_height
-    )
-
-    painting_x = (
-        WIDTH -
-        painting.width
-    ) // 2
-
-    painting_y = 30
-
-    canvas.paste(
-        painting,
-        (
-            painting_x,
-            painting_y
+    painting_bottom = HEIGHT // 2 - 90
+    if image is not None:
+        painting = (
+            Image.open(image)
+            .convert("RGB")
         )
-    )
 
-    painting_bottom = (
-        painting_y +
-        painting.height
-    )
+        # Generous adaptive image area.
+        #
+        # The artwork is NEVER cropped or distorted.
+        # Its natural aspect ratio determines its final size.
+        #
+        # These are maximum bounds rather than fixed dimensions,
+        # so landscape, square and portrait paintings are all
+        # handled automatically.
+
+        painting_area_width = 1080
+        painting_area_height = 455
+
+        painting = fit_painting(
+            painting,
+            painting_area_width,
+            painting_area_height
+        )
+
+        painting_x = (
+            WIDTH -
+            painting.width
+        ) // 2
+
+        painting_y = 30
+
+        canvas.paste(
+            painting,
+            (
+                painting_x,
+                painting_y
+            )
+        )
+
+        painting_bottom = (
+            painting_y +
+            painting.height
+        )
 
     # --------------------------------------------------------
     # Title

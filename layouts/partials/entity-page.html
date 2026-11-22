@@ -6,7 +6,13 @@
     {{ $source := . }}
 
     {{ range .Params.connections }}
-        {{ if eq .target $current.RelPermalink }}
+        {{ if and
+            (eq .target $current.RelPermalink)
+            (not (and
+                (eq $current.Section "journeys")
+                (eq .relation "belongs-to")
+            ))
+        }}
             {{ $incoming = $incoming | append (dict
                 "page" $source
                 "relation" .relation
@@ -86,7 +92,7 @@
                                     </a>
 
                                     <span class="entity-connection__relation">
-                                        {{ $connection.relation | humanize }}
+                                        {{ partial "relationship-label.html" (dict "relation" $connection.relation "direction" "outgoing") }}
                                     </span>
 
                                     {{ with $connection.note }}
@@ -126,19 +132,7 @@
                             {{ $source := .page }}
                             {{ $relation := .relation }}
 
-                            {{ $reverseLabel := "related through" }}
-
-                            {{ if eq $relation "authored" }}
-                                {{ $reverseLabel = "authored by" }}
-                            {{ else if eq $relation "explores" }}
-                                {{ $reverseLabel = "explored through" }}
-                            {{ else if eq $relation "influenced" }}
-                                {{ $reverseLabel = "influenced by" }}
-                            {{ else if eq $relation "disagrees-with" }}
-                                {{ $reverseLabel = "disagreed with by" }}
-                            {{ else if eq $relation "belongs-to" }}
-                                {{ $reverseLabel = "part of this journey" }}
-                            {{ end }}
+                            {{ $reverseLabel := partial "relationship-label.html" (dict "relation" $relation "direction" "incoming") }}
 
                             <li class="entity-connection">
 
