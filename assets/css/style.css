@@ -6034,3 +6034,26 @@ q {
         top: 195px;
     }
 }
+
+
+/* Permanent Writing Desk spacing fix */
+.editor-test-page {
+    margin-top: 80px !important;
+}
+
+#codemirror-editor .lilamaya-document-title-panel {
+    position: relative !important;
+    top: auto !important;
+}
+
+#codemirror-editor .lilamaya-toolbar {
+    position: sticky !important;
+    top: 42px !important;
+    z-index: 1500;
+}
+
+@media (max-width: 700px) {
+    #codemirror-editor .lilamaya-toolbar {
+        top: 42px !important;
+    }
+}
