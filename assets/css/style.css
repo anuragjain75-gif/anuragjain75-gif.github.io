@@ -1556,15 +1556,15 @@ nav a:hover {
     /* The invocation remains completely visible and untouched. */
 }
 
-.fragment-content > .invocation ~ p:first-of-type {
+.fragment:not(.fragment-page) .fragment-content > .invocation ~ p:first-of-type {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
 }
 
-.fragment-content > .invocation ~ p:not(:first-of-type),
-.fragment-content > .invocation ~ blockquote {
+.fragment:not(.fragment-page) .fragment-content > .invocation ~ p:not(:first-of-type),
+.fragment:not(.fragment-page) .fragment-content > .invocation ~ blockquote {
     display: none;
 }
 
