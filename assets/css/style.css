@@ -1757,6 +1757,7 @@ nav a:hover {
 
 .invocation p {
     margin: 0;
+    font-weight: 700;
 }
 
 .invocation-separator {
