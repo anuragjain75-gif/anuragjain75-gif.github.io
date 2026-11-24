@@ -33,7 +33,7 @@ class GitHubProvider{
   const token=this.#token||await this.#credential();this.#token=token;let r,retries=0;
   for(;;){try{r=await this.#transport({method,url:'https://api.github.com'+endpoint,headers:{Accept:'application/vnd.github+json','Content-Type':'application/json',Authorization:'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28'},body});break;}catch(error){
     const code=String(typeof error?.code==='string'?error.code:'UNKNOWN').replace(/[^A-Za-z0-9_.-]/g,'_').slice(0,80),name=String(typeof error?.name==='string'?error.name:'Error').replace(/[^A-Za-z0-9_.-]/g,'_').slice(0,80);
-    const transient=TRANSIENT_NETWORK_CODES.has(code)||name==='TimeoutError';
+    const transient=TRANSIENT_NETWORK_CODES.has(code)||name==='TimeoutError'||name==='TypeError';
     if(method==='GET'&&transient&&retries<MAX_GET_RETRIES){
       retries++;
       await new Promise(resolve=>setTimeout(resolve,350*(2**(retries-1))));
