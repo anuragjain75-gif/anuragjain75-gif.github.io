@@ -60,18 +60,33 @@ class GitHubProvider{
  async head(){const r=await this.request('GET',this.base+'/git/ref/heads/main');if(r.object?.type!=='commit'||!/^([a-f0-9]{40})$/.test(r.object.sha))throw Error('Unexpected branch reference');return r.object.sha;}
  async commit(sha){const r=await this.request('GET',this.base+'/git/commits/'+sha);if(r.sha!==sha||!/^([a-f0-9]{40})$/.test(r.tree?.sha||'')||!Array.isArray(r.parents))throw Error('Invalid commit evidence');return r;}
  async snapshot(expected=null){
-  const head=await this.head();if(expected&&head!==expected)throw Error('Remote parent changed');const root=await this.commit(head),objects={};let total=0;
+  const head=await this.head();if(expected&&head!==expected)throw Error('Remote parent changed');const root=await this.commit(head),objects={},treeShas=new Set(),blobShas=new Set();
   const visit=async(sha,depth=0)=>{
-   if(objects[sha])return;if(depth>32||Object.keys(objects).length>20000)throw Error('Remote inventory limit');
+   if(treeShas.has(sha))return;if(depth>32||treeShas.size+blobShas.size>20000)throw Error('Remote inventory limit');treeShas.add(sha);
    const r=await this.request('GET',this.base+'/git/trees/'+sha);if(r.sha!==sha||r.truncated||!Array.isArray(r.tree))throw Error('Incomplete remote tree');
    const seen=new Set(),entries=[...r.tree].sort((a,b)=>Buffer.compare(Buffer.from(a.path+(a.type==='tree'?'/':'')),Buffer.from(b.path+(b.type==='tree'?'/':''))));
    for(const e of entries){if(e.path.includes('/')||seen.has(e.path)||!['040000','100644','100755'].includes(e.mode)||!['tree','blob'].includes(e.type))throw Error('Unsafe remote tree mode/name');seen.add(e.path);
     if(e.type==='tree')await visit(e.sha,depth+1);
-    else if(!objects[e.sha]){const b=await this.request('GET',this.base+'/git/blobs/'+e.sha);if(b.encoding!=='base64')throw Error('Unsupported blob encoding');const bytes=Buffer.from(b.content.replace(/\s/g,''),'base64');total+=bytes.length;if(bytes.length>20*1024*1024||total>200*1024*1024||oid('blob',bytes)!==e.sha)throw Error('Invalid or oversized blob');objects[e.sha]={type:'blob',data:bytes.toString('base64')};}
+    else{blobShas.add(e.sha);if(treeShas.size+blobShas.size>20000)throw Error('Remote inventory limit');}
    }
-   const bytes=Buffer.concat(entries.map(e=>Buffer.concat([Buffer.from((e.mode==='040000'?'40000':e.mode)+' '+e.path+'\0'),Buffer.from(e.sha,'hex')])));if(oid('tree',bytes)!==sha)throw Error('Remote tree hash mismatch');objects[sha]={type:'tree',data:bytes.toString('base64')};
+   const bytes=Buffer.concat(entries.map(e=>Buffer.concat([Buffer.from((e.mode==='040000'?'40000':e.mode)+' '+e.path+'\\0'),Buffer.from(e.sha,'hex')])));if(oid('tree',bytes)!==sha)throw Error('Remote tree hash mismatch');objects[sha]={type:'tree',data:bytes.toString('base64')};
   };
-  await visit(root.tree.sha);return {kind:'github-snapshot',ref:{name:'refs/heads/main',oid:head},commitRecord:root,objects};
+  await visit(root.tree.sha);
+  const queue=[...blobShas];let next=0,total=0,failure=null;
+  const worker=async()=>{
+   while(!failure){
+    const index=next++;if(index>=queue.length)return;const sha=queue[index];
+    try{
+     const b=await this.request('GET',this.base+'/git/blobs/'+sha);if(b.encoding!=='base64')throw Error('Unsupported blob encoding');
+     const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');
+     if(bytes.length>20*1024*1024||oid('blob',bytes)!==sha)throw Error('Invalid or oversized blob');
+     total+=bytes.length;if(total>200*1024*1024)throw Error('Invalid or oversized blob');
+     objects[sha]={type:'blob',data:bytes.toString('base64')};
+    }catch(error){if(!failure)failure=error;}
+   }
+  };
+  await Promise.all(Array.from({length:Math.min(4,queue.length)},()=>worker()));if(failure)throw failure;
+  return {kind:'github-snapshot',ref:{name:'refs/heads/main',oid:head},commitRecord:root,objects};
  }
  async publish(tx,grant,journal){
   if(!this.writesEnabled&&!this.#controlled)throw writesDisabled();
