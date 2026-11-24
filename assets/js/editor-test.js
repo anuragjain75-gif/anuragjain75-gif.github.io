@@ -10,8 +10,7 @@ let paintingThemesLoaded = false;
 import {createLilamayaEditor} from "./lilamaya-rich-editor.js";
 import {createSaveSafety, createSaveSafetyPanel} from "./lilamaya-save-safety.mjs";
 
-const defaultDocumentPath = "content/essays/the-art-of-becoming-whole/index.md";
-let documentPath = defaultDocumentPath;
+let documentPath = null;
 let documentSha = null;
 let documentIsLocal = false;
 let richEditor = null;
@@ -1598,20 +1597,8 @@ async function loadEditor() {
 
   try {
     await loadDocumentList();
-
-    const savedDocumentPath = localStorage.getItem(
-      "lilamaya-editor-document-path"
-    );
-
-    const initialDocumentPath = availableDocuments.some(
-      item => item.path === savedDocumentPath
-    )
-      ? savedDocumentPath
-      : defaultDocumentPath;
-
-    await loadDocument(initialDocumentPath);
     await loadCreationThemes();
-    showEditorScreen();
+    showLibraryScreen();
   } catch (error) {
     console.error("Lilamaya Editor Error:", error);
     alert(error.message);
