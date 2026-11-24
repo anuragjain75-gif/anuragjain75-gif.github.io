@@ -630,10 +630,11 @@ async function loadDocument(path) {
 
     const toolbarTop = creationToolbarHeight;
     const toolbarHeight = formattingToolbar.getBoundingClientRect().height;
-    titlePanel.style.setProperty(
-      "--lilamaya-title-sticky-top",
-      `${toolbarTop + toolbarHeight}px`
-    );
+    const titleStickyTop = `${toolbarTop + toolbarHeight}px`;
+    titlePanel.style.setProperty("--lilamaya-title-sticky-top", titleStickyTop);
+    titlePanel.style.setProperty("position", "sticky", "important");
+    titlePanel.style.setProperty("top", titleStickyTop, "important");
+    titlePanel.style.setProperty("z-index", "1501", "important");
   };
   updateTitleOffset();
   const titleToolbarObserver = new ResizeObserver(updateTitleOffset);
