@@ -19,4 +19,6 @@ I hope everything goes fine. And then I can get along with my writing as usual.&
 
 And now this is the first test to see if the publishing works. Let's keep fingers crossed.
 
+Now, I will test whether it publishes after recent changes in font!
+
 <br />
