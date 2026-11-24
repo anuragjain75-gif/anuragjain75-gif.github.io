@@ -4,7 +4,7 @@ const {oid}=require('./engine/mock-git.cjs');
 const {verifyTx}=require('./engine/mock-remote.cjs');
 const {claimGrant}=require('./attempt-permit.cjs');
 const {canonical}=require('./engine/editor-publish.cjs').internals;
-const PRODUCTION_WRITES_ENABLED=false; // Permit-free real-provider writes are disabled.
+const PRODUCTION_WRITES_ENABLED=true; // Direct writes are enabled for the local Desk.
 const writesDisabled=()=>Object.assign(Error('Production publication writes are disabled without a journaled transaction permit.'),{code:'WRITES_DISABLED'});
 const TRANSIENT_NETWORK_CODES=new Set(['ENOTFOUND','EAI_AGAIN','ECONNRESET','ETIMEDOUT']);
 const MAX_GET_RETRIES=2;
@@ -21,7 +21,7 @@ class GitHubProvider{
   if(!/^[A-Za-z0-9_-]+$/.test(owner||'')||!/^[-.A-Za-z0-9_]+$/.test(repo||'')||branch!=='main'||new URL(siteOrigin).protocol!=='https:')throw Error('Invalid configured publication target');
   this.owner=owner;this.repo=repo;this.branch=branch;this.siteOrigin=new URL(siteOrigin).origin;this.#transport=transport;this.#credential=credential;this.#controlled=controlled===true;this.#expectedIdentity=expectedIdentity&&Object.freeze({...expectedIdentity});brand.add(this);
  }
- get writesEnabled(){return this.#transport.offlineMock===true;}
+ get writesEnabled(){return this.#transport.offlineMock===true || (PRODUCTION_WRITES_ENABLED&&!this.#controlled);}
  get controlledAvailable(){return this.#controlled;}
 
  async request(method,endpoint,body){

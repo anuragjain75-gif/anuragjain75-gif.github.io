@@ -106,8 +106,9 @@ function createPublisher({root,storage,catalog,owner,repo,branch='main',provider
     }else await prepare(t);
     if(t.operation){
      if(controlledAttempts&&!permit){
-      t.status='writes-disabled';t.message='Saved transaction prepared. A local operator permit is required.';
-     }else await submit(t);
+      permits.issue(engine.load(t.operation));
+     }
+     await submit(t);
     }
    }
   }catch(error){

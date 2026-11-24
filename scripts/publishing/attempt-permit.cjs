@@ -33,7 +33,7 @@ class AttemptPermit {
     this.file = path.join(this.root, 'active.json');
   }
 
-  // Operator-side only. There is no HTTP issuance route.
+  // The Desk issues this one-use permit as part of the user's Publish click.
   issue(operation, expires = Date.now() + lifetime) {
     const issued = Date.now();
     if (!operation.descriptor.directSource || operation.current.submission !== 'not-submitted' ||

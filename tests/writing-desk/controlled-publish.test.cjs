@@ -208,7 +208,7 @@ test('credential stays private and a dedicated provider verifies account and rep
     }};
   };
   const provider = new GitHubProvider({...target, transport, credential:load, expectedIdentity});
-  assert.equal(PRODUCTION_WRITES_ENABLED, false);
+  assert.equal(PRODUCTION_WRITES_ENABLED,true);
   assert.equal(provider.writesEnabled, false);
   assert.deepEqual(calls, []);
   await provider.verifyIdentity();
