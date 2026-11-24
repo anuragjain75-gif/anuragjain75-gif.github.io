@@ -6079,3 +6079,9 @@ q {
     white-space: nowrap;
     overflow-wrap: normal;
 }
+
+/* Center Writing Desk bullets on their text lines */
+#codemirror-editor .milkdown-list-item-block > li.list-item
+> .label-wrapper > .milkdown-icon.label.bullet > svg {
+    transform: translateY(5px) !important;
+}
