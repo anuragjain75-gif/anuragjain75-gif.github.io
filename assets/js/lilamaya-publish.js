@@ -32,7 +32,8 @@ export function installPublisher({button, status, getState}) {
       (labels[active.status] || active.status) + (active.message ? ' · ' + active.message : '');
     if (active.status === 'live' && active.liveURL) {
       const link = document.createElement('a');
-      link.textContent = ' · Open live';
+      link.textContent = 'Open Live';
+      link.classList.add('editor-live-link');
       link.href = active.liveURL;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
