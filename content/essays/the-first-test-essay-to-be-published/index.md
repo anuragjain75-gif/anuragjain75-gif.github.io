@@ -17,4 +17,6 @@ I hope everything goes fine. And then I can get along with my writing as usual.&
 2. Run
 3. Publish
 
+And now this is the first test to see if the publishing works. Let's keep fingers crossed.
+
 <br />
