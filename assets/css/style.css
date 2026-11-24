@@ -6057,3 +6057,17 @@ q {
         top: 42px !important;
     }
 }
+
+/* Writing Desk list labels and text alignment */
+#codemirror-editor .milkdown-list-item-block > li.list-item {
+    list-style: none !important;
+    position: relative !important;
+}
+
+#codemirror-editor .milkdown-list-item-block > li.list-item > .label-wrapper {
+    position: absolute !important;
+    left: -1.35em !important;
+    top: 0 !important;
+    width: 1.1em !important;
+    text-align: right !important;
+}
