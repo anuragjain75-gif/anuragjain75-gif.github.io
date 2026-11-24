@@ -21,4 +21,6 @@ And now this is the first test to see if the publishing works. Let's keep finger
 
 Now, I will test whether it publishes after recent changes in font!
 
+And now, this is the second try. I hope it succeeds this time.
+
 <br />
