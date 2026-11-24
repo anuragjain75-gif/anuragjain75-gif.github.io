@@ -26,4 +26,8 @@ And now, this is the second try. I hope it succeeds this time.
 * time for testing bullets
 * As you can see, the text and bullets are misaligned vertically. 
 
+And now, I am going to insert a picture and then test publication 
+
+![lilamaya launcher](images/lilamaya-launcher-1795528252037.png)
+
 <br />
