@@ -4,8 +4,7 @@
 
 <main class="editor-test-page">
     <div class="editor-test-inner">
-        <h1>Writing Desk</h1>
-        <p class="editor-test-intro">A private test of the Lilamaya writing room.</p>
+        <h1>Lilamaya Writing Desk</h1>
 
         <div id="new-essay-form" class="new-document-form" hidden>
             <h2 id="new-document-heading">Begin a New Essay</h2>
@@ -125,8 +124,9 @@
                 <button type="button" id="preview-editor" disabled
                         title="Open a saved local entry to preview. Save pending changes first.">Preview</button>
                 <button type="button" id="publish-editor" class="editor-publish" disabled
-                        title="Publish — Not yet configured">Publish</button>
+                        title="Save the selected entry before publishing">Publish</button>
             </div>
+            <span id="publish-status" role="status" aria-live="polite" hidden></span>
         </div>
 
         <div id="codemirror-editor"></div>

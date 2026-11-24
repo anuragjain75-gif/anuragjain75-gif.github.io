@@ -1,4 +1,12 @@
-{{ with .Params.connections }}
+{{ $connections := slice }}
+{{ range .Params.connections }}
+    {{ $connection := . }}
+    {{ with site.GetPage $connection.target }}
+        {{ $connections = $connections | append (dict "page" . "connection" $connection) }}
+    {{ end }}
+{{ end }}
+
+{{ with $connections }}
 
 <section class="entity-connections essay-connections">
 
@@ -10,39 +18,35 @@
 
         <ul class="entity-connection-list">
 
-            {{ range $.Params.connections }}
+            {{ range . }}
+                {{ $connection := .connection }}
+                {{ $page := .page }}
 
-                {{ $connection := . }}
+                {{ $label := partial "relationship-label.html" (dict "relation" $connection.relation "direction" "outgoing") }}
 
-                {{ with site.GetPage $connection.target }}
+                <li class="entity-connection">
 
-                    {{ $label := partial "relationship-label.html" (dict "relation" $connection.relation "direction" "outgoing") }}
+                    <a href="{{ $page.RelPermalink }}">
+                        {{ $page.Title }}
+                    </a>
 
-                    <li class="entity-connection">
+                    <span class="entity-connection__relation">
+                        {{ $label }}
+                    </span>
 
-                        <a href="{{ .RelPermalink }}">
-                            {{ .Title }}
-                        </a>
+                    {{ with $connection.note }}
+                        <p class="entity-connection__note">
+                            {{ . }}
+                        </p>
+                    {{ end }}
 
-                        <span class="entity-connection__relation">
-                            {{ $label }}
+                    {{ with $connection.basis }}
+                        <span class="entity-connection__basis">
+                            {{ . | humanize }} relationship
                         </span>
+                    {{ end }}
 
-                        {{ with $connection.note }}
-                            <p class="entity-connection__note">
-                                {{ . }}
-                            </p>
-                        {{ end }}
-
-                        {{ with $connection.basis }}
-                            <span class="entity-connection__basis">
-                                {{ . | humanize }} relationship
-                            </span>
-                        {{ end }}
-
-                    </li>
-
-                {{ end }}
+                </li>
 
             {{ end }}
 

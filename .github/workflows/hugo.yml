@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,7 +21,7 @@ jobs:
 
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment_attempt_3.outputs.page_url || steps.deployment_attempt_2.outputs.page_url || steps.deployment_attempt_1.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -54,10 +55,27 @@ jobs:
         run: npx pagefind --site public
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./public
 
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+# Automatic Pages deployment retries
+      - name: Deploy to GitHub Pages (attempt 1)
+        continue-on-error: true
+        id: deployment_attempt_1
+        uses: actions/deploy-pages@v5
+      - name: Wait before Pages deployment retry (attempt 2)
+        if: steps.deployment_attempt_1.outcome == 'failure'
+        run: sleep 15
+      - name: Deploy to GitHub Pages (attempt 2)
+        continue-on-error: true
+        if: steps.deployment_attempt_1.outcome == 'failure'
+        id: deployment_attempt_2
+        uses: actions/deploy-pages@v5
+      - name: Wait before Pages deployment retry (attempt 3)
+        if: steps.deployment_attempt_1.outcome == 'failure' && steps.deployment_attempt_2.outcome == 'failure'
+        run: sleep 30
+      - name: Deploy to GitHub Pages (attempt 3)
+        if: steps.deployment_attempt_1.outcome == 'failure' && steps.deployment_attempt_2.outcome == 'failure'
+        id: deployment_attempt_3
+        uses: actions/deploy-pages@v5

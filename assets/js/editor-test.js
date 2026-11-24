@@ -1,3 +1,4 @@
+import {installPublisher} from './lilamaya-publish.js';
 import {mountDeleteControl} from './lilamaya-delete-entry.js';
 import {mountThemeManager} from './lilamaya-theme-manager.js';
 import metadataPatch from './lilamaya-metadata-patch.cjs';
@@ -9,8 +10,7 @@ let paintingThemesLoaded = false;
 import {createLilamayaEditor} from "./lilamaya-rich-editor.js";
 import {createSaveSafety, createSaveSafetyPanel} from "./lilamaya-save-safety.mjs";
 
-const defaultDocumentPath = "content/essays/the-art-of-becoming-whole/index.md";
-let documentPath = defaultDocumentPath;
+let documentPath = null;
 let documentSha = null;
 let documentIsLocal = false;
 let richEditor = null;
@@ -20,6 +20,14 @@ let newEssayMode = false;
 let newEntryMode = false;
 let availableDocuments = [];
 let saveSafety = null;
+let publicationUI=null;
+function publishEligibility(){
+ const saved=getPreviewState();
+ const assetsPending=imageInsertionBusy||metadataView?.hasPendingHero();
+ const eligible=privateDesk&&!!saved.url&&!assetsPending;
+ const reason=eligible?'Publish this saved version.':assetsPending?'Finish and save pending image changes before publishing.':saved.reason;
+ return {eligible,path:documentPath,sha:documentSha,reason};
+}
 let pendingSave = null;
 let pendingEditor = null;
 let lastSaveHttpStatus = null;
@@ -152,6 +160,7 @@ function getPreviewState(state = saveSafety?.state()) {
   const permalink = availableDocuments.find(item => item.path === documentPath)?.permalink;
   try {
     const origin = new URL(window.location.origin);
+    if (origin.port === "1314" && ["localhost", "127.0.0.1"].includes(origin.hostname)) origin.port = "1313";
     if (origin.protocol !== "http:" ||
         !["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname) ||
         typeof permalink !== "string" || !/^\/(?!\/)/.test(permalink) ||
@@ -213,6 +222,8 @@ function renderSaveStatus(state = saveSafety?.state()) {
   if (status.textContent !== text) status.textContent = text;
   deleteView?.refresh();
   renderPreviewButton(state);
+  if(!publicationUI&&document.querySelector('#publish-status'))publicationUI=installPublisher({button:document.querySelector('#publish-editor'),status:document.querySelector('#publish-status'),getState:publishEligibility});
+  publicationUI?.render();
   renderSocialCard();
 }
 
@@ -337,7 +348,12 @@ function showEditorScreen() {
   renderPreviewButton();
 }
 
-const apiBase = "http://localhost:1314";
+const privateDesk = location.protocol === "http:" &&
+  ["localhost", "127.0.0.1"].includes(location.hostname) && location.port === "1314";
+const apiBase = privateDesk ? location.origin : "http://localhost:1314";
+if (location.origin === "http://localhost:1313") {
+  location.replace(apiBase + "/editor-test/");
+}
 
 async function fetchDocument(path) {
   const response = await fetch(
@@ -601,22 +617,23 @@ async function loadDocument(path) {
   // Keep the sticky title immediately beneath the actual toolbar height.
   const updateTitleOffset = () => {
     const creationToolbar = document.querySelector(".author-bar");
-    const creationToolbarBottom = creationToolbar
-      ? creationToolbar.getBoundingClientRect().bottom
+    const creationToolbarHeight = creationToolbar
+      ? creationToolbar.getBoundingClientRect().height
       : 42;
 
     formattingToolbar.style.setProperty(
       "top",
-      `${creationToolbarBottom}px`,
+      `${creationToolbarHeight}px`,
       "important"
     );
 
-    const toolbarTop = creationToolbarBottom;
+    const toolbarTop = creationToolbarHeight;
     const toolbarHeight = formattingToolbar.getBoundingClientRect().height;
-    titlePanel.style.setProperty(
-      "--lilamaya-title-sticky-top",
-      `${toolbarTop + toolbarHeight}px`
-    );
+    const titleStickyTop = `${toolbarTop + toolbarHeight}px`;
+    titlePanel.style.setProperty("--lilamaya-title-sticky-top", titleStickyTop);
+    titlePanel.style.setProperty("position", "sticky", "important");
+    titlePanel.style.setProperty("top", titleStickyTop, "important");
+    titlePanel.style.setProperty("z-index", "1501", "important");
   };
   updateTitleOffset();
   const titleToolbarObserver = new ResizeObserver(updateTitleOffset);
@@ -1580,20 +1597,8 @@ async function loadEditor() {
 
   try {
     await loadDocumentList();
-
-    const savedDocumentPath = localStorage.getItem(
-      "lilamaya-editor-document-path"
-    );
-
-    const initialDocumentPath = availableDocuments.some(
-      item => item.path === savedDocumentPath
-    )
-      ? savedDocumentPath
-      : defaultDocumentPath;
-
-    await loadDocument(initialDocumentPath);
     await loadCreationThemes();
-    showEditorScreen();
+    showLibraryScreen();
   } catch (error) {
     console.error("Lilamaya Editor Error:", error);
     alert(error.message);

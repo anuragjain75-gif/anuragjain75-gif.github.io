@@ -1,5 +1,5 @@
 ---
-title: "Writing Desk"
+title: "Lilamaya Writing Desk"
 layout: "editor-test"
 draft: true
 ---

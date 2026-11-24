@@ -8,32 +8,7 @@ const GITHUB_OWNER = "anuragjain75-gif";
 const GITHUB_REPO = "anuragjain75-gif.github.io";
 const GITHUB_BRANCH = "main";
 
-// GitHub credentials are optional for local writing.
-// Remote operations check credentials individually.
-if (!process.env.GITHUB_TOKEN) {
-  try {
-    const credentials = execFileSync(
-      "git",
-      ["credential", "fill"],
-      {
-        input: "protocol=https\nhost=github.com\n\n",
-        encoding: "utf8",
-        stdio: ["pipe", "pipe", "ignore"]
-      }
-    );
-
-    const match = credentials.match(/^password=(.+)$/m);
-
-    if (match) {
-      process.env.GITHUB_TOKEN = match[1];
-      console.log("GitHub credential loaded from Git credential manager.");
-    } else {
-      console.warn("GitHub credentials unavailable. Local editing remains available.");
-    }
-  } catch (error) {
-    console.warn("GitHub credentials unavailable. Local editing remains available.");
-  }
-}
+// Publication credentials are loaded lazily in the private provider, never into child environments.
 
 function requireGitHubCredentials() {
   if (!process.env.GITHUB_TOKEN) {
@@ -286,7 +261,7 @@ function listHugoPermalinks() {
   const repoRoot = nodePath.resolve(__dirname, "..");
 
   const output = execFileSync("hugo", ["list", "all"], {
-    cwd: repoRoot,
+    cwd: repoRoot, env:{PATH:process.env.PATH,HOME:process.env.HOME,LANG:process.env.LANG||'C.UTF-8'},
     encoding: "utf8",
     maxBuffer: 10 * 1024 * 1024
   });
@@ -1418,11 +1393,58 @@ const deletion = require('./editor-delete.js').createDeleteService({directory,sn
   }
 });
 function authorizeDeletion(req){
-  if(!['127.0.0.1:1314','localhost:1314'].includes(req.headers.host)||req.headers.origin!=='http://localhost:1313'||
+  if(!['127.0.0.1:1314','localhost:1314'].includes(req.headers.host)||!['http://localhost:1313','http://'+req.headers.host].includes(req.headers.origin)||
     !/^application\/json(?:;|$)/i.test(req.headers['content-type']||''))throw storageError(403,'Deletion requires a JSON request from the local Writing Desk.');
 }
 
+const publicationTarget={owner:GITHUB_OWNER,repo:GITHUB_REPO,branch:GITHUB_BRANCH};
+const publicationArgs=process.argv.slice(2);
+const prepareOnly=publicationArgs.length===4&&publicationArgs[2]==='--prepare-publish';
+const controlledPublication=require('./publishing/controlled-startup.cjs').publicationOptions(prepareOnly?publicationArgs.slice(0,2):publicationArgs,publicationTarget);
+const publisher=require('./publishing/service.cjs').createPublisher({root:repositoryRoot,storage:{directory,snapshot,readLocalFile},catalog:()=>listLocalDocuments(),...publicationTarget,...controlledPublication});
+
+// Serve only the desk and its built assets on the private publication origin.
+function serveWritingDesk(req,res){
+  if(req.method!=="GET"||!["localhost:1314","127.0.0.1:1314"].includes(req.headers.host))return false;
+  const route=req.url;
+  if(!route.startsWith("/")||route.startsWith("//")||route.includes("\\")||
+    new URL(route,"http://localhost:1313").pathname!==route)return false;
+  const desk=route==="/editor-test/";
+  const image=/^\/(?:images|essays|fragments|paintings|people|works|ideas|traditions|places|journeys)\/[^?#]+\.(?:png|jpe?g|webp|gif|avif|ico)$/i.test(route);
+  const font=/^\/fonts\/[a-zA-Z0-9/_-]+\.woff2$/.test(route);
+  if(!desk&&!image&&!font&&!/^\/(?:js\/(?:editor-test|search|share)\.js|css\/style\.min\.[a-f0-9]+\.css|vendor\/milkdown\/crepe\/theme\/(?:common|crepe)\/style\.css)$/.test(route))return false;
+  const upstream=http.get({hostname:"127.0.0.1",port:1313,path:route,headers:{Host:"localhost:1313"}},response=>{
+    const type=desk?"text/html; charset=utf-8":route.endsWith(".js")?"text/javascript":
+      font?"font/woff2":image?response.headers["content-type"]:"text/css";
+    if(response.statusCode!==200||(image&&!/^image\/(?:png|jpeg|webp|gif|avif|x-icon|vnd\.microsoft\.icon)$/.test(type||""))){
+      if(!desk){
+        response.resume();
+        res.writeHead(404,{"Content-Type":"text/plain"});
+        res.end("Writing Desk asset unavailable.");
+        return;
+      }
+      response.resume();
+      res.writeHead(502,{"Content-Type":"text/plain"});
+      res.end("Start local Hugo on port 1313 to open the Writing Desk.");
+      return;
+    }
+    res.writeHead(200,{"Content-Type":type,"Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
+      "Content-Security-Policy":"script-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'"});
+    response.on("error",()=>res.destroy());
+    response.pipe(res);
+  });
+  upstream.setTimeout(5000,()=>upstream.destroy());
+  upstream.on("error",()=>{
+    if(res.headersSent){res.destroy();return;}
+    res.writeHead(502,{"Content-Type":"text/plain"});
+    res.end("Start local Hugo on port 1313 to open the Writing Desk.");
+  });
+  res.on("close",()=>upstream.destroy());
+  return true;
+}
+
 const server = http.createServer(async (req, res) => {
+  if(await publisher.handle(req,res)||serveWritingDesk(req,res))return;
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:1313");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -2394,6 +2416,13 @@ stage: ${JSON.stringify(stage)}
   res.end(JSON.stringify({error: "Not found"}));
 });
 
-server.listen(1314, "127.0.0.1", () => {
-  console.log("Lilamaya editor API listening on http://127.0.0.1:1314");
-});
+if(prepareOnly){
+  const selected=publicationArgs[3];
+  Promise.resolve().then(()=>publisher.prepareDirect(selected,readLocalFile(selected).sha))
+    .then(result=>console.log(JSON.stringify(result,null,2)))
+    .catch(error=>{console.error(error.message);process.exitCode=1;});
+}else{
+  server.listen(1314, "127.0.0.1", () => {
+    console.log("Lilamaya editor API listening on http://127.0.0.1:1314");
+  });
+}

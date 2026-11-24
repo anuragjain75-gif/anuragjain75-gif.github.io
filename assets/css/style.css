@@ -1,13 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@1,7..72,400&display=swap");
 
-@font-face {
-    font-family: "Mozilla Headline Variable";
-    font-style: normal;
-    font-weight: 200 700;
-    font-display: swap;
-    src: url("/fonts/mozilla-headline/mozilla-headline-latin-variable.woff2") format("woff2");
-}
-
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap");
 html {
     color-scheme: light;
 }
@@ -496,7 +489,6 @@ nav a:hover {
 .essay-content h2,
 .page-content h2 {
 
-    font-family: "Mozilla Headline Variable", sans-serif;
     margin-top: 3rem;
 
     margin-bottom: 1.6rem;
@@ -510,7 +502,6 @@ nav a:hover {
 .essay-content h3,
 .page-content h3 {
 
-    font-family: "Mozilla Headline Variable", sans-serif;
     margin: 2.5em 0 .8em;
 
     font-size: 1.5rem;
@@ -1556,15 +1547,15 @@ nav a:hover {
     /* The invocation remains completely visible and untouched. */
 }
 
-.fragment-content > .invocation ~ p:first-of-type {
+.fragment:not(.fragment-page) .fragment-content > .invocation ~ p:first-of-type {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
 }
 
-.fragment-content > .invocation ~ p:not(:first-of-type),
-.fragment-content > .invocation ~ blockquote {
+.fragment:not(.fragment-page) .fragment-content > .invocation ~ p:not(:first-of-type),
+.fragment:not(.fragment-page) .fragment-content > .invocation ~ blockquote {
     display: none;
 }
 
@@ -1757,6 +1748,7 @@ nav a:hover {
 
 .invocation p {
     margin: 0;
+    font-weight: 700;
 }
 
 .invocation-separator {
@@ -2834,7 +2826,7 @@ nav a:hover {
 .editor-test-inner h1 {
     text-align: center;
     font-weight: 400;
-    margin-bottom: 12px;
+    margin-bottom: 40px;
 }
 
 .editor-test-intro {
@@ -2952,21 +2944,26 @@ nav a:hover {
     position: fixed;
     inset: auto 0 0;
     z-index: 1600;
-    min-height: 52px;
     margin: 0;
     padding: 8px max(18px, calc((100vw - 1000px) / 2));
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "saved actions"
+        "publication publication";
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    column-gap: 16px;
+    row-gap: 4px;
     border-top: 1px solid rgba(60, 58, 54, 0.18);
     background: #fff9eb;
 }
 
 .editor-action-buttons {
+    grid-area: actions;
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    flex-wrap: nowrap;
     justify-content: flex-end;
     gap: 10px;
 }
@@ -3003,13 +3000,47 @@ nav a:hover {
 }
 
 #save-status {
-    flex: 1;
+    grid-area: saved;
+    justify-self: start;
+    width: max-content;
+    max-width: 100%;
     min-width: 0;
-    overflow-wrap: anywhere;
     color: #2F2D2A;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 0.88rem;
     line-height: 1.4;
+    white-space: nowrap;
+}
+
+#publish-status {
+    grid-area: publication;
+    min-width: 0;
+    max-width: 100%;
+    color: #2F2D2A;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.15rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+#publish-status .editor-live-link {
+    display: inline-block;
+    margin-left: 0.45em;
+    padding: 3px 10px;
+    border: 1px solid rgba(110, 116, 81, 0.45);
+    border-radius: 2px;
+    background: #F8F2E5;
+    color: #6e7451;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.9em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+#publish-status .editor-live-link:hover {
+    border-color: #6e7451;
+    background: rgba(110, 116, 81, 0.08);
+    color: #3C3A36;
 }
 
 @media (max-width: 700px) {
@@ -3025,16 +3056,36 @@ nav a:hover {
     }
 
     .editor-actions {
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    .editor-actions #save-status {
-        flex-basis: 100%;
+        column-gap: 8px;
     }
 
     .editor-action-buttons {
-        margin-left: auto;
+        gap: 5px;
+    }
+
+    .editor-actions button {
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 0.86rem;
+    }
+
+    #save-status {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .editor-actions {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "saved"
+            "actions"
+            "publication";
+        row-gap: 6px;
+    }
+
+    .editor-action-buttons {
+        justify-self: end;
     }
 }
 
@@ -6374,41 +6425,66 @@ q {
 #lilamaya-metadata-panel .lilamaya-social-card-status { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(110, 116, 81, .15); }
 #lilamaya-metadata-panel .lilamaya-social-card-status .lilamaya-metadata-note { margin: 0 0 8px; }
 
-
-/* LILAMAYA WRITING DESK — TOOLBAR LAYOUT REFINEMENT */
-
-/* The title follows the toolbar and scrolls with the manuscript. */
-#codemirror-editor .lilamaya-document-title-panel {
-    position: relative;
-    top: auto;
-    z-index: auto;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+/* Permanent Writing Desk spacing fix */
+.editor-test-page {
+    margin-top: 80px !important;
 }
 
-/* The toolbar is the only sticky element in the editor's title stack. */
+#codemirror-editor .lilamaya-document-title-panel {
+    position: relative !important;
+    top: auto !important;
+    z-index: auto !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
 #codemirror-editor .lilamaya-toolbar {
-    position: sticky;
-    top: 112px;
+    position: sticky !important;
+    top: 42px !important;
     z-index: 1500;
 }
 
 @media (max-width: 700px) {
     #codemirror-editor .lilamaya-toolbar {
-        top: 105px;
+        top: 42px !important;
     }
 }
 
+/* Writing Desk list labels and text alignment */
+#codemirror-editor .milkdown-list-item-block > li.list-item {
+    list-style: none !important;
+    position: relative !important;
+}
 
-/* LILAMAYA — CONNECTED STICKY TITLE REFINEMENT */
+#codemirror-editor .milkdown-list-item-block > li.list-item > .label-wrapper {
+    position: absolute !important;
+    left: -1.35em !important;
+    top: 0 !important;
+    width: 1.1em !important;
+    text-align: right !important;
+}
 
-#codemirror-editor .lilamaya-document-title-panel {
-    position: sticky;
-    top: var(--lilamaya-title-sticky-top, 196px);
-    z-index: 1499;
-    background: rgba(255, 249, 235, 0.98);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+/* Lilamaya editorial headings: EB Garamond */
+.essay-content h2,
+.page-content h2,
+.essay-content h3,
+.page-content h3 {
+    font-family: "EB Garamond", serif;
+}
+
+/* Keep Writing Desk save indicator on one line */
+#save-status {
+    flex: 0 0 auto;
+    width: max-content;
+    min-width: max-content;
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+/* Center Writing Desk bullets on their text lines */
+#codemirror-editor .milkdown-list-item-block > li.list-item
+> .label-wrapper > .milkdown-icon.label.bullet > svg {
+    transform: translateY(5px) !important;
 }
 
 /* Recoverable entry actions: intentionally quiet, separate from metadata edits. */
