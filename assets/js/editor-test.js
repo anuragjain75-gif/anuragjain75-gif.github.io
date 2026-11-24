@@ -1,14 +1,319 @@
+import {installPublisher} from './lilamaya-publish.js';
+import {mountDeleteControl} from './lilamaya-delete-entry.js';
+import {mountThemeManager} from './lilamaya-theme-manager.js';
+import metadataPatch from './lilamaya-metadata-patch.cjs';
+import {createMetadataPanel} from "./lilamaya-metadata-panel.js";
+// Creation reuses the existing local form, editor and save lifecycle.
+let newDocumentType = "essays";
+let fragmentThemesLoaded = false;
+let paintingThemesLoaded = false;
 import {createLilamayaEditor} from "./lilamaya-rich-editor.js";
+import {createSaveSafety, createSaveSafetyPanel} from "./lilamaya-save-safety.mjs";
 
 const defaultDocumentPath = "content/essays/the-art-of-becoming-whole/index.md";
 let documentPath = defaultDocumentPath;
 let documentSha = null;
+let documentIsLocal = false;
 let richEditor = null;
 let savedContent = null;
 let savedConnections = "[]";
 let newEssayMode = false;
 let newEntryMode = false;
 let availableDocuments = [];
+let saveSafety = null;
+let publicationUI=null;
+function publishEligibility(){
+ const saved=getPreviewState();
+ const assetsPending=imageInsertionBusy||metadataView?.hasPendingHero();
+ const eligible=privateDesk&&!!saved.url&&!assetsPending;
+ const reason=eligible?'Publish this saved version.':assetsPending?'Finish and save pending image changes before publishing.':saved.reason;
+ return {eligible,path:documentPath,sha:documentSha,reason};
+}
+let pendingSave = null;
+let pendingEditor = null;
+let lastSaveHttpStatus = null;
+let acknowledgedDiskKnown = false;
+let documentLoading = false;
+let saveValidationError = null;
+let metadataEdits = {};
+let metadataType = null;
+let metadataHeroAsset = null;
+let metadataView = null;
+let deleteView=null,deleteBusy=false,deleteUncertain=false,imageInsertionBusy=false;
+function deletionBlocked(){
+  const state=saveSafety?.state();
+  if(deleteUncertain)return 'Recovery requires inspection. Export your draft before closing; do not retry or save.';
+  if(deleteBusy||documentLoading||pendingSave||imageInsertionBusy||socialCardBusy||state?.busy||metadataView?.hasPendingHero())return 'Wait for the current operation and save pending image changes before deleting.';
+  if(!richEditor||!documentIsLocal||!acknowledgedDiskKnown||state?.issue||!state?.canRetry||saveValidationError||hasUnsavedBufferChanges())return 'Save all changes and resolve Draft Safety warnings before deleting.';
+  return '';
+}
+async function deletionRequest(route,body){
+  const response=await fetch(apiBase+'/api/delete-entry/'+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const result=await response.json();
+  if(!response.ok||!result.ok)throw Object.assign(Error(result.error||'Recovery move was not confirmed.'),{outcome:result.outcome||'uncertain'});
+  return result;
+}
+async function prepareDeletion(){
+  const blocked=deletionBlocked();if(blocked)throw Error(blocked);
+  const identity=currentBufferIdentity(),path=documentPath,sha=documentSha,editor=richEditor;
+  const {review}=await deletionRequest('prepare',{path,sha});
+  if(editor!==richEditor||path!==documentPath||sha!==documentSha||identity!==currentBufferIdentity()||deletionBlocked())throw Error('The draft changed during review. Nothing was moved.');
+  return review;
+}
+async function confirmDeletion(review,confirmation){
+  const blocked=deletionBlocked();if(blocked)throw Error(blocked);
+  if(review.path!==documentPath||review.revision!==documentSha)throw Error('The reviewed revision is no longer open.');
+  const editor=richEditor,identity=currentBufferIdentity();deleteBusy=true;renderSaveStatus();
+  let result;
+  try{
+    result=await deletionRequest('confirm',{token:review.token,path:documentPath,sha:documentSha,confirmation});
+    if(result.deleted!==true||result.path!==documentPath||!result.recoveryId||editor!==richEditor||identity!==currentBufferIdentity())throw Error('The draft or recovery response changed. Export your draft and inspect recovery.');
+  }catch(error){
+    if(error.outcome!=='unchanged'){deleteUncertain=true;acknowledgedDiskKnown=false;}
+    deleteBusy=false;renderSaveStatus();throw error;
+  }
+  // Never dispose a draft until the backend explicitly verifies the move.
+  try{
+    cleanupStickyTitle?.();cleanupStickyTitle=null;
+    await richEditor.destroy();richEditor=null;window.__lilamayaRichEditor=null;
+    deleteView?.destroy();deleteView=null;metadataView?.destroy();metadataView=null;
+    localStorage.removeItem('lilamaya-editor-document-path');
+    availableDocuments=availableDocuments.filter(item=>item.path!==documentPath);
+    documentPath=null;documentSha=null;documentIsLocal=false;savedContent=null;savedConnections='[]';metadataEdits={};metadataType=null;metadataHeroAsset=null;
+    socialCardEpoch++;socialCardResult=null;socialCardBusy=false;acknowledgedDiskKnown=false;deleteBusy=false;
+    document.querySelector('#codemirror-editor').replaceChildren();showLibraryScreen();renderSaveStatus();
+  }catch(error){deleteBusy=false;deleteUncertain=true;acknowledgedDiskKnown=false;renderSaveStatus();throw Error('Entry moved to recovery '+result.recoveryId+', but editor cleanup needs inspection.');}
+  const notice=document.createElement('p');notice.className='lilamaya-metadata-note';notice.setAttribute('role','status');notice.textContent='Moved to local recovery: '+result.recoveryId;
+  document.querySelector('#document-selector').prepend(notice);
+  try{await loadDocumentList();document.querySelector('#document-selector').prepend(notice);}
+  catch{notice.textContent+=' · Library refresh failed. Reopen the library before selecting another entry.';}
+}
+let socialCardResult=null,socialCardEpoch=0,socialCardBusy=false;
+function renderSocialCard(){
+ const group=document.querySelector('#lilamaya-metadata-panel [data-metadata-field="hero"]');if(!group)return;
+ let box=group.querySelector('.lilamaya-social-card-status');
+ if(!box){box=document.createElement('div');box.className='lilamaya-social-card-status';const message=document.createElement('p');message.className='lilamaya-metadata-note';message.setAttribute('role','status');const retry=document.createElement('button');retry.type='button';retry.className='secondary-action';retry.textContent='Retry Social Card';retry.addEventListener('click',retrySocialCard);box.append(message,retry);group.append(box);}
+ const status=socialCardResult?.status;
+ let message=socialCardBusy?'Updating social card…':status==='updated'?'Last saved version: social card updated.':status==='current'?'Social card is current for the saved version.':status==='failed'?'Last saved version: social-card update failed. You can retry without saving again.':status==='stale'?'Social card needs updating. Save relevant changes or retry the saved version.':'Social-card status unavailable.';
+ if(status==='failed'&&typeof socialCardResult.message==='string')message+=' '+socialCardResult.message.slice(0,400);
+ const paragraph=box.querySelector('p');if(paragraph.textContent!==message)paragraph.textContent=message;
+ const retry=box.querySelector('button'),hidden=status==='updated'||status==='current',disabled=socialCardBusy||documentLoading||!acknowledgedDiskKnown||pendingSave!==null||hasUnsavedBufferChanges();if(retry.hidden!==hidden)retry.hidden=hidden;if(retry.disabled!==disabled)retry.disabled=disabled;const title=disabled?'Preserve and save pending manuscript changes before retrying.':'Update only the saved document’s social card.';if(retry.title!==title)retry.title=title;
+}
+async function retrySocialCard(){
+ if(socialCardBusy||documentLoading||pendingSave||!acknowledgedDiskKnown||hasUnsavedBufferChanges())return;
+ const epoch=++socialCardEpoch,path=documentPath,sha=documentSha;socialCardBusy=true;renderSocialCard();
+ try{const response=await fetch(apiBase+'/api/social-card/retry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,sha})});const result=await response.json();if(epoch!==socialCardEpoch||path!==documentPath||sha!==documentSha)return;socialCardResult=response.ok?result.socialCard:{status:'failed'};}
+ catch{if(epoch===socialCardEpoch)socialCardResult={status:'failed'};}
+ finally{if(epoch===socialCardEpoch){socialCardBusy=false;renderSocialCard();}}
+}
+function composeCurrentMarkdown() {
+  const source=richEditor.getMarkdown();
+  return metadataType && Object.keys(metadataEdits).length ? metadataPatch.patchMetadata(source,metadataType,metadataEdits) : source;
+}
+function updateMetadata(key,value) {
+  metadataEdits={...metadataEdits,[key]:Array.isArray(value)?[...value]:value};
+  if(key==='title'){const heading=document.querySelector('.lilamaya-document-title');if(heading)heading.textContent=value;}
+  try {composeCurrentMarkdown();metadataView?.setValidationMessage('');}
+  catch(error){metadataView?.setValidationMessage(error.message);}
+  renderSaveStatus();
+}
+async function loadMetadataThemes(type) {
+  const stem={essays:'essay',fragments:'fragment',paintings:'painting'}[type];
+  if(!stem)throw new Error('Unsupported theme collection');
+  const response=await fetch(apiBase+'/api/'+stem+'-themes');
+  if(!response.ok)throw new Error('Theme collection unavailable');
+  return response.json();
+}
+
+
+function differsFromSubmitted(draft) {
+  if (!richEditor || draft.path !== documentPath) return true;
+  try {
+    return composeCurrentMarkdown() !== draft.markdown ||
+      JSON.stringify(collectDocumentConnections()) !== JSON.stringify(draft.connections);
+  } catch { return true; }
+}
+
+function hasUnsavedBufferChanges() {
+  if (!richEditor || savedContent === null) return false;
+  if (!acknowledgedDiskKnown) return true;
+  try {
+    return composeCurrentMarkdown() !== savedContent ||
+      JSON.stringify(collectDocumentConnections()) !== savedConnections;
+  } catch { return true; }
+}
+
+function getPreviewState(state = saveSafety?.state()) {
+  const blocked = reason => ({url: null, reason});
+  if (documentLoading || !richEditor || newEssayMode || newEntryMode ||
+      document.querySelector(".editor-actions").hidden || !documentIsLocal ||
+      typeof documentPath !== "string" || !/^content\/[^\\\u0000-\u001f]+\.md$/i.test(documentPath) ||
+      documentPath.split("/").some(part => !part || part === "." || part === "..") ||
+      !Object.hasOwn(metadataPatch.FIELDS, documentPath.split("/")[1])) {
+    return blocked("Open a saved local entry to preview.");
+  }
+  if (deleteBusy || deleteUncertain || !state || state.busy || pendingSave || state.issue || saveValidationError ||
+      !acknowledgedDiskKnown || typeof savedContent !== "string" ||
+      !/^LOCAL:[a-f0-9]{64}$/.test(documentSha) || hasUnsavedBufferChanges() ||
+      document.querySelector("#save-status").textContent !== "Saved") {
+    return blocked("Save changes and resolve any save warning before previewing.");
+  }
+  const permalink = availableDocuments.find(item => item.path === documentPath)?.permalink;
+  try {
+    const origin = new URL(window.location.origin);
+    if (origin.port === "1314" && ["localhost", "127.0.0.1"].includes(origin.hostname)) origin.port = "1313";
+    if (origin.protocol !== "http:" ||
+        !["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname) ||
+        typeof permalink !== "string" || !/^\/(?!\/)/.test(permalink) ||
+        /[\s\\?#]/.test(permalink)) throw new Error("Unsafe preview URL");
+    const decoded = decodeURIComponent(permalink);
+    if (decoded.startsWith("//") || /[\\\u0000-\u001f\u007f?#]/.test(decoded) ||
+        decoded.split("/").some(part => part === "." || part === "..")) {
+      throw new Error("Unsafe preview path");
+    }
+    const url = new URL(permalink, origin);
+    if (url.origin !== origin.origin || url.username || url.password || url.search || url.hash) {
+      throw new Error("Unsafe preview origin");
+    }
+    return {url: url.href, reason: "Preview the saved document on local Hugo. Recent saves may take a moment to render."};
+  } catch {
+    return blocked("No safe local Hugo preview URL is available for this document.");
+  }
+}
+
+function renderPreviewButton(state = saveSafety?.state()) {
+  const button = document.querySelector("#preview-editor");
+  const preview = getPreviewState(state);
+  button.disabled = !preview.url;
+  button.title = preview.reason;
+  button.setAttribute("aria-label", "Preview — " + preview.reason);
+}
+
+function previewDocument() {
+  const button = document.querySelector("#preview-editor");
+  const preview = getPreviewState();
+  if (!preview.url) { renderPreviewButton(); window.alert(preview.reason); return; }
+  if (button.disabled) return;
+  window.open(preview.url, "_blank", "noopener,noreferrer");
+}
+
+function renderSaveStatus(state = saveSafety?.state()) {
+  const status = document.querySelector("#save-status");
+  if (!status) return;
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  document.querySelector("#save-editor").disabled =
+    deleteBusy || deleteUncertain || documentLoading || !richEditor || !state?.canRetry;
+  // A stale/uncertain outcome invalidates our old view of disk, even after the
+  // user explicitly acknowledges recovery review. Only load/save reestablishes it.
+  if (state?.issue && (state.issue.kind === "stale" || state.issue.publication !== "none")) {
+    acknowledgedDiskKnown = false;
+  }
+  let text = "";
+  if(deleteUncertain) text = "Recovery outcome uncertain — export your draft and inspect recovery before further writes.";
+  else if(deleteBusy) text = "Moving to recovery…";
+  else if (documentLoading) text = "Opening…";
+  else if (state?.busy) text = pendingSave && differsFromSubmitted(pendingSave)
+    ? "Saving… — newer changes unsaved" : "Saving…";
+  else if (state?.issue) text = state.issue.kind === "stale" || lastSaveHttpStatus === 409
+    ? "Conflict — preserve your draft and review the warning."
+    : "Save failed — preserve your draft and review the warning.";
+  else if (saveValidationError) text = "Save failed — " + saveValidationError;
+  else if (richEditor && savedContent !== null) text = hasUnsavedBufferChanges() ? "Unsaved" : "Saved";
+  if (status.textContent !== text) status.textContent = text;
+  deleteView?.refresh();
+  renderPreviewButton(state);
+  if(!publicationUI&&document.querySelector('#publish-status'))publicationUI=installPublisher({button:document.querySelector('#publish-editor'),status:document.querySelector('#publish-status'),getState:publishEligibility});
+  publicationUI?.render();
+  renderSocialCard();
+}
+
+function initializeSaveStatusNotifications() {
+  const editor = document.querySelector("#codemirror-editor");
+  const connections = document.querySelector("#document-connection-list");
+  let queued = false;
+  const changed = () => {
+    saveValidationError = null;
+    // Invalidate a visible Saved label immediately; reconcile after Milkdown's
+    // DOM observer has processed the edit. No debounce timer, autosave or retry.
+    const status = document.querySelector("#save-status");
+    if (richEditor && !documentLoading && !saveSafety?.state().issue && status.textContent === "Saved") {
+      status.textContent = "Unsaved";
+    }
+    document.querySelector("#preview-editor").disabled = true;
+    document.querySelector("#preview-editor").title = "Save changes before previewing.";
+    if (queued) return;
+    queued = true;
+    queueMicrotask(() => { queued = false; renderSaveStatus(); });
+  };
+  for (const root of [editor, connections]) {
+    root.addEventListener("input", changed);
+    root.addEventListener("change", changed);
+    new MutationObserver(changed).observe(root, {
+      subtree: true, childList: true, characterData: true, attributes: true
+    });
+  }
+}
+
+function currentBufferIdentity() {
+  if (!richEditor) return null;
+  const {segments, ...snapshot} = richEditor.captureDraftSnapshot();
+  // Derived serialized source may refresh without an edit; compare live nodes
+  // and protected fields instead when guarding a pending document load.
+  return JSON.stringify({...snapshot,
+    segments: segments.map(({source, originalSource, ...live}) => live),
+    connections: collectDocumentConnections(),metadata:metadataEdits,heroAsset:metadataHeroAsset});
+}
+
+
+function captureUnsavedDraft() {
+  if (!richEditor) throw new Error("No manuscript is loaded.");
+  const snapshot = richEditor.captureDraftSnapshot();
+  let baseFrontmatter=snapshot.frontmatter;
+  let markdown=null, serializationError=null;
+  let raw=null;
+  try {raw=richEditor.getMarkdown();if(metadataType&&Object.keys(metadataEdits).length)baseFrontmatter=metadataPatch.frontmatter(raw).source;markdown=metadataType&&Object.keys(metadataEdits).length?metadataPatch.patchMetadata(raw,metadataType,metadataEdits):raw;} catch(error) { serializationError=error.message; }
+  return {path:documentPath, revision:documentSha, snapshot, markdown, serializationError,
+    ...(metadataType?{metadata:{changes:JSON.parse(JSON.stringify(metadataEdits)),baseFrontmatter,heroAsset:metadataHeroAsset,expectedPermalink:availableDocuments.find(item=>item.path===documentPath)?.permalink}}:{}),
+    connections:collectDocumentConnections()};
+}
+
+function initializeSaveSafety() {
+  if(saveSafety)return;
+  let panel;
+  const download=()=>saveSafety.exportDraft(async payload=>{
+    const url=URL.createObjectURL(new Blob([payload.text],{type:"application/json;charset=utf-8"}));
+    const a=document.createElement("a");a.href=url;a.download="lilamaya-unsaved-draft-"+(typeof crypto.randomUUID==="function"?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2))+".json";
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  });
+  const copy=()=>saveSafety.exportDraft(async payload=>{
+    if(!navigator.clipboard?.writeText)throw new Error("Clipboard is unavailable; use download.");
+    await navigator.clipboard.writeText(payload.text);
+  });
+  panel=createSaveSafetyPanel(document,document.querySelector(".editor-actions"),{
+    download,copy,resolve:flags=>saveSafety.acknowledgeResolution(flags)
+  });
+  saveSafety=createSaveSafety({readDraft:captureUnsavedDraft,isDirty:hasUnsavedChanges,
+    confirmResolution:()=>window.confirm("Confirm that you preserved the latest exported draft and reviewed all disk/recovery versions. Nothing will be reloaded or restored. Continue?"),
+    onSaved:(result,draft)=>{
+      if (draft.path !== documentPath || pendingEditor !== richEditor) {
+        throw new Error("The save acknowledgment belongs to a different editor.");
+      }
+      documentSha=result.sha;
+      socialCardEpoch++;socialCardBusy=false;socialCardResult=result.socialCard||null;
+      savedContent=draft.markdown;
+      if(JSON.stringify(draft.metadata?.changes?.hero)===JSON.stringify(metadataEdits.hero)&&JSON.stringify(draft.metadata?.heroAsset)===JSON.stringify(metadataHeroAsset))metadataView?.heroSaved();
+      savedConnections=JSON.stringify(draft.connections);
+      acknowledgedDiskKnown=true;
+    },
+    render:state=>{
+      panel.render(state);
+      renderSaveStatus(state);
+    }});
+  window.addEventListener("beforeunload",event=>saveSafety.beforeUnload(event));
+  initializeSaveStatusNotifications();
+}
+
 
 function showLibraryScreen() {
   newEssayMode = false;
@@ -18,6 +323,7 @@ function showLibraryScreen() {
   document.querySelector("#new-entry-form").hidden = true;
   const documentSelector = document.querySelector("#document-selector");
   documentSelector.hidden = false;
+  renderDocumentSelector(availableDocuments);
 
   documentSelector.querySelectorAll(
     ".document-selector-select"
@@ -40,9 +346,15 @@ function showEditorScreen() {
   document.querySelector("#document-connections").hidden = false;
   document.querySelector(".editor-actions").hidden = false;
   document.querySelector("#codemirror-editor").hidden = false;
+  renderPreviewButton();
 }
 
-const apiBase = "http://localhost:1314";
+const privateDesk = location.protocol === "http:" &&
+  ["localhost", "127.0.0.1"].includes(location.hostname) && location.port === "1314";
+const apiBase = privateDesk ? location.origin : "http://localhost:1314";
+if (location.origin === "http://localhost:1313") {
+  location.replace(apiBase + "/editor-test/");
+}
 
 async function fetchDocument(path) {
   const response = await fetch(
@@ -58,6 +370,12 @@ async function fetchDocument(path) {
 
 
 async function handleImageInsertion(insertImageAtCursor) {
+  if(deleteBusy||deleteUncertain)throw Error('Resolve the recovery operation before inserting an image.');
+  imageInsertionBusy=true;renderSaveStatus();
+  try{return await performImageInsertion(insertImageAtCursor);}
+  finally{imageInsertionBusy=false;renderSaveStatus();}
+}
+async function performImageInsertion(insertImageAtCursor) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/jpeg,image/png,image/webp";
@@ -104,16 +422,14 @@ async function handleImageInsertion(insertImageAtCursor) {
       .slice(0, 60) || "image";
 
     const filename = `${filenameStem}-${Date.now()}.${extension}`;
-    const essayMatch = documentPath.match(
-      /^content\/essays\/([a-z0-9-]+)\/index\.md$/i
-    );
+    const bundle = documentPath.match(/^content\/(essays|fragments|paintings)\/([a-z0-9-]+)\/index\.md$/i);
+    const standalone = documentPath.match(/^content\/fragments\/([a-z0-9-]+)\.md$/i);
 
-    if (!essayMatch) {
-      throw new Error("Inline images can only be inserted into essay documents.");
-    }
-
-    const imagePath =
-      `content/essays/${essayMatch[1]}/images/${filename}`;
+    if (!bundle && !standalone) throw new Error("Images require an essay, fragment or painting document.");
+    const imagePath = bundle
+      ? `content/${bundle[1]}/${bundle[2]}/images/${filename}`
+      : `static/images/fragments/${standalone[1]}/${filename}`;
+    const imageReference = bundle ? `images/${filename}` : `/images/fragments/${standalone[1]}/${filename}`;
 
     const base64Content = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -143,7 +459,7 @@ async function handleImageInsertion(insertImageAtCursor) {
       body: JSON.stringify({
         path: imagePath,
         content: base64Content,
-        local: documentSha === "LOCAL"
+        local: documentIsLocal
       })
     });
 
@@ -154,7 +470,7 @@ async function handleImageInsertion(insertImageAtCursor) {
     }
 
     const markdown =
-      `![${altText.replace(/[\[\]\\]/g, "")}](images/${filename})`;
+      `![${altText.replace(/[\[\]\\]/g, "")}](${imageReference})`;
 
     const previewUrl = URL.createObjectURL(file);
 
@@ -172,11 +488,28 @@ async function handleImageInsertion(insertImageAtCursor) {
   }
 }
 
+let cleanupStickyTitle = null;
+
 async function loadDocument(path) {
+  if(deleteBusy||deleteUncertain)throw Error("Resolve the recovery operation before opening another entry.");
+  cleanupStickyTitle?.();
+  cleanupStickyTitle = null;
+  if(saveSafety && !saveSafety.canNavigate()) throw new Error("Preserve your current draft and resolve its warning before opening another document.");
+  if (documentLoading) throw new Error("Another manuscript is still opening.");
+  const previousEditor = richEditor;
+  const previousBuffer = currentBufferIdentity();
+  documentLoading = true;
+  renderSaveStatus();
+  try {
   const data = await fetchDocument(path);
+  if (previousEditor !== richEditor || previousBuffer !== currentBufferIdentity() ||
+      (saveSafety && !saveSafety.canNavigate())) {
+    throw new Error("The current draft changed while opening another manuscript. It has been retained; choose the document again when ready.");
+  }
 
   documentPath = data.path;
   documentSha = data.sha;
+  documentIsLocal = data.local === true;
   localStorage.setItem("lilamaya-editor-document-path", documentPath);
 
   renderDocumentSelector(availableDocuments);
@@ -192,22 +525,28 @@ async function loadDocument(path) {
     editorRoot,
     data.content,
     {
+      documentType: documentPath.split("/")[1],
       onRequestImage: handleImageInsertion,
+      imageSourcePrefix: (() => {
+        const standalone = documentPath.match(/^content\/fragments\/([a-z0-9-]+)\.md$/i);
+        return standalone ? `/images/fragments/${standalone[1]}/` : "images/";
+      })(),
       imageBaseUrl: (() => {
-        const match = documentPath.match(
-          /^content\/essays\/([a-z0-9-]+)\/index\.md$/i
-        );
-
-        return match
-          ? `/essays/${match[1]}/`
-          : "";
+        const permalink = availableDocuments.find(item => item.path === documentPath)?.permalink;
+        if (typeof permalink !== "string" || !/^\/(?!\/)/.test(permalink) || /[\s\\?#]/.test(permalink)) return "";
+        try {
+          const url = new URL(permalink, window.location.origin);
+          return url.origin === window.location.origin ? url.pathname : "";
+        } catch { return ""; }
       })()
     }
   );
 
+  window.__lilamayaRichEditor = richEditor;
+
   // Display the actual title of the currently loaded document.
   const documentTitle =
-    data.title ||
+    data.title || data.metadata?.fields?.title ||
     availableDocuments.find(item => item.path === documentPath)?.title ||
     documentPath.split("/").filter(Boolean).pop().replace(/\.md$/, "").replace(/-/g, " ");
 
@@ -242,16 +581,79 @@ async function loadDocument(path) {
 
   const titleMeta = document.createElement("div");
   titleMeta.className = "lilamaya-document-title-meta";
-  titleMeta.textContent = sectionForPath(documentPath).toUpperCase();
+  const writingType =
+    documentPath.startsWith("content/essays/") ? "ESSAY" :
+    documentPath.startsWith("content/fragments/") ? "FRAGMENT" :
+    documentPath.startsWith("content/paintings/") ? "PAINTING" :
+    null;
+
+  titleMeta.textContent = writingType
+    ? `WRITINGS · ${writingType}`
+    : sectionForPath(documentPath).toUpperCase();
 
   titlePanel.append(titleRow, titleMeta);
+  deleteView?.destroy();deleteView=null;
+  metadataView?.destroy();
+  socialCardEpoch++;socialCardBusy=false;socialCardResult=data.socialCard||null;
+  metadataEdits={};metadataType=data.metadata?.type||null;metadataHeroAsset=data.metadata?.heroAsset||null;
+  const metadataPanel = createMetadataPanel(document, data.metadata,
+    availableDocuments.find(item => item.path === documentPath)?.permalink, window.location.origin,
+    {onChange:updateMetadata,heroContext:{documentPath,apiBase,onAsset:asset=>{metadataHeroAsset=asset;}},loadThemes:loadMetadataThemes,mountThemes:(options)=>mountThemeManager(document,{...options,apiBase,
+      beforeMutation:({operation,usage})=>{
+        if(documentLoading||pendingSave||saveSafety?.state().busy)throw Error('Wait for the current load or save before managing global themes.');
+        if(operation==='rename'&&(usage?.[metadataType]||[]).some(item=>item.path===documentPath))throw Error('This rename would rewrite the open manuscript. Preserve and save its draft, then review the rename from the creation form after leaving this document. No changes were made.');
+      }})});
+  metadataView=metadataPanel;
+  if(metadataPanel)deleteView=mountDeleteControl(document,metadataPanel.panel,{type:data.metadata.type,path:documentPath,reason:deletionBlocked,prepare:prepareDeletion,confirm:confirmDeletion});
+
   richEditor.attachSearchPanel(titlePanel);
-  editorRoot.insertBefore(titlePanel, editorRoot.firstChild);
+  const formattingToolbar = editorRoot.querySelector(":scope > .lilamaya-toolbar");
+  if (!formattingToolbar) {
+    throw new Error("Writing Desk formatting toolbar was not found.");
+  }
+  editorRoot.insertBefore(formattingToolbar, editorRoot.firstChild);
+  editorRoot.insertBefore(titlePanel, formattingToolbar.nextSibling);
+  if (metadataPanel) editorRoot.insertBefore(metadataPanel.utility, formattingToolbar);
+
+  // Keep the sticky title immediately beneath the actual toolbar height.
+  const updateTitleOffset = () => {
+    const creationToolbar = document.querySelector(".author-bar");
+    const creationToolbarHeight = creationToolbar
+      ? creationToolbar.getBoundingClientRect().height
+      : 42;
+
+    formattingToolbar.style.setProperty(
+      "top",
+      `${creationToolbarHeight}px`,
+      "important"
+    );
+
+    const toolbarTop = creationToolbarHeight;
+    const toolbarHeight = formattingToolbar.getBoundingClientRect().height;
+    titlePanel.style.setProperty(
+      "--lilamaya-title-sticky-top",
+      `${toolbarTop + toolbarHeight}px`
+    );
+  };
+  updateTitleOffset();
+  const titleToolbarObserver = new ResizeObserver(updateTitleOffset);
+  titleToolbarObserver.observe(formattingToolbar);
+  window.addEventListener("resize", updateTitleOffset, { passive: true });
+
+  cleanupStickyTitle = () => {
+    titleToolbarObserver.disconnect();
+    window.removeEventListener("resize", updateTitleOffset);
+  };
 
   renderDocumentConnections(data.connections || []);
   savedContent = data.content;
   savedConnections = JSON.stringify(collectDocumentConnections());
-  document.querySelector("#save-status").textContent = "";
+  acknowledgedDiskKnown = true;
+  saveValidationError = null;
+  } finally {
+    documentLoading = false;
+    renderSaveStatus();
+  }
 }
 
 function sectionForPath(path) {
@@ -328,12 +730,45 @@ function renderDocumentSelector(documents) {
     placeholder.selected = !items.some(item => item.path === documentPath);
     select.appendChild(placeholder);
 
-    for (const item of items) {
-      const option = document.createElement("option");
-      option.value = item.path;
-      option.textContent = item.title;
-      option.selected = item.path === documentPath;
-      select.appendChild(option);
+    if (section === "Writings") {
+      const writingGroups = [
+        ["ESSAYS", "content/essays/"],
+        ["FRAGMENTS", "content/fragments/"],
+        ["PAINTINGS", "content/paintings/"]
+      ];
+
+      for (const [label, prefix] of writingGroups) {
+        const matchingItems = items
+          .filter(item => item.path.startsWith(prefix))
+          .sort((a, b) =>
+            a.title.localeCompare(b.title, undefined, {
+              sensitivity: "base"
+            })
+          );
+
+        if (!matchingItems.length) continue;
+
+        const group = document.createElement("optgroup");
+        group.label = label;
+
+        for (const item of matchingItems) {
+          const option = document.createElement("option");
+          option.value = item.path;
+          option.textContent = item.title;
+          option.selected = item.path === documentPath;
+          group.appendChild(option);
+        }
+
+        select.appendChild(group);
+      }
+    } else {
+      for (const item of items) {
+        const option = document.createElement("option");
+        option.value = item.path;
+        option.textContent = item.title;
+        option.selected = item.path === documentPath;
+        select.appendChild(option);
+      }
     }
 
     select.addEventListener("change", async () => {
@@ -377,598 +812,9 @@ function renderDocumentSelector(documents) {
   }
 }
 
-async function loadEssayThemes() {
-  const response = await fetch(`${apiBase}/api/essay-themes`);
-
-  if (!response.ok) {
-    throw new Error(`Essay themes failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const themes = data.themes || [];
-  const select = document.querySelector("#new-essay-themes");
-
-  select.innerHTML = "";
-  select.classList.add("theme-select-hidden");
-
-  const picker = document.createElement("div");
-  picker.className = "theme-picker";
-
-  for (const theme of themes) {
-    const option = document.createElement("option");
-    option.value = theme;
-    option.textContent = theme;
-    select.appendChild(option);
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "theme-choice";
-    button.textContent = theme;
-    button.setAttribute("aria-pressed", "false");
-
-    button.addEventListener("click", () => {
-      option.selected = !option.selected;
-
-      const selected = option.selected;
-
-      button.classList.toggle("selected", selected);
-      button.setAttribute("aria-pressed", String(selected));
-    });
-
-    picker.appendChild(button);
-  }
-
-  select.parentNode.insertBefore(picker, select);
-
-  const addThemeButton = document.querySelector("#add-essay-theme");
-
-  const addThemeArea = document.createElement("div");
-  addThemeArea.className = "add-theme-area";
-  addThemeArea.hidden = true;
-
-  const addThemeInput = document.createElement("input");
-  addThemeInput.type = "text";
-  addThemeInput.placeholder = "New theme";
-  addThemeInput.className = "add-theme-input";
-
-  const confirmThemeButton = document.createElement("button");
-  confirmThemeButton.type = "button";
-  confirmThemeButton.textContent = "Add";
-  confirmThemeButton.className = "confirm-theme-button";
-
-  const addThemeError = document.createElement("div");
-  addThemeError.className = "entry-connection-warning";
-  addThemeError.setAttribute("role", "alert");
-  addThemeError.hidden = true;
-
-  addThemeArea.appendChild(addThemeInput);
-  addThemeArea.appendChild(confirmThemeButton);
-  addThemeArea.appendChild(addThemeError);
-
-  addThemeButton.insertAdjacentElement("afterend", addThemeArea);
-
-  const manageThemes = document.createElement("details");
-  manageThemes.className = "manage-themes";
-
-  const manageSummary = document.createElement("summary");
-  const manageCount = document.createElement("span");
-  manageCount.textContent = `${themes.length} themes`;
-  manageSummary.textContent = "Manage Themes ";
-  manageSummary.appendChild(manageCount);
-
-  const manageContent = document.createElement("div");
-  manageContent.className = "manage-themes-content";
-
-  const manageDescription = document.createElement("p");
-  manageDescription.textContent =
-    "Rename themes across the collection and essays, or remove them from the collection.";
-
-  const manageList = document.createElement("div");
-  manageList.className = "manage-themes-list";
-
-  manageContent.appendChild(manageDescription);
-  manageContent.appendChild(manageList);
-  manageThemes.appendChild(manageSummary);
-  manageThemes.appendChild(manageContent);
-
-  addThemeArea.insertAdjacentElement("afterend", manageThemes);
-
-  function renderManagedTheme(theme) {
-    if ([...manageList.children].some(row => row.dataset.theme === theme)) {
-      return;
-    }
-
-    const row = document.createElement("div");
-    row.className = "manage-theme-row";
-    row.dataset.theme = theme;
-
-    const name = document.createElement("span");
-    name.className = "manage-theme-name";
-    name.textContent = theme;
-
-    const controls = document.createElement("div");
-    controls.className = "manage-theme-controls";
-
-    const renameButton = document.createElement("button");
-    renameButton.type = "button";
-    renameButton.className = "rename-theme-button";
-    renameButton.textContent = "Rename";
-
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "remove-theme-button";
-    removeButton.textContent = "Remove";
-
-    controls.appendChild(renameButton);
-    controls.appendChild(removeButton);
-
-    row.appendChild(name);
-    row.appendChild(controls);
-    manageList.appendChild(row);
-
-    renameButton.addEventListener("click", () => {
-      if (row.querySelector(".rename-theme-editor")) return;
-
-      renameButton.disabled = true;
-      removeButton.disabled = true;
-
-      const editor = document.createElement("div");
-      editor.className = "rename-theme-editor";
-
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "rename-theme-input";
-      input.value = theme;
-      input.maxLength = 100;
-      input.setAttribute("aria-label", `New name for ${theme}`);
-
-      const message = document.createElement("p");
-      message.className = "rename-theme-message";
-      message.setAttribute("role", "status");
-
-      const actions = document.createElement("div");
-      actions.className = "remove-theme-actions";
-
-      const cancelButton = document.createElement("button");
-      cancelButton.type = "button";
-      cancelButton.className = "secondary-action";
-      cancelButton.textContent = "Cancel";
-
-      const previewButton = document.createElement("button");
-      previewButton.type = "button";
-      previewButton.className = "rename-theme-preview-button";
-      previewButton.textContent = "Preview Rename";
-
-      actions.appendChild(cancelButton);
-      actions.appendChild(previewButton);
-
-      editor.appendChild(input);
-      editor.appendChild(message);
-      editor.appendChild(actions);
-      row.appendChild(editor);
-
-      function closeEditor() {
-        editor.remove();
-        renameButton.disabled = false;
-        removeButton.disabled = false;
-      }
-
-      cancelButton.addEventListener("click", closeEditor);
-
-      input.addEventListener("keydown", event => {
-        if (event.key === "Escape") closeEditor();
-        if (event.key === "Enter") previewButton.click();
-      });
-
-      previewButton.addEventListener("click", async () => {
-        const newTheme = input.value.trim();
-
-        if (!newTheme) {
-          message.textContent = "Please enter a theme name.";
-          input.focus();
-          return;
-        }
-
-        if (newTheme.length > 100) {
-          message.textContent = "Theme names cannot exceed 100 characters.";
-          input.focus();
-          return;
-        }
-
-        if (newTheme === theme) {
-          message.textContent = "The new name is identical to the current name.";
-          input.focus();
-          return;
-        }
-
-        if (themes.includes(newTheme)) {
-          message.textContent = "A theme with that name already exists.";
-          input.focus();
-          return;
-        }
-
-        previewButton.disabled = true;
-        cancelButton.disabled = true;
-        input.disabled = true;
-        message.textContent = "Checking which essays use this theme…";
-
-        try {
-          const usageResponse = await fetch(
-            `${apiBase}/api/essay-theme-usage?theme=${encodeURIComponent(theme)}`
-          );
-          const usage = await usageResponse.json();
-
-          if (!usageResponse.ok) {
-            throw new Error(usage.error || "Could not check theme usage.");
-          }
-
-          message.textContent = usage.count === 0
-            ? `Rename “${theme}” to “${newTheme}”? No essays currently use this theme.`
-            : `Rename “${theme}” to “${newTheme}”? This will update ${usage.count} essay${usage.count === 1 ? "" : "s"} as well as the theme collection.`;
-
-          if (usage.essays.length) {
-            const essayList = document.createElement("ul");
-
-            for (const essay of usage.essays) {
-              const item = document.createElement("li");
-              item.textContent = essay.title;
-              essayList.appendChild(item);
-            }
-
-            editor.insertBefore(essayList, actions);
-          }
-
-          actions.replaceChildren();
-
-          const finalCancelButton = document.createElement("button");
-          finalCancelButton.type = "button";
-          finalCancelButton.className = "secondary-action";
-          finalCancelButton.textContent = "Cancel";
-
-          const confirmButton = document.createElement("button");
-          confirmButton.type = "button";
-          confirmButton.className = "rename-theme-confirm-button";
-          confirmButton.textContent = "Rename Theme";
-
-          actions.appendChild(finalCancelButton);
-          actions.appendChild(confirmButton);
-
-          finalCancelButton.addEventListener("click", closeEditor);
-
-          confirmButton.addEventListener("click", async () => {
-            confirmButton.disabled = true;
-            finalCancelButton.disabled = true;
-            message.textContent = "Updating the theme collection and essays…";
-
-            try {
-              const response = await fetch(
-                apiBase + "/api/essay-themes/rename",
-                {
-                  method: "POST",
-                  headers: {"Content-Type": "application/json"},
-                  body: JSON.stringify({
-                    oldTheme: theme,
-                    newTheme,
-                    confirm: true
-                  })
-                }
-              );
-
-              const result = await response.json();
-
-              if (!response.ok) {
-                throw new Error(
-                  result.error || `Theme rename failed: ${response.status}`
-                );
-              }
-
-              // Preserve the user's current theme selections.
-              const selectedThemes = new Set(
-                [...select.selectedOptions].map(option => option.value)
-              );
-
-              const option = [...select.options].find(
-                item => item.value === theme
-              );
-
-              if (option) {
-                option.value = newTheme;
-                option.textContent = newTheme;
-                option.selected = selectedThemes.has(theme);
-              }
-
-              const pickerButton = [...picker.querySelectorAll(".theme-choice")]
-                .find(button => button.textContent === theme);
-
-              if (pickerButton) {
-                pickerButton.textContent = newTheme;
-                pickerButton.classList.toggle(
-                  "selected",
-                  selectedThemes.has(theme)
-                );
-                pickerButton.setAttribute(
-                  "aria-pressed",
-                  String(selectedThemes.has(theme))
-                );
-              }
-
-              // Keep the local collection in sync for duplicate checks.
-              const themeIndex = themes.indexOf(theme);
-              if (themeIndex !== -1) themes[themeIndex] = newTheme;
-              themes.sort((a, b) => a.localeCompare(b));
-
-              row.dataset.theme = newTheme;
-              name.textContent = newTheme;
-
-              manageList.removeChild(row);
-              renderManagedTheme(newTheme);
-              manageCount.textContent = `${result.themes.length} themes`;
-
-            } catch (error) {
-              console.error("Essay theme rename error:", error);
-              message.textContent = error.message;
-              confirmButton.remove();
-              finalCancelButton.textContent = "Close";
-              finalCancelButton.disabled = false;
-              finalCancelButton.onclick = closeEditor;
-            }
-          });
-
-        } catch (error) {
-          console.error("Essay theme usage error:", error);
-          message.textContent = error.message;
-          previewButton.disabled = false;
-          cancelButton.disabled = false;
-          input.disabled = false;
-        }
-      });
-
-      input.focus();
-      input.select();
-    });
-
-    removeButton.addEventListener("click", async () => {
-      removeButton.disabled = true;
-      renameButton.disabled = true;
-
-      try {
-        const usageResponse = await fetch(
-          `${apiBase}/api/essay-theme-usage?theme=${encodeURIComponent(theme)}`
-        );
-        const usage = await usageResponse.json();
-
-        if (!usageResponse.ok) {
-          throw new Error(usage.error || "Could not check theme usage.");
-        }
-
-        const confirmation = document.createElement("div");
-        confirmation.className = "remove-theme-confirmation";
-
-        const message = document.createElement("p");
-        message.textContent = usage.count === 0
-          ? `“${theme}” is not currently used by any essays. Remove it from the collection?`
-          : `“${theme}” is currently used by ${usage.count} essay${usage.count === 1 ? "" : "s"}. Removing it from the collection will not alter those essays.`;
-
-        confirmation.appendChild(message);
-
-        if (usage.essays.length) {
-          const essayList = document.createElement("ul");
-
-          for (const essay of usage.essays) {
-            const item = document.createElement("li");
-            item.textContent = essay.title;
-            essayList.appendChild(item);
-          }
-
-          confirmation.appendChild(essayList);
-        }
-
-        const actions = document.createElement("div");
-        actions.className = "remove-theme-actions";
-
-        const cancelButton = document.createElement("button");
-        cancelButton.type = "button";
-        cancelButton.className = "secondary-action";
-        cancelButton.textContent = "Cancel";
-
-        const confirmButton = document.createElement("button");
-        confirmButton.type = "button";
-        confirmButton.className = "remove-theme-confirm-button";
-        confirmButton.textContent = "Remove Theme";
-
-        actions.appendChild(cancelButton);
-        actions.appendChild(confirmButton);
-        confirmation.appendChild(actions);
-        row.appendChild(confirmation);
-
-        cancelButton.addEventListener("click", () => {
-          confirmation.remove();
-          removeButton.disabled = false;
-          renameButton.disabled = false;
-        });
-
-        confirmButton.addEventListener("click", async () => {
-          confirmButton.disabled = true;
-          cancelButton.disabled = true;
-
-          try {
-            const response = await fetch(
-              apiBase + "/api/essay-themes/delete",
-              {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                  theme,
-                  confirm: true
-                })
-              }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok) {
-              throw new Error(
-                result.error || `Theme removal failed: ${response.status}`
-              );
-            }
-
-            const option = [...select.options].find(
-              item => item.value === theme
-            );
-
-            if (option) option.remove();
-
-            const pickerButton = [...picker.querySelectorAll(".theme-choice")]
-              .find(button => button.textContent === theme);
-
-            if (pickerButton) pickerButton.remove();
-
-            row.remove();
-            manageCount.textContent = `${result.themes.length} themes`;
-
-            const themeIndex = themes.indexOf(theme);
-            if (themeIndex !== -1) themes.splice(themeIndex, 1);
-
-          } catch (error) {
-            console.error("Essay theme removal error:", error);
-            message.textContent = error.message;
-            confirmButton.remove();
-            cancelButton.textContent = "Close";
-            cancelButton.disabled = false;
-            cancelButton.onclick = () => {
-              confirmation.remove();
-              removeButton.disabled = false;
-              renameButton.disabled = false;
-            };
-          }
-        });
-
-      } catch (error) {
-        console.error("Essay theme usage error:", error);
-        alert(error.message);
-        removeButton.disabled = false;
-        renameButton.disabled = false;
-      }
-    });
-  }
-
-  for (const theme of themes) {
-    renderManagedTheme(theme);
-  }
-
-  addThemeButton.addEventListener("click", () => {
-    addThemeArea.hidden = false;
-    addThemeInput.focus();
-  });
-
-  async function addTheme() {
-    const theme = addThemeInput.value.trim();
-
-    if (!theme) {
-      addThemeError.textContent = "Please enter a theme name.";
-      addThemeError.hidden = false;
-      addThemeInput.focus();
-      return;
-    }
-
-    addThemeError.textContent = "";
-    addThemeError.hidden = true;
-
-    const selectedThemes = new Set(
-      [...select.selectedOptions].map(option => option.value)
-    );
-
-    confirmThemeButton.disabled = true;
-
-    try {
-      const response = await fetch(apiBase + "/api/essay-themes", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({theme})
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result.error || `Theme save failed: ${response.status}`
-        );
-      }
-
-      let existingOption = [...select.options]
-        .find(option => option.value === result.theme);
-
-      if (!existingOption) {
-        existingOption = document.createElement("option");
-        existingOption.value = result.theme;
-        existingOption.textContent = result.theme;
-        select.appendChild(existingOption);
-
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "theme-choice";
-        button.textContent = result.theme;
-        button.setAttribute("aria-pressed", "false");
-
-        button.addEventListener("click", () => {
-          existingOption.selected = !existingOption.selected;
-
-          const selected = existingOption.selected;
-
-          button.classList.toggle("selected", selected);
-          button.setAttribute("aria-pressed", String(selected));
-        });
-
-        picker.appendChild(button);
-      }
-
-      renderManagedTheme(result.theme);
-      manageCount.textContent = `${manageList.children.length} themes`;
-
-      selectedThemes.add(result.theme);
-
-      for (const option of select.options) {
-        option.selected = selectedThemes.has(option.value);
-      }
-
-      for (const button of picker.querySelectorAll(".theme-choice")) {
-        const option = [...select.options].find(
-          item => item.value === button.textContent
-        );
-
-        const selected = option ? option.selected : false;
-
-        button.classList.toggle("selected", selected);
-        button.setAttribute("aria-pressed", String(selected));
-      }
-
-      addThemeInput.value = "";
-      addThemeArea.hidden = true;
-
-    } catch (error) {
-      console.error("Essay theme error:", error);
-      alert(error.message);
-
-    } finally {
-      confirmThemeButton.disabled = false;
-    }
-  }
-
-  confirmThemeButton.addEventListener("click", addTheme);
-
-  addThemeInput.addEventListener("input", () => {
-    if (addThemeInput.value.trim()) {
-      addThemeError.textContent = "";
-      addThemeError.hidden = true;
-    }
-  });
-
-  addThemeInput.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      addTheme();
-    }
-  });
+async function loadCreationThemes(kind = "essays") {
+ const stem={essays:'essay',fragments:'fragment',paintings:'painting'}[kind];
+ return mountThemeManager(document,{kind,apiBase,select:document.querySelector(`#new-${stem}-themes`),addThemeButton:document.querySelector(`#add-${stem}-theme`)});
 }
 
 async function loadDocumentList() {
@@ -988,55 +834,73 @@ async function loadDocumentList() {
   renderDocumentSelector(availableDocuments);
 }
 
+function saveSubmissionIdentity({path, revision, markdown, connections, metadata}) {
+  return JSON.stringify({path, revision, markdown, connections, metadata});
+}
+
 async function saveDocument() {
-  const markdownText = richEditor.getMarkdown();
-
-  const savePayload = {
-    path: documentPath,
-    content: markdownText,
-    sha: documentSha,
-    connections: collectDocumentConnections()
-  };
-
-  console.log("Lilamaya Save:", savePayload);
-
-  const saveStatus = document.querySelector("#save-status");
-
-  if (updateDuplicateWarnings("#document-connection-list")) {
-    saveStatus.textContent = "Resolve duplicate connections before saving.";
+  initializeSaveSafety();
+  if (deleteBusy || deleteUncertain || documentLoading || !richEditor || !saveSafety.state().canRetry) {
+    renderSaveStatus();
     return;
   }
-
-  saveStatus.textContent = "Saving…";
-
-  try {
-    const response = await fetch(apiBase + "/api/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(savePayload)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || `Save failed: ${response.status}`);
-    }
-
-    documentSha = result.sha;
-    savedContent = markdownText;
-    savedConnections = JSON.stringify(savePayload.connections);
-    saveStatus.textContent = "Saved";
-  } catch (error) {
-    console.error("Lilamaya Save Error:", error);
-    saveStatus.textContent = "Save failed";
+  if(updateDuplicateWarnings("#document-connection-list")) {
+    saveValidationError = "Resolve duplicate connections before saving.";
+    renderSaveStatus();
+    return;
   }
-
-  setTimeout(() => {
-    saveStatus.textContent = "";
-  }, 2000);
+  saveValidationError = null;
+  lastSaveHttpStatus = null;
+  let confirmedYearChange = null;
+  try {
+    if (metadataType && Object.hasOwn(metadataEdits, "date")) {
+      const proposed = captureUnsavedDraft();
+      // Serialization failures retain the existing Draft Safety handling below.
+      if (!proposed.serializationError && typeof proposed.markdown === "string") {
+        const originalDate = metadataPatch.dateString(proposed.metadata.baseFrontmatter);
+        const proposedDate = metadataPatch.dateString(proposed.markdown);
+        if (!metadataPatch.validDate(originalDate) || !metadataPatch.validDate(proposedDate)) {
+          throw new Error("The original or proposed date cannot be safely verified. Your draft is retained.");
+        }
+        if (originalDate.slice(0, 4) !== proposedDate.slice(0, 4)) {
+          const reviewed = {identity:saveSubmissionIdentity(proposed), editor:richEditor};
+          if (!window.confirm(`Confirm calendar year change.\n\nOriginal year: ${originalDate.slice(0, 4)}\nProposed year: ${proposedDate.slice(0, 4)}\n\nOriginal date: ${originalDate}\nProposed date: ${proposedDate}\n\nSave this exact date? Existing revision and URL safeguards still apply. Cancel keeps your draft.`)) {
+            renderSaveStatus();
+            return;
+          }
+          confirmedYearChange = reviewed;
+        }
+      }
+    }
+  } catch (error) {
+    saveValidationError = error.message;
+    renderSaveStatus();
+    return;
+  }
+  try {
+    await saveSafety.save(async draft=>{
+      if (confirmedYearChange && (richEditor !== confirmedYearChange.editor ||
+          saveSubmissionIdentity(draft) !== confirmedYearChange.identity)) {
+        return {ok:false,status:422,body:{
+          error:"The draft changed after year confirmation. Review the date and Save again.",
+          save:{kind:"failure",publication:"none",recovery:{required:false}}
+        }};
+      }
+      pendingSave = draft;
+      pendingEditor = richEditor;
+      renderSaveStatus();
+      const response=await fetch(apiBase+"/api/save",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({path:draft.path,content:draft.markdown,sha:draft.revision,connections:draft.connections,metadata:draft.metadata})});
+      lastSaveHttpStatus = response.status;
+      return {ok:response.ok,status:response.status,body:await response.json()};
+    });
+  } finally {
+    pendingSave = null;
+    pendingEditor = null;
+    renderSaveStatus();
+  }
 }
+
 
 async function beginNewEssay() {
   const newEssayForm = document.querySelector("#new-essay-form");
@@ -1046,14 +910,23 @@ async function beginNewEssay() {
 
   const titleInput = document.querySelector("#new-essay-title");
   const introductionInput = document.querySelector("#new-essay-introduction");
-  const themesSelect = document.querySelector("#new-essay-themes");
+  const themeStem={essays:"essay",fragments:"fragment",paintings:"painting"}[newDocumentType];
+  const themesSelect = document.querySelector(`#new-${themeStem}-themes`);
   const imageInput = document.querySelector("#new-essay-image");
   const beginButton = document.querySelector("#begin-new-essay");
 
   const title = titleInput.value.trim();
-  const introduction = introductionInput.value.trim();
+  const introduction = newDocumentType === "fragments" ? "" : introductionInput.value.trim();
+  const type = newDocumentType;
   const themes = [...themesSelect.selectedOptions].map(option => option.value);
-  const imageFile = imageInput.files[0] || null;
+  const artist = document.querySelector("#new-painting-artist").value.trim();
+  const year = document.querySelector("#new-painting-year").value.trim();
+  const imageFile = type === "fragments" ? null : imageInput.files[0] || null;
+
+  if (type === "paintings" && (!artist || !/^\d{4}$/.test(year) || !imageFile)) {
+    alert("Please provide an artist, four-digit year and hero image for the painting.");
+    return;
+  }
 
   const extension = imageFile
     ? imageFile.name.split(".").pop().toLowerCase()
@@ -1077,25 +950,43 @@ async function beginNewEssay() {
 
   if (!title) {
     const titleError = document.querySelector("#new-essay-title-error");
-    titleError.textContent = "Please enter a title for this essay.";
+    titleError.textContent = "Please enter a title for this document.";
     titleError.hidden = false;
     titleInput.focus();
     return;
   }
 
+  const documentConnections = document.querySelector("#document-connections");
+
+  const previousScreen = {
+    selectorHidden: documentSelector.hidden,
+    actionsHidden: editorActions.hidden,
+    editorHidden: codeMirrorEditor.hidden,
+    connectionsHidden: documentConnections.hidden
+  };
+
+  // Hide the previously loaded document while the new one is prepared.
+  documentSelector.hidden = true;
+  editorActions.hidden = true;
+  codeMirrorEditor.hidden = true;
+  documentConnections.hidden = true;
+
   beginButton.disabled = true;
   beginButton.textContent = "Creating…";
 
+  let createdPath = null;
   try {
-    const response = await fetch(apiBase + "/api/new-essay", {
+    const endpoint = {essays: "/api/new-essay", fragments: "/api/new-fragment", paintings: "/api/new-painting"}[type];
+    const response = await fetch(apiBase + endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         title,
-        introduction,
+        ...(type === "fragments" ? {} : {introduction}),
         themes,
+        ...(type === "paintings" ? {artist, year} : {}),
         date: (() => {
           const now = new Date();
           const year = now.getFullYear();
@@ -1115,6 +1006,7 @@ async function beginNewEssay() {
       );
     }
 
+    createdPath = result.path;
     if (imageFile) {
       beginButton.textContent = "Uploading image…";
 
@@ -1143,7 +1035,8 @@ async function beginNewEssay() {
             /index\.md$/,
             `hero.${extension}`
           ),
-          content: base64
+          content: base64,
+          local: result.local === true
         })
       });
 
@@ -1157,18 +1050,29 @@ async function beginNewEssay() {
       }
     }
 
-    newEssayMode = false;
-    newEssayForm.hidden = true;
-    documentSelector.hidden = false;
-    editorActions.hidden = false;
-    codeMirrorEditor.hidden = false;
-
     await loadDocumentList();
     await loadDocument(result.path);
     showEditorScreen();
 
   } catch (error) {
     console.error("New Essay error:", error);
+
+    // A failed optional upload must not hide the already-created local draft.
+    if (createdPath) {
+      try {
+        await loadDocumentList();
+        await loadDocument(createdPath);
+        showEditorScreen();
+        alert(`The local draft was created, but setup did not complete: ${error.message}. No draft was deleted. Use the library to reopen it; do not recreate it.`);
+        return;
+      } catch { /* Preserve the original error and restore the previous display. */ }
+    }
+    // Restore the previous screen if creation or loading fails.
+    documentSelector.hidden = previousScreen.selectorHidden;
+    editorActions.hidden = previousScreen.actionsHidden;
+    codeMirrorEditor.hidden = previousScreen.editorHidden;
+    documentConnections.hidden = previousScreen.connectionsHidden;
+
     alert(error.message);
 
   } finally {
@@ -1438,18 +1342,15 @@ function collectDocumentConnections() {
 }
 
 function hasUnsavedChanges() {
-  if (!richEditor || savedContent === null) return false;
-
-  const contentChanged =
-    richEditor.getMarkdown() !== savedContent;
-
-  const connectionsChanged =
-    JSON.stringify(collectDocumentConnections()) !== savedConnections;
-
-  return contentChanged || connectionsChanged;
+  if(deleteBusy||deleteUncertain)return true;
+  if(saveSafety && (saveSafety.state().issue || saveSafety.state().busy))return true;
+  return hasUnsavedBufferChanges();
 }
 
+
 function confirmDiscardUnsavedChanges() {
+  if(deleteBusy||deleteUncertain)return false;
+  if(saveSafety && !saveSafety.canNavigate())return false;
   if (!hasUnsavedChanges()) return true;
 
   return window.confirm(
@@ -1526,8 +1427,7 @@ async function createNewEntry() {
     await loadDocument(result.path);
     showEditorScreen();
 
-    document.querySelector("#save-status").textContent =
-      result.local ? "Local test entry created — draft" : "Entry created — draft";
+    renderSaveStatus();
 
   } catch (error) {
     console.error("New Entry Error:", error);
@@ -1540,6 +1440,7 @@ async function createNewEntry() {
 }
 
 async function loadEditor() {
+  initializeSaveSafety();
   const newEssayForm = document.querySelector("#new-essay-form");
   const newEntryForm = document.querySelector("#new-entry-form");
 
@@ -1573,13 +1474,35 @@ async function loadEditor() {
     }
   });
 
-  if (newEssayButton) {
-    newEssayButton.addEventListener("click", () => {
+  const creationButtons = [[newEssayButton, "essays", "Essay"],
+    [[...document.querySelectorAll(".author-bar button")].find(button => button.textContent.trim() === "New Fragment"), "fragments", "Fragment"],
+    [[...document.querySelectorAll(".author-bar button")].find(button => button.textContent.trim() === "New Painting"), "paintings", "Painting"]];
+  for (const [button, type, label] of creationButtons) {
+    if (!button) continue;
+    button.addEventListener("click", async () => {
+      if ((type === "fragments" && !fragmentThemesLoaded) || (type === "paintings" && !paintingThemesLoaded)) {
+        button.disabled = true;
+        try { await loadCreationThemes(type); if(type === "fragments") fragmentThemesLoaded=true; else paintingThemesLoaded=true; }
+        catch (error) { alert(label + " themes could not be loaded: " + error.message); return; }
+        finally { button.disabled = false; }
+      }
       if (!confirmDiscardUnsavedChanges()) return;
-
+      newDocumentType = type;
       essayTitleError.textContent = "";
       essayTitleError.hidden = true;
-
+      document.querySelector("#new-document-heading").textContent = `Begin a New ${label}`;
+      document.querySelector("#painting-theme-fields").hidden = type !== "paintings";
+      document.querySelector("#fragment-theme-fields").hidden = type !== "fragments";
+      document.querySelector("#new-essay-introduction").hidden = type === "fragments";
+      document.querySelector('label[for="new-essay-introduction"]').hidden = type === "fragments";
+      document.querySelector("#new-painting-fields").hidden = type !== "paintings";
+      document.querySelector("#essay-theme-fields").hidden = type !== "essays";
+      const essayThemes = document.querySelector("#new-essay-themes");
+      essayThemes.hidden = type !== "essays";
+      document.querySelector('label[for="new-essay-themes"]').hidden = type !== "essays";
+      document.querySelector("#add-essay-theme").hidden = type !== "essays";
+      document.querySelector("#new-essay-image").hidden = type === "fragments";
+      document.querySelector("#new-document-image-label").textContent = type === "paintings" ? "Hero image (required)" : type === "fragments" ? "Insert body images after creating the fragment." : "Image (optional)";
       newEssayMode = true;
       newEntryMode = false;
       newEntryForm.hidden = true;
@@ -1588,13 +1511,8 @@ async function loadEditor() {
       documentSelector.hidden = true;
       editorActions.hidden = true;
       codeMirrorEditor.hidden = true;
-
-      document.querySelector("#new-essay-title").focus();
-
-      window.scrollTo({
-        top: newEssayForm.offsetTop - 30,
-        behavior: "smooth"
-      });
+      essayTitleInput.focus();
+      window.scrollTo({top: newEssayForm.offsetTop - 30, behavior: "smooth"});
     });
   }
 
@@ -1670,6 +1588,10 @@ async function loadEditor() {
     .addEventListener("click", saveDocument);
 
   document
+    .querySelector("#preview-editor")
+    .addEventListener("click", previewDocument);
+
+  document
     .querySelector("#begin-new-essay")
     .addEventListener("click", beginNewEssay);
 
@@ -1687,7 +1609,7 @@ async function loadEditor() {
       : defaultDocumentPath;
 
     await loadDocument(initialDocumentPath);
-    await loadEssayThemes();
+    await loadCreationThemes();
     showEditorScreen();
   } catch (error) {
     console.error("Lilamaya Editor Error:", error);

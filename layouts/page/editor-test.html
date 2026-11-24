@@ -1,11 +1,14 @@
 {{ define "main" }}
+<link rel="stylesheet" href="/vendor/milkdown/crepe/theme/common/style.css">
+<link rel="stylesheet" href="/vendor/milkdown/crepe/theme/crepe/style.css">
+
 <main class="editor-test-page">
     <div class="editor-test-inner">
         <h1>Writing Desk</h1>
         <p class="editor-test-intro">A private test of the Lilamaya writing room.</p>
 
         <div id="new-essay-form" class="new-document-form" hidden>
-            <h2>Begin a New Essay</h2>
+            <h2 id="new-document-heading">Begin a New Essay</h2>
 
             <label for="new-essay-title">Title</label>
             <input type="text" id="new-essay-title" autocomplete="off">
@@ -16,6 +19,7 @@
             <label for="new-essay-introduction">Introduction</label>
             <textarea id="new-essay-introduction" rows="3"></textarea>
 
+            <div id="essay-theme-fields">
             <label for="new-essay-themes">Themes</label>
             <select id="new-essay-themes" multiple></select>
 
@@ -23,7 +27,24 @@
                 + Add new theme
             </button>
 
-            <label for="new-essay-image">Image</label>
+            </div>
+            <div id="fragment-theme-fields" hidden>
+                <label for="new-fragment-themes">Themes</label>
+                <select id="new-fragment-themes" multiple></select>
+                <button type="button" id="add-fragment-theme" class="secondary-action">+ Add new theme</button>
+            </div>
+            <div id="painting-theme-fields" hidden>
+                <label for="new-painting-themes">Themes</label>
+                <select id="new-painting-themes" multiple></select>
+                <button type="button" id="add-painting-theme" class="secondary-action">+ Add new theme</button>
+            </div>
+            <div id="new-painting-fields" hidden>
+                <label for="new-painting-artist">Artist</label>
+                <input id="new-painting-artist" type="text" maxlength="200">
+                <label for="new-painting-year">Year (four digits)</label>
+                <input id="new-painting-year" type="text" inputmode="numeric" maxlength="4">
+            </div>
+            <label for="new-essay-image" id="new-document-image-label">Image</label>
             <input
                 type="file"
                 id="new-essay-image"
@@ -97,9 +118,16 @@
                     class="secondary-action">+ Add connection</button>
         </section>
 
-        <div class="editor-actions">
-            <button type="button" id="save-editor">Save</button>
-            <span id="save-status"></span>
+        <div class="editor-actions" role="group" aria-label="Manuscript actions">
+            <span id="save-status" role="status" aria-live="polite"></span>
+            <div class="editor-action-buttons">
+                <button type="button" id="save-editor">Save</button>
+                <button type="button" id="preview-editor" disabled
+                        title="Open a saved local entry to preview. Save pending changes first.">Preview</button>
+                <button type="button" id="publish-editor" class="editor-publish" disabled
+                        title="Save the selected entry before publishing">Publish</button>
+                <span id="publish-status" role="status" aria-live="polite" hidden></span>
+            </div>
         </div>
 
         <div id="codemirror-editor"></div>

@@ -75,6 +75,14 @@ export function parseHugoDocument(source) {
     });
   }
 
+  // An empty document still needs one editable Markdown segment.
+  if (segments.length === 0) {
+    segments.push({
+      type: "markdown",
+      content: ""
+    });
+  }
+
   // Never silently pass an unrecognised or malformed Lilamaya
   // shortcode into the ordinary Markdown editor.
   for (const segment of segments) {
@@ -167,6 +175,16 @@ export function updateHugoIntroduction(frontmatter, introduction) {
     typeof introduction !== "string"
   ) {
     throw new TypeError("Invalid introduction update.");
+  }
+
+  // Preserve the original YAML exactly when the introduction is unchanged.
+  const originalIntroduction = readHugoIntroduction(frontmatter);
+  const normalizedIntroduction = introduction
+    .replace(/\r\n/g, "\n")
+    .trim();
+
+  if (originalIntroduction === normalizedIntroduction) {
+    return frontmatter;
   }
 
   const newline = frontmatter.includes("\r\n") ? "\r\n" : "\n";

@@ -1,0 +1,9 @@
+'use strict';
+const fs=require('fs'),path=require('path'),crypto=require('crypto');
+function identity(pid=process.pid){try{return {pid,boot:fs.readFileSync('/proc/sys/kernel/random/boot_id','utf8').trim(),start:fs.readFileSync('/proc/'+pid+'/stat','utf8').slice(fs.readFileSync('/proc/'+pid+'/stat','utf8').lastIndexOf(')')+2).split(' ')[19]};}catch{return null;}}
+async function locked(root,operation,action){const dir=path.join(root,'.publisher-lock');try{fs.mkdirSync(dir,{mode:0o700});}catch{throw Error('Another publisher or interrupted operation owns the publication lock. Inspect/recover it before retrying.');}
+ const owner={...identity(),operation,nonce:crypto.randomBytes(16).toString('hex')};const fd=fs.openSync(dir+'/owner.json','wx',0o600);try{fs.writeFileSync(fd,JSON.stringify(owner));fs.fsyncSync(fd);}finally{fs.closeSync(fd);}const dd=fs.openSync(dir,'r');try{fs.fsyncSync(dd);}finally{fs.closeSync(dd);}
+ try{return await action();}finally{const current=JSON.parse(fs.readFileSync(dir+'/owner.json'));if(current.nonce===owner.nonce){fs.unlinkSync(dir+'/owner.json');fs.rmdirSync(dir);}}
+}
+function recover(root){const dir=path.join(root,'.publisher-lock');if(!fs.existsSync(dir))return;const file=dir+'/owner.json',stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Invalid publisher lock; manual inspection required');const owner=JSON.parse(fs.readFileSync(file));if(!Number.isInteger(owner.pid)||owner.pid<1||typeof owner.boot!=='string'||typeof owner.start!=='string')throw Error('Invalid lock identity; manual inspection required');const current=identity(owner.pid);if(current&&current.boot===owner.boot&&current.start===owner.start)throw Error('The publisher process is still active');if(fs.readdirSync(dir).join()!=='owner.json')throw Error('Unexpected publisher recovery files');fs.unlinkSync(file);fs.rmdirSync(dir);}
+module.exports={locked,recover};

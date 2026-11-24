@@ -1,0 +1,30 @@
+baseURL = "https://anuragjain75-gif.github.io/"
+languageCode = "en-us"
+title = "The Lilamaya"
+
+[taxonomies]
+theme = "themes"
+fragmenttheme = "fragmentthemes"
+paintingtheme = "paintingthemes"
+
+[params]
+tagline = "A Personal Atlas of Literature, Ideas and Existence"
+author = "Anurag Jain"
+description = "An evolving landscape of human thought and imagination, connected through the paths of literature, philosophy, art, history and personal discovery."
+[page]
+  nextPrevSortOrder = "asc"
+
+[outputs]
+home = ["HTML", "RSS"]
+section = ["HTML", "RSS"]
+page = ["HTML"]
+taxonomy = ["HTML"]
+term = ["HTML"]
+
+[permalinks]
+  fragments = "/fragments/:year/:month/:day/:slug/"
+
+  [markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
