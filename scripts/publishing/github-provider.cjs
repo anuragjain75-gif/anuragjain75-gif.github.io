@@ -69,7 +69,7 @@ class GitHubProvider{
     if(e.type==='tree')await visit(e.sha,depth+1);
     else{blobShas.add(e.sha);if(treeShas.size+blobShas.size>20000)throw Error('Remote inventory limit');}
    }
-   const bytes=Buffer.concat(entries.map(e=>Buffer.concat([Buffer.from((e.mode==='040000'?'40000':e.mode)+' '+e.path+'\\0'),Buffer.from(e.sha,'hex')])));if(oid('tree',bytes)!==sha)throw Error('Remote tree hash mismatch');objects[sha]={type:'tree',data:bytes.toString('base64')};
+   const bytes=Buffer.concat(entries.map(e=>Buffer.concat([Buffer.from((e.mode==='040000'?'40000':e.mode)+' '+e.path+'\0'),Buffer.from(e.sha,'hex')])));if(oid('tree',bytes)!==sha)throw Error('Remote tree hash mismatch');objects[sha]={type:'tree',data:bytes.toString('base64')};
   };
   await visit(root.tree.sha);
   const queue=[...blobShas];let next=0,total=0,failure=null;
@@ -78,7 +78,7 @@ class GitHubProvider{
     const index=next++;if(index>=queue.length)return;const sha=queue[index];
     try{
      const b=await this.request('GET',this.base+'/git/blobs/'+sha);if(b.encoding!=='base64')throw Error('Unsupported blob encoding');
-     const bytes=Buffer.from(b.content.replace(/\\s/g,''),'base64');
+     const bytes=Buffer.from(b.content.replace(/\s/g,''),'base64');
      if(bytes.length>20*1024*1024||oid('blob',bytes)!==sha)throw Error('Invalid or oversized blob');
      total+=bytes.length;if(total>200*1024*1024)throw Error('Invalid or oversized blob');
      objects[sha]={type:'blob',data:bytes.toString('base64')};
