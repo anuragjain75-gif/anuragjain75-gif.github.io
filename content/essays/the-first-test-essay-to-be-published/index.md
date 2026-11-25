@@ -30,5 +30,8 @@ And now, I am going to insert a picture and then test publication 
 
 ![lilamaya launcher](images/lilamaya-launcher-1795528252037.png)
 
-Ok. We have made some changes in the publishing code to increase it's speed. Let's see if it works or fails.\
-After recent edits, I am publishing again to see that there are no errors.
+Ok. We have made some changes in the publishing code to increase it's speed. Let's see if it works or fails.
+
+After recent edits, I am publishing again to see that there are no errors. 
+
+After the next push, let's check publish again.
