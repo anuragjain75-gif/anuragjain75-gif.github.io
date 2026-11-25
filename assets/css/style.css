@@ -4182,6 +4182,23 @@ q {
 
 @media (hover: hover) and (pointer: fine) {
 
+    /* Keep the menu hovered while the pointer crosses its 12px visual gap. */
+    .main-nav .nav-dropdown::after {
+        content: "";
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: -60px;
+        right: -60px;
+        height: 12px;
+        z-index: 1099;
+    }
+
+    .main-nav .nav-dropdown:hover::after,
+    .main-nav .nav-dropdown:focus-within::after {
+        display: block;
+    }
+
     .main-nav .nav-dropdown:hover .nav-dropdown-menu,
     .main-nav .nav-dropdown:focus-within .nav-dropdown-menu {
         display: flex;

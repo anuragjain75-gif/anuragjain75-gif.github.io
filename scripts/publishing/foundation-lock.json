@@ -2,7 +2,7 @@
   "tree": "1c3bb9faf124781374d437d6d52faf1d89de97ec",
   "files": {
     ".github/workflows/hugo.yml": "8e61b753445e901ee3830ea34987762076c5870d24ac5cffe2b1dd153fa0e525",
-    "assets/css/style.css": "72daa0f05bde57694c470c9c9c24e8e6d28894c6156deae88ed248ff9aaf92d6",
+    "assets/css/style.css": "2ff63dd23561b4f774a4c790768fb7d62220c7473655b848c15447e47563b15a",
     "assets/fonts/CormorantGaramond-Bold.ttf": "8a41a6f966a0d60daa5065609150ad666347c789432369bb3d7951020a022131",
     "assets/fonts/CormorantGaramond-BoldItalic.ttf": "b4497b87acb8571d1d245fa763a8ea15dad3db5d841c5e08b9a3020ed65ca207",
     "assets/fonts/CormorantGaramond-Italic.ttf": "64af109bd58506885c366991e35904180112c7e3359bd9ad9945202bfeb949d3",
