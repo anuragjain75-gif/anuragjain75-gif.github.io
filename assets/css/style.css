@@ -2146,22 +2146,6 @@ nav a:hover {
     position: relative;
     isolation: isolate;
 
-    /*
-     * Extremely subtle paper-like atmosphere.
-     * The underlying Lilamaya ivory remains dominant.
-     */
-    background:
-        radial-gradient(
-            circle at 20% 20%,
-            rgba(120, 105, 80, 0.025) 0,
-            transparent 45%
-        ),
-        radial-gradient(
-            circle at 80% 70%,
-            rgba(120, 105, 80, 0.018) 0,
-            transparent 50%
-        ),
-        #fff9eb;
 }
 
 .paintings-header {
