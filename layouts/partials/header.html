@@ -170,3 +170,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
+
+<script>
+/* LILAMAYA NAV SCROLL SHADOW */
+(() => {
+    const nav = document.querySelector(".main-nav");
+    if (!nav) return;
+
+    const updateShadow = () => {
+        const pinnedAtTop =
+            window.scrollY > 0 &&
+            nav.getBoundingClientRect().top <= 1;
+
+        nav.classList.toggle("is-scrolled", pinnedAtTop);
+    };
+
+    updateShadow();
+    window.addEventListener("scroll", updateShadow, { passive: true });
+})();
+</script>

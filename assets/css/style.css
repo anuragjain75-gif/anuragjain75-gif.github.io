@@ -6500,3 +6500,17 @@ q {
 .lilamaya-delete-dialog label { display: block; margin-bottom: .5rem; }
 .lilamaya-delete-dialog input { font: inherit; max-width: 100%; box-sizing: border-box; padding: .4rem; }
 .lilamaya-delete-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1rem; }
+
+/* FULL-WIDTH LITERARY NAVIGATION */
+.main-nav {
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    box-sizing: border-box;
+    box-shadow: none;
+}
+
+.main-nav.is-scrolled {
+    box-shadow: 0 5px 12px -5px rgba(110, 116, 81, 0.28);
+}
